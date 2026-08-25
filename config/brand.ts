@@ -47,7 +47,7 @@ export type Brand = {
 };
 
 export const brand: Brand = {
-  name: "Genius Kids",
+  name: "Papa Bonski Super Kids",
   tagline: "Cerita Cerdas untuk Anak Hebat,",
   subtagline: "dari Kisah Personal Mereka Sendiri.",
   logoEmoji: "🧠",
