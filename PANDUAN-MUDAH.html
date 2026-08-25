@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panduan Mudah Mykarakids</title>
+  <style>
+    :root {
+      --ink: #182033;
+      --muted: #5c677d;
+      --soft: #f4f7fb;
+      --line: #dce3ee;
+      --primary: #2563eb;
+      --accent: #ec4899;
+      --green: #0f766e;
+      --amber: #b45309;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #e9edf4;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 16px auto;
+      padding: 18mm 17mm;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(24, 32, 51, 0.12);
+      page-break-after: always;
+    }
+
+    .page:last-child { page-break-after: auto; }
+
+    .cover {
+      display: flex;
+      min-height: 260mm;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(236, 72, 153, 0.10)),
+        #fff;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    h1, h2, h3 { line-height: 1.15; margin: 0; }
+    h1 { font-size: 42px; letter-spacing: 0; }
+    h2 { font-size: 25px; margin-bottom: 14px; color: #101827; }
+    h3 { font-size: 15px; margin-bottom: 6px; color: #101827; }
+
+    p { margin: 0 0 10px; }
+
+    .subtitle {
+      max-width: 620px;
+      margin-top: 16px;
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #e8f0ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .box,
+    .step,
+    .tip,
+    .warn {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .box strong,
+    .step strong,
+    .tip strong,
+    .warn strong { color: #101827; }
+
+    .tip {
+      border-color: #a7f3d0;
+      background: #ecfdf5;
+    }
+
+    .warn {
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .num {
+      display: inline-flex;
+      width: 34px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .mini-title {
+      margin-bottom: 4px;
+      font-weight: 800;
+    }
+
+    ul, ol {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    li { margin: 5px 0; }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: #0f172a;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 10px 0 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #e5edf7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 9px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--soft);
+      font-weight: 800;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .tick {
+      width: 16px;
+      height: 16px;
+      margin-top: 4px;
+      border: 2px solid var(--primary);
+      border-radius: 4px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer {
+      margin-top: 18px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="page cover">
+    <div>
+      <div class="brand-row">
+        <img class="logo" src="public/logo.png" alt="Mykarakids" />
+        <div>
+          <div class="tag">Panduan mudah</div>
+          <h3>Mykarakids White-Label</h3>
+        </div>
+      </div>
+
+      <div style="margin-top: 54px;">
+        <h1>Panduan Install, Deploy, dan Pakai Aplikasi</h1>
+        <p class="subtitle">
+          Versi ringkas untuk owner, reseller, guru, atau tim non-teknis yang ingin
+          menjalankan aplikasi cerita anak AI dari lokal sampai online.
+        </p>
+      </div>
+
+      <div class="pill-row">
+        <span class="pill">Supabase</span>
+        <span class="pill">Vercel</span>
+        <span class="pill">Gemini AI</span>
+        <span class="pill">PWA</span>
+        <span class="pill">PDF dan ZIP</span>
+        <span class="pill">Admin White-Label</span>
+      </div>
+
+      <div class="meta">
+        <div class="box">
+          <strong>Target pembaca</strong>
+          <p class="small">Orang yang ingin meng-install, menjual ulang, atau mengoperasikan aplikasi.</p>
+        </div>
+        <div class="box">
+          <strong>Yang paling penting</strong>
+          <p class="small">Jalankan satu SQL Supabase, isi env, deploy, lalu tes alur cerita sampai selesai.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      File utama: PANDUAN-INSTALL.md, DEPLOY.md, WHITELABEL.md, supabase/migrations/0001_init.sql
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>1. Gambaran Singkat Aplikasi</h2>
+    <p>
+      Mykarakids membuat buku cerita anak personal. Orang tua memilih profil anak,
+      tema, masalah anak hari ini, level bahasa, dan gaya ilustrasi. Aplikasi membuat
+      teks terlebih dulu, lalu orang tua bisa meninjau dan mengedit sebelum gambar
+      serta audio dibuat.
+    </p>
+
+    <div class="grid-2">
+      <div class="box">
+        <h3>Fitur untuk orang tua</h3>
+        <ul>
+          <li>Profil anak reusable: nama, usia, gender, foto, deskripsi karakter.</li>
+          <li>Template masalah anak: susah tidur, tidak mau sayur, marah, takut sekolah, gadget.</li>
+          <li>Preview dan edit cerita sebelum biaya gambar/audio dipakai.</li>
+          <li>Flipbook dengan gambar, audio, moral, doa, dan parent guide.</li>
+          <li>Progress baca, favorit, share link privat, export PDF, download ZIP.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Fitur untuk reseller</h3>
+        <ul>
+          <li>Dashboard admin white-label di <code>/admin</code>.</li>
+          <li>Ubah brand, warna, logo, provider AI, suara TTS, limit, dan harga paket.</li>
+          <li>PWA: aplikasi bisa di-install di HP dan tablet.</li>
+          <li>Cerita Anak Digital English: video, PDF, ringkasan, vocabulary IPA+TTS, kuis.</li>
+          <li>Job queue server-side agar proses tetap jalan walau browser ditutup.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top: 14px;">
+      <strong>Prinsip mudahnya:</strong>
+      Supabase menyimpan data, Gemini membuat cerita/gambar/audio, Vercel membuat
+      aplikasi online, dan admin dashboard mengatur tampilan bisnis tanpa edit code.
+    </div>
+
+    <h2 style="margin-top: 24px;">2. Yang Perlu Disiapkan</h2>
+    <table>
+      <tr>
+        <th>Kebutuhan</th>
+        <th>Dipakai untuk</th>
+      </tr>
+      <tr>
+        <td>Akun Supabase</td>
+        <td>Database, login anonymous, dan storage gambar/audio.</td>
+      </tr>
+      <tr>
+        <td>Akun Google AI Studio</td>
+        <td>Mengambil <code>GEMINI_API_KEY</code> untuk cerita, gambar, dan TTS.</td>
+      </tr>
+      <tr>
+        <td>Akun Vercel</td>
+        <td>Deploy aplikasi agar punya domain online.</td>
+      </tr>
+      <tr>
+        <td>Node.js 20+</td>
+        <td>Menjalankan aplikasi di komputer lokal.</td>
+      </tr>
+      <tr>
+        <td>KIE API key optional</td>
+        <td>Cadangan gambar saat kuota Gemini image habis.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="page">
+    <h2>3. Setup Supabase dengan Satu SQL</h2>
+    <p>
+      Semua schema database sudah digabung ke satu file:
+      <code>supabase/migrations/0001_init.sql</code>. File ini aman dijalankan ulang.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <div class="mini-title">Buat project Supabase</div>
+          Buka <code>supabase.com</code>, buat project baru, lalu tunggu sampai database siap.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <div class="mini-title">Aktifkan Anonymous Auth</div>
+          Masuk ke Authentication, buka Providers, aktifkan Anonymous. Ini membuat tiap
+          perangkat punya identitas pemilik cerita tanpa halaman login.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <div class="mini-title">Jalankan SQL gabungan</div>
+          Buka SQL Editor, salin seluruh isi <code>supabase/migrations/0001_init.sql</code>,
+          lalu klik Run.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <div class="mini-title">Ambil API keys</div>
+          Dari Project Settings - API, salin Project URL, anon key, dan service role key.
+        </div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top: 14px;">
+      <h3>Yang dibuat oleh SQL ini</h3>
+      <ul>
+        <li>Tabel <code>children</code>, <code>stories</code>, <code>scenes</code>, <code>story_jobs</code>, <code>white_label_settings</code>.</li>
+        <li>Kolom review teks, share token, progress baca, favorit, language level, illustration style.</li>
+        <li>Row Level Security agar user hanya melihat data miliknya.</li>
+        <li>Bucket <code>child-photos</code> privat dan <code>story-assets</code> publik.</li>
+      </ul>
+    </div>
+
+    <div class="warn" style="margin-top: 14px;">
+      <strong>Jangan jalankan migrasi lama terpisah.</strong>
+      Versi terbaru hanya memakai <code>0001_init.sql</code>. Jika sebelumnya ada error
+      "kolom tidak ditemukan", jalankan ulang file ini.
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>4. Isi Environment Variables</h2>
+    <p>
+      Buat file <code>.env.local</code> untuk lokal, lalu isi variabel yang sama di
+      Vercel saat deploy.
+    </p>
+
+    <pre>NEXT_PUBLIC_SUPABASE_URL="https://project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="anon-key"
+SUPABASE_SERVICE_ROLE_KEY="service-role-key"
+
+STORY_WORKER_SECRET="rahasia-worker-panjang"
+STORY_WORKER_AUTOKICK="true"
+STORY_WORKER_AUTOKICK_LIMIT="5"
+CRON_SECRET="rahasia-cron-panjang-opsional"
+ADMIN_DASHBOARD_SECRET="rahasia-admin-opsional"
+
+GEMINI_API_KEY="kunci-google-ai-studio"
+
+IMAGE_RESOLUTION="1K"
+KIE_API_KEY=""
+IMAGE_PROVIDER="gemini"
+
+NEXT_PUBLIC_STORY_QUEUE_POLL_MS="2500"
+NEXT_PUBLIC_STORY_QUEUE_MAX_POLLS="240"
+NEXT_PUBLIC_STORY_QUEUE_NUDGE_EVERY_POLLS="4"</pre>
+
+    <table>
+      <tr>
+        <th>Env</th>
+        <th>Status</th>
+        <th>Fungsi</th>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_SUPABASE_URL</code></td>
+        <td>Wajib</td>
+        <td>Alamat project Supabase.</td>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td>
+        <td>Wajib</td>
+        <td>Dipakai browser untuk akses data user dengan RLS.</td>
+      </tr>
+      <tr>
+        <td><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+        <td>Wajib</td>
+        <td>Dipakai server untuk worker, admin, export, dan asset generation.</td>
+      </tr>
+      <tr>
+        <td><code>STORY_WORKER_SECRET</code></td>
+        <td>Wajib</td>
+        <td>Melindungi endpoint worker <code>/api/jobs/process</code>.</td>
+      </tr>
+      <tr>
+        <td><code>STORY_WORKER_AUTOKICK</code></td>
+        <td>Disarankan</td>
+        <td>Isi <code>true</code> agar worker langsung dipicu saat user membuat cerita.</td>
+      </tr>
+      <tr>
+        <td><code>CRON_SECRET</code></td>
+        <td>Opsional</td>
+        <td>Secret untuk cron aman ke <code>/api/jobs/cron</code>.</td>
+      </tr>
+      <tr>
+        <td><code>STORY_WORKER_AUTOKICK_LIMIT</code></td>
+        <td>Opsional</td>
+        <td>Jumlah job yang diambil sekali autokick. Default <code>5</code>.</td>
+      </tr>
+      <tr>
+        <td><code>ADMIN_DASHBOARD_SECRET</code></td>
+        <td>Opsional</td>
+        <td>Password khusus dashboard admin. Jika kosong, memakai worker secret.</td>
+      </tr>
+      <tr>
+        <td><code>GEMINI_API_KEY</code></td>
+        <td>Wajib</td>
+        <td>Kunci AI untuk cerita, gambar, audio, quality check, vocabulary TTS.</td>
+      </tr>
+    </table>
+
+    <div class="tip" style="margin-top: 14px;">
+      <strong>Apa isi tiga env worker?</strong>
+      <ul>
+        <li><code>STORY_WORKER_SECRET</code>: isi teks acak panjang buatan sendiri, bukan API key Supabase/Gemini. Dipakai server untuk memproses antrean cerita.</li>
+        <li><code>STORY_WORKER_AUTOKICK</code>: isi <code>true</code>. Jika <code>false</code> dan tidak ada cron/worker eksternal, cerita bisa stuck di "Antrean teks".</li>
+        <li><code>STORY_WORKER_AUTOKICK_LIMIT</code>: boleh dibiarkan <code>5</code> untuk awal. Naikkan perlahan jika trafik cerita mulai ramai.</li>
+        <li><code>CRON_SECRET</code>: isi teks acak panjang lain jika memakai cron. Kirim sebagai header <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code>.</li>
+      </ul>
+      <p>Buat secret acak dari terminal:</p>
+      <pre>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</pre>
+      <p>Gunakan nilai hasil generate sendiri. Jangan memakai contoh rahasia dari panduan.</p>
+      <p><strong>Setelah env diubah di Vercel, wajib Redeploy.</strong> Env baru tidak aktif pada deployment lama.</p>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>5. Jalankan di Lokal</h2>
+    <p>Gunakan lokal untuk memastikan semua env benar sebelum deploy.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <div class="mini-title">Install package</div>
+          <pre>npm install</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <div class="mini-title">Jalankan dev server</div>
+          <pre>npm run dev</pre>
+          Buka <code>http://localhost:3000</code>.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <div class="mini-title">Tes AI key</div>
+          <pre>npm run test:live</pre>
+          Jika semua OK, Gemini text, image, dan TTS siap dipakai.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <div class="mini-title">Cek compile</div>
+          <pre>npm run build</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top: 24px;">6. Deploy ke Vercel</h2>
+    <ol>
+      <li>Push kode ke GitHub.</li>
+      <li>Buka Vercel, pilih New Project, import repository.</li>
+      <li>Masukkan semua env dari <code>.env.local</code> ke Environment Variables, terutama Supabase, Gemini, <code>STORY_WORKER_SECRET</code>, dan <code>STORY_WORKER_AUTOKICK=true</code>.</li>
+      <li>Pastikan env diterapkan ke environment <strong>Production</strong>.</li>
+      <li>Klik Deploy.</li>
+      <li>Setelah deploy, buka domain Vercel dan tes aplikasi.</li>
+    </ol>
+
+    <div class="tip" style="margin-top: 14px;">
+      <strong>Catatan komersial:</strong>
+      Untuk aplikasi white-label yang dijual ulang, gunakan Vercel Pro agar sesuai
+      kebutuhan bisnis.
+    </div>
+
+    <div class="warn" style="margin-top: 14px;">
+      <strong>Setelah ubah env:</strong>
+      buka Deployments di Vercel, pilih deployment terbaru, lalu klik Redeploy.
+      Tanpa redeploy, worker masih memakai env lama.
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>7. Cara Pakai Aplikasi</h2>
+    <p>Alur terbaru sengaja dibuat hemat biaya: teks dibuat dan disetujui dulu, baru gambar/audio.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <div class="mini-title">Buat atau pilih profil anak</div>
+          Isi nama, usia, gender, foto, dan character description. Profil ini bisa dipakai ulang.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <div class="mini-title">Pilih kebutuhan cerita</div>
+          Pilih template masalah anak hari ini atau pilih tema/subtema manual.
+          Tentukan level bahasa: Balita, TK, SD awal, atau SD besar.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <div class="mini-title">Pilih gaya ilustrasi</div>
+          Contoh: watercolor, 3D cartoon, pastel storybook, anime soft, paper cutout.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <div class="mini-title">Generate teks dan review</div>
+          Baca judul, opener, setiap scene, moral, doa, dan parent guide.
+          Gunakan regenerate scene, buat lebih lucu, lebih Islami, atau edit manual.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <div class="mini-title">Setujui teks</div>
+          Setelah teks disetujui, job queue mulai membuat gambar dan audio di server.
+          Jika muncul pesan antrean belum diambil, klik <strong>Cek worker sekarang</strong>
+          untuk melihat diagnostik autokick.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">6</div>
+        <div>
+          <div class="mini-title">Baca dan bagikan</div>
+          Buka flipbook, tandai favorit, lanjutkan progress baca, buat share link privat,
+          export PDF, atau download ZIP lengkap.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>8. Jika Loading Cerita Lama</h2>
+    <p>
+      Jika muncul pesan <strong>Antrean belum diambil server</strong>, cerita tidak hilang.
+      Data sudah tersimpan, tetapi worker belum berhasil mengambil job dari antrean.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <div class="mini-title">Klik Cek worker sekarang</div>
+          Tombol ini memanggil ulang worker dan menampilkan status terakhir:
+          sukses, gagal, HTTP 401, atau error dari server.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <div class="mini-title">Jika HTTP 401</div>
+          Cek <code>STORY_WORKER_SECRET</code> di Vercel Production. Biasanya secret
+          belum diisi, beda nilai, atau belum redeploy.
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <div class="mini-title">Jika worker terpanggil tapi antrean tetap</div>
+          Buka Vercel Logs, cari request <code>/api/jobs/process</code>, lalu lihat
+          apakah error berasal dari Gemini, Supabase, atau provider gambar/audio.
+        </div>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top: 14px;">
+      Untuk produksi, gunakan <code>STORY_WORKER_AUTOKICK=true</code>. Cron dengan
+      <code>CRON_SECRET</code> boleh ditambahkan sebagai cadangan agar antrean tetap
+      diproses berkala.
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>9. Admin White-Label</h2>
+    <p>
+      Dashboard admin ada di <code>/admin</code>. Gunakan halaman ini untuk mengubah
+      tampilan dan pengaturan bisnis tanpa edit code.
+    </p>
+
+    <div class="grid-2">
+      <div class="box">
+        <h3>Yang bisa diubah</h3>
+        <ul>
+          <li>Nama brand, logo, tagline, warna.</li>
+          <li>Provider AI, model gambar, voice TTS.</li>
+          <li>Limit cerita per user dan limit profil anak.</li>
+          <li>Harga paket dan copy penjualan.</li>
+          <li>Katalog tema dan template masalah anak.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Syarat admin</h3>
+        <ul>
+          <li><code>SUPABASE_SERVICE_ROLE_KEY</code> sudah benar.</li>
+          <li><code>STORY_WORKER_SECRET</code> sudah diisi.</li>
+          <li><code>ADMIN_DASHBOARD_SECRET</code> diisi jika ingin password terpisah.</li>
+          <li>SQL <code>0001_init.sql</code> sudah dijalankan.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="margin-top: 24px;">10. Cerita Anak Digital English</h2>
+    <p>
+      Menu Cerita Anak Digital (English) berisi katalog video cerita bahasa Inggris.
+      Setiap halaman video memuat video Google Drive, PDF, ringkasan bahasa Indonesia,
+      vocabulary 30 kata dengan phonetic symbol dan TTS, serta 20 soal pilihan ganda.
+    </p>
+
+    <div class="tip" style="margin-top: 14px;">
+      <strong>Manfaat bisnis:</strong>
+      Fitur ini bisa dijual sebagai bonus belajar English, materi guru, atau paket
+      reseller dengan konten siap pakai.
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>11. Checklist Go-Live</h2>
+    <div class="checklist">
+      <div class="check"><span class="tick"></span><span>Supabase project sudah dibuat dan Anonymous Auth aktif.</span></div>
+      <div class="check"><span class="tick"></span><span><code>supabase/migrations/0001_init.sql</code> sudah dijalankan sampai selesai.</span></div>
+      <div class="check"><span class="tick"></span><span>Semua env Supabase, Gemini, <code>STORY_WORKER_SECRET</code>, dan <code>STORY_WORKER_AUTOKICK=true</code> sudah diisi di Production.</span></div>
+      <div class="check"><span class="tick"></span><span>Setelah mengubah env di Vercel, deployment sudah di-Redeploy.</span></div>
+      <div class="check"><span class="tick"></span><span><code>npm run build</code> sukses di lokal.</span></div>
+      <div class="check"><span class="tick"></span><span>Deploy Vercel sukses dan domain produksi bisa dibuka.</span></div>
+      <div class="check"><span class="tick"></span><span>Dashboard <code>/admin</code> bisa login dan simpan pengaturan.</span></div>
+      <div class="check"><span class="tick"></span><span>Buat cerita dari profil anak sampai flipbook selesai.</span></div>
+      <div class="check"><span class="tick"></span><span>Share link privat, export PDF, dan download ZIP berhasil.</span></div>
+      <div class="check"><span class="tick"></span><span>Progress baca, favorit, dan badge koleksi berubah sesuai penggunaan.</span></div>
+      <div class="check"><span class="tick"></span><span>PWA bisa di-install di HP/tablet dari domain produksi.</span></div>
+      <div class="check"><span class="tick"></span><span>Menu Cerita Anak Digital (English) bisa membuka video, PDF, vocabulary, expression dialog, dan kuis.</span></div>
+      <div class="check"><span class="tick"></span><span>Konten cerita, doa, dan nilai Islami sudah ditinjau untuk audiens.</span></div>
+    </div>
+
+    <h2 style="margin-top: 24px;">12. Masalah Umum</h2>
+    <table>
+      <tr>
+        <th>Masalah</th>
+        <th>Solusi cepat</th>
+      </tr>
+      <tr>
+        <td>Kolom/tabel tidak ditemukan</td>
+        <td>Jalankan ulang <code>supabase/migrations/0001_init.sql</code>.</td>
+      </tr>
+      <tr>
+        <td>Gambar placeholder</td>
+        <td>Kuota image habis. Isi <code>KIE_API_KEY</code>, tambah key gambar, atau aktifkan billing.</td>
+      </tr>
+      <tr>
+        <td>Audio lama atau antre</td>
+        <td>Tambahkan <code>GEMINI_AUDIO_API_KEYS</code> dan biarkan worker mencoba ulang.</td>
+      </tr>
+      <tr>
+        <td>Job cerita macet</td>
+        <td>Klik <strong>Cek worker sekarang</strong>. Jika HTTP 401, cek <code>STORY_WORKER_SECRET</code> dan redeploy. Jika worker terpanggil tapi antrean tetap, cek log <code>/api/jobs/process</code> di Vercel.</td>
+      </tr>
+      <tr>
+        <td>Admin tidak bisa simpan</td>
+        <td>Cek <code>SUPABASE_SERVICE_ROLE_KEY</code> dan tabel <code>white_label_settings</code>.</td>
+      </tr>
+      <tr>
+        <td>PWA tidak muncul</td>
+        <td>Gunakan domain HTTPS produksi, lalu pilih Add to Home Screen dari browser mobile.</td>
+      </tr>
+    </table>
+
+    <div class="footer">
+      Versi mudah ini dibuat dari panduan teknis terbaru. Untuk detail lengkap,
+      baca PANDUAN-INSTALL.md, DEPLOY.md, dan WHITELABEL.md.
+    </div>
+  </section>
+</body>
+</html>
