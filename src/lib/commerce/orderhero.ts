@@ -24,8 +24,8 @@ const obj = (v:any):AnyRecord => v && typeof v === "object" ? v : {};
 
 /**
  * Defensive OrderHero adapter.
- * Public OrderHero docs confirm a Webhook plugin exists, but do not publish a stable payload schema.
- * We therefore accept common shapes and preserve the raw payload for one-click mapping after the first live event.
+ * Supports the official OrderHero webhook body plus earlier/common shapes.
+ * Raw payload is still preserved by the receiver for diagnostics/mapping.
  */
 export function normalizeOrderHeroPayload(input: Record<string, unknown>): NormalizedOrderHeroOrder {
   const root:any = input;
@@ -37,21 +37,26 @@ export function normalizeOrderHeroPayload(input: Record<string, unknown>): Norma
   const meta = obj(first(order.metadata, data.metadata, root.metadata, order.meta, data.meta, root.meta));
   const attribution = obj(first(order.attribution, data.attribution, root.attribution, meta.attribution));
 
-  const amountRaw = first(order.grand_total, order.total, order.amount, payment.amount, data.grand_total, data.total, data.amount, root.amount);
+  const amountRaw = first(
+    order.grand_total, order.total_amount, order.total, order.amount,
+    payment.amount,
+    data.grand_total, data.total_amount, data.total, data.amount,
+    root.total_amount, root.amount
+  );
   const amount = Number(String(amountRaw ?? "").replace(/[^0-9.-]/g,""));
   const status = lower(first(order.payment_status, payment.status, order.status, data.payment_status, data.status, root.payment_status, root.status, root.event));
 
   return {
-    eventKey: String(first(root.event_id, root.idempotency_key, data.event_id, data.idempotency_key, order.uuid, order.id, order.order_id, "") || "") || undefined,
+    eventKey: String(first(root.delivery_id, root.event_id, root.idempotency_key, data.delivery_id, data.event_id, data.idempotency_key, order.uuid, order.id, order.order_id, "") || "") || undefined,
     eventName: first(root.event, root.type, root.event_name, data.event, data.type),
     externalOrderId: String(first(order.order_id, order.order_number, order.invoice_number, order.invoice, order.id, data.order_id, root.order_id, root.id) || "") || undefined,
     status,
     name: first(customer.name, customer.full_name, order.customer_name, order.buyer_name, data.customer_name, root.customer_name),
     email: lower(first(customer.email, order.customer_email, order.buyer_email, data.customer_email, root.customer_email)),
     phone: first(customer.phone, customer.whatsapp, customer.phone_number, order.customer_phone, order.buyer_phone, data.customer_phone, root.customer_phone),
-    productSku: first(product.sku, product.code, order.product_sku, data.product_sku, root.product_sku),
+    productSku: first(product.sku, product.code, product.variant_id, order.product_sku, data.product_sku, root.product_sku),
     externalProductId: String(first(product.id, product.product_id, order.product_id, data.product_id, root.product_id) || "") || undefined,
-    productName: first(product.name, product.title, order.product_name, data.product_name, root.product_name),
+    productName: first(product.name, product.title, product.product_name, order.product_name, data.product_name, root.product_name),
     amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
     currency: String(first(order.currency, payment.currency, data.currency, root.currency, "IDR")),
     paidAt: first(order.paid_at, payment.paid_at, data.paid_at, root.paid_at),
@@ -73,15 +78,32 @@ export function webhookAuthMode() {
   return process.env.NODE_ENV === "production" ? "missing" : "development-open";
 }
 
+function secureEqualHex(received:string, expected:string) {
+  if (!/^[0-9a-f]+$/i.test(received) || received.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(received.toLowerCase()), Buffer.from(expected.toLowerCase()));
+}
+
 export function verifyWebhook(rawBody: string, req: Request) {
   const hmacSecret = process.env.ORDERHERO_WEBHOOK_SECRET;
   if (hmacSecret) {
-    const signature = req.headers.get("x-orderhero-signature") ?? req.headers.get("x-webhook-signature") ?? req.headers.get("x-signature");
-    if (!signature) return false;
-    const expected = crypto.createHmac("sha256", hmacSecret).update(rawBody).digest("hex");
-    const clean = signature.replace(/^sha256=/i, "");
-    if (clean.length !== expected.length) return false;
-    return crypto.timingSafeEqual(Buffer.from(clean), Buffer.from(expected));
+    const signatureHeader = req.headers.get("x-webhook-signature") ?? req.headers.get("x-orderhero-signature") ?? req.headers.get("x-signature");
+    const timestampHeader = req.headers.get("x-webhook-timestamp");
+    if (!signatureHeader || !timestampHeader) return false;
+
+    // Official OrderHero format: X-Webhook-Signature: t=<ts>,v1=<hex>
+    // Signature input: `${ts}.${rawBody}` using HMAC-SHA256 with the webhook whsec_ secret.
+    const parts = Object.fromEntries(
+      signatureHeader.split(",").map(part => part.trim().split("=", 2)).filter(([k,v]) => k && v)
+    );
+    const signedTimestamp = parts.t || timestampHeader;
+    const received = parts.v1 || signatureHeader.replace(/^sha256=/i, "");
+    if (signedTimestamp !== timestampHeader) return false;
+
+    const expected = crypto
+      .createHmac("sha256", hmacSecret)
+      .update(`${signedTimestamp}.${rawBody}`)
+      .digest("hex");
+    return secureEqualHex(received, expected);
   }
 
   // Fallback for webhook providers that cannot sign requests but allow a secret URL/header.
