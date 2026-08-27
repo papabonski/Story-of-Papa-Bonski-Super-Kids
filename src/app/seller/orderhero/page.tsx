@@ -4,7 +4,8 @@ export const dynamic="force-dynamic";
 
 export default async function OrderHeroIntegrationPage(){
   const authMode=webhookAuthMode();
-  const base=(process.env.NEXT_PUBLIC_APP_URL||"https://papabonski.com").replace(/\/$/,"");
+  const vercelUrl=process.env.VERCEL_URL?`https://${process.env.VERCEL_URL}`:undefined;
+  const base=(process.env.NEXT_PUBLIC_APP_URL||vercelUrl||"https://papabonski.com").replace(/\/$/,"");
   const token=process.env.ORDERHERO_WEBHOOK_TOKEN;
   const webhookUrl=`${base}/api/orderhero/webhook${authMode==="token"&&token?`?token=${encodeURIComponent(token)}`:""}`;
   let events:any[]=[]; let mappings:any[]=[]; let dbOk=true;
