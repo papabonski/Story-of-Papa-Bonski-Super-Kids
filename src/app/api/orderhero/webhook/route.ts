@@ -5,7 +5,11 @@ import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } fr
 export const runtime = "nodejs";
 
 function safeHeaders(req:Request){
-  const allowed=["content-type","user-agent","x-orderhero-signature","x-webhook-signature","x-signature","x-request-id"];
+  const allowed=[
+    "content-type","user-agent","x-request-id",
+    "x-webhook-event","x-webhook-delivery","x-webhook-timestamp","x-webhook-signature",
+    "x-orderhero-signature","x-signature"
+  ];
   return Object.fromEntries(allowed.map(k=>[k,req.headers.get(k)]).filter(([,v])=>v));
 }
 
@@ -19,7 +23,7 @@ export async function POST(req: Request) {
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL, key=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if(!url||!key) return NextResponse.json({ok:false,error:"server_not_configured"},{status:503});
   const db=createClient(url,key,{auth:{persistSession:false}});
-  const eventKey=n.eventKey ?? n.externalOrderId ?? req.headers.get("x-request-id") ?? undefined;
+  const eventKey=n.eventKey ?? req.headers.get("x-webhook-delivery") ?? n.externalOrderId ?? req.headers.get("x-request-id") ?? undefined;
 
   const inserted=await db.from("webhook_events").insert({provider:"orderhero",event_key:eventKey,payload,normalized:n,external_order_id:n.externalOrderId,http_headers:safeHeaders(req)}).select("id").single();
   if(inserted.error?.code==="23505") return NextResponse.json({ok:true,duplicate:true});
@@ -30,7 +34,6 @@ export async function POST(req: Request) {
     const readiness=payloadReadiness(n);
     if(!readiness.ready){
       await db.from("webhook_events").update({status:"needs_mapping",error:`Missing: ${readiness.missing.join(", ")}`,processed_at:new Date().toISOString()}).eq("id",event.id);
-      // 202 prevents retries while still exposing the sample safely in Seller Center for mapping.
       return NextResponse.json({ok:true,accepted:true,needsMapping:true,missing:readiness.missing},{status:202});
     }
     if(!isPaid(n.status)) {
@@ -71,7 +74,6 @@ export async function POST(req: Request) {
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
     const expires=new Date(Date.now()+(plan.duration_days||365)*86400000).toISOString();
 
-    // Idempotent subscription: one source order must not create multiple subscriptions.
     const existingSub=await db.from("subscriptions").select("id").eq("source_order_id",order.id).maybeSingle();
     if(!existingSub.data){
       const sub=await db.from("subscriptions").insert({customer_id:customerId,plan_id:plan.id,source_order_id:order.id,status:"active",expires_at:expires});
