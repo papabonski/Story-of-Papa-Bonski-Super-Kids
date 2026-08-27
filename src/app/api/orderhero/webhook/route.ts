@@ -4,6 +4,8 @@ import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } fr
 
 export const runtime = "nodejs";
 
+const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
+
 function safeHeaders(req:Request){
   const allowed=[
     "content-type","user-agent","x-request-id",
@@ -43,14 +45,22 @@ export async function POST(req: Request) {
 
     let productSku=n.productSku || "PBSK-SUPER-KIDS";
     let planCode=process.env.ORDERHERO_DEFAULT_PLAN||"PBSK-PREMIUM-1Y";
-    const candidates=[
-      n.productSku && {match_type:"sku",match_value:String(n.productSku)},
-      n.externalProductId && {match_type:"product_id",match_value:String(n.externalProductId)},
-      n.productName && {match_type:"product_name",match_value:String(n.productName)}
-    ].filter(Boolean) as {match_type:string;match_value:string}[];
-    for(const c of candidates){
-      const {data:m}=await db.from("orderhero_product_mappings").select("product_sku,plan_code").eq("match_type",c.match_type).ilike("match_value",c.match_value).eq("active",true).maybeSingle();
-      if(m){ productSku=m.product_sku; planCode=m.plan_code; break; }
+
+    // Canonical V5.4 mapping for the live OrderHero Papa Bonski Super Kids product.
+    // Keep this explicit so purchase activation does not depend on a mutable product name.
+    if (n.externalProductId === ORDERHERO_SUPER_KIDS_PRODUCT_ID) {
+      productSku = "PBSK-SUPER-KIDS";
+      planCode = "PBSK-PREMIUM-1Y";
+    } else {
+      const candidates=[
+        n.productSku && {match_type:"sku",match_value:String(n.productSku)},
+        n.externalProductId && {match_type:"product_id",match_value:String(n.externalProductId)},
+        n.productName && {match_type:"product_name",match_value:String(n.productName)}
+      ].filter(Boolean) as {match_type:string;match_value:string}[];
+      for(const c of candidates){
+        const {data:m}=await db.from("orderhero_product_mappings").select("product_sku,plan_code").eq("match_type",c.match_type).ilike("match_value",c.match_value).eq("active",true).maybeSingle();
+        if(m){ productSku=m.product_sku; planCode=m.plan_code; break; }
+      }
     }
 
     let customerId:string|undefined;
@@ -86,7 +96,7 @@ export async function POST(req: Request) {
       await db.from("attributions").insert({customer_id:customerId,order_id:order.id,utm_source:n.utm.source,utm_medium:n.utm.medium,utm_campaign:n.utm.campaign,utm_content:n.utm.content,utm_term:n.utm.term,fbclid:n.utm.fbclid,landing_path:n.utm.landingPath});
     }
     const existingActivation=await db.from("activations").select("id").eq("order_id",order.id).maybeSingle();
-    if(!existingActivation.data) await db.from("activations").insert({customer_id:customerId,order_id:order.id,status:"active",metadata:{source:"orderhero_webhook",plan_code:plan.code}});
+    if(!existingActivation.data) await db.from("activations").insert({customer_id:customerId,order_id:order.id,status:"active",metadata:{source:"orderhero_webhook",plan_code:plan.code,orderhero_product_id:n.externalProductId}});
     await db.from("webhook_events").update({status:"processed",processed_at:new Date().toISOString(),normalized:{...n,productSku,planCode}}).eq("id",event.id);
     return NextResponse.json({ok:true,activated:true,customerId,orderId:order.id,planCode});
   } catch(e:any){
