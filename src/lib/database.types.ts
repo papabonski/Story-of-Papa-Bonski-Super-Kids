@@ -1,7 +1,7 @@
 /**
- * Database types matching supabase/migrations/0001_init.sql.
- * Hand-authored (kept in sync with the SQL). If you later run
- * `supabase gen types typescript`, you can replace this file.
+ * Database types matching Supabase migrations 0001 through 0005.
+ * Hand-authored for the preview branch; production can later replace this
+ * with `supabase gen types typescript` after migrations are applied.
  */
 
 export type StoryStatus =
@@ -19,17 +19,14 @@ export type SceneStatus =
   | "error";
 
 export type StoryJobPhase = "text" | "assets" | "audio";
-
 export type StoryJobStatus =
   | "queued"
   | "running"
   | "waiting_review"
   | "completed"
   | "failed";
-
 export type Gender = "male" | "female";
 
-/** One karaoke timing entry for a spoken word. */
 export type WordTiming = {
   word: string;
   startMs: number;
@@ -92,9 +89,7 @@ export type SceneRow = {
   narration_text: string | null;
   image_prompt: string | null;
   image_path: string | null;
-  /** Compatibility array for the scene's single visual prompt. */
   image_prompts: string[];
-  /** Compatibility array for the scene's single image path (null = pending). */
   image_paths: (string | null)[];
   audio_path: string | null;
   word_timings: WordTiming[];
@@ -224,7 +219,20 @@ export type WhiteLabelSettingsInsert = {
   updated_at?: string;
 };
 
-/** Minimal Database shape for the supabase-js client generic. */
+/**
+ * V5 tables are intentionally permissive here so the preview can compile
+ * before Supabase-generated types exist. The table names themselves are exact
+ * and correspond to migrations 0002-0005. Once those migrations are applied,
+ * regenerate types from Supabase for stricter per-column typing.
+ */
+export type V5CommerceRow = Record<string, any>;
+export type V5CommerceTable = {
+  Row: V5CommerceRow;
+  Insert: Record<string, any>;
+  Update: Record<string, any>;
+  Relationships: [];
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -258,6 +266,18 @@ export type Database = {
         Update: Partial<WhiteLabelSettingsRow>;
         Relationships: [];
       };
+      customers: V5CommerceTable;
+      customer_users: V5CommerceTable;
+      products: V5CommerceTable;
+      plans: V5CommerceTable;
+      orders: V5CommerceTable;
+      subscriptions: V5CommerceTable;
+      entitlements: V5CommerceTable;
+      attributions: V5CommerceTable;
+      webhook_events: V5CommerceTable;
+      activations: V5CommerceTable;
+      funnel_events: V5CommerceTable;
+      orderhero_product_mappings: V5CommerceTable;
     };
     Views: { [_ in never]: never };
     Functions: { [_ in never]: never };
