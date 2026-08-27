@@ -25,10 +25,16 @@ export async function POST(req: Request) {
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL, key=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if(!url||!key) return NextResponse.json({ok:false,error:"server_not_configured"},{status:503});
   const db=createClient(url,key,{auth:{persistSession:false}});
-  const eventKey=n.eventKey ?? req.headers.get("x-webhook-delivery") ?? n.externalOrderId ?? req.headers.get("x-request-id") ?? undefined;
 
-  const inserted=await db.from("webhook_events").insert({provider:"orderhero",event_key:eventKey,payload,normalized:n,external_order_id:n.externalOrderId,http_headers:safeHeaders(req)}).select("id").single();
-  if(inserted.error?.code==="23505") return NextResponse.json({ok:true,duplicate:true});
+  // OrderHero sends a unique X-Webhook-Delivery for every delivery/event.
+  // Always prefer it over order IDs so order_new and order_paid for the same order
+  // are not incorrectly treated as duplicates.
+  const deliveryId=req.headers.get("x-webhook-delivery");
+  const eventName=req.headers.get("x-webhook-event") ?? n.eventName;
+  const eventKey=deliveryId ?? n.eventKey ?? (eventName && n.externalOrderId ? `${eventName}:${n.externalOrderId}` : undefined) ?? req.headers.get("x-request-id") ?? n.externalOrderId ?? undefined;
+
+  const inserted=await db.from("webhook_events").insert({provider:"orderhero",event_key:eventKey,payload,normalized:{...n,eventName:eventName ?? n.eventName},external_order_id:n.externalOrderId,http_headers:safeHeaders(req)}).select("id").single();
+  if(inserted.error?.code==="23505") return NextResponse.json({ok:true,duplicate:true,eventKey});
   if(inserted.error) return NextResponse.json({ok:false,error:"event_store_failed",detail:inserted.error.message},{status:500});
   const event=inserted.data;
 
@@ -97,7 +103,7 @@ export async function POST(req: Request) {
     }
     const existingActivation=await db.from("activations").select("id").eq("order_id",order.id).maybeSingle();
     if(!existingActivation.data) await db.from("activations").insert({customer_id:customerId,order_id:order.id,status:"active",metadata:{source:"orderhero_webhook",plan_code:plan.code,orderhero_product_id:n.externalProductId}});
-    await db.from("webhook_events").update({status:"processed",processed_at:new Date().toISOString(),normalized:{...n,productSku,planCode}}).eq("id",event.id);
+    await db.from("webhook_events").update({status:"processed",processed_at:new Date().toISOString(),normalized:{...n,eventName:eventName ?? n.eventName,productSku,planCode}}).eq("id",event.id);
     return NextResponse.json({ok:true,activated:true,customerId,orderId:order.id,planCode});
   } catch(e:any){
     await db.from("webhook_events").update({status:"error",error:String(e?.message||e),processed_at:new Date().toISOString()}).eq("id",event.id);
