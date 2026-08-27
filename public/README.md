@@ -11,7 +11,7 @@ here:
 public/logo.png
 ```
 
-**Save the Genius Kids logo image as `public/logo.png`.**
+**Save the Papa Bonski Super Kids logo image as `public/logo.png`.**
 
 It is used for:
 - the landing-page hero

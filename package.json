@@ -1,8 +1,8 @@
 {
-  "name": "mykarakids",
-  "version": "0.1.0",
+  "name": "papa-bonski-super-kids",
+  "version": "5.4.0",
   "private": true,
-  "description": "White-label personalized children's storybook generator (flipbook with AI illustration, story & audio).",
+  "description": "Papa Bonski Super Kids V5.4 — OrderHero live webhook integration and automatic purchase activation",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,20 +10,24 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "worker:stories": "node scripts/story-worker.mjs",
-    "test:live": "node scripts/test-live.mjs"
+    "test:live": "node scripts/test-live.mjs",
+    "setup": "node scripts/easy-setup.mjs",
+    "commercial:check": "node scripts/commercial-package.mjs",
+    "seller:init": "node scripts/seller/init-keys.mjs",
+    "seller:license": "node scripts/seller/create-license.mjs",
+    "deploy:vercel": "node scripts/deploy-vercel.mjs",
+    "orderhero:test": "node scripts/test-orderhero-webhook.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.45.4",
     "heic2any": "^0.0.4",
     "next": "^15.5.20",
-    "pg": "^8.13.1",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
-    "@types/pg": "^8.11.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",

@@ -44,3 +44,6 @@ yarn-error.log*
 
 # Stray copy of the logo at the repo root — the real one lives in public/logo.png
 /logo.png
+
+.seller/
+licenses/

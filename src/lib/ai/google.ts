@@ -851,7 +851,7 @@ export async function generateGoogleImage(opts: {
     aspect_ratio: opts.aspectRatio,
   };
   // Cap resolution so higher-cost 2K/4K tiers aren't billed unless asked for.
-  //if (opts.resolution) responseFormat.resolution = opts.resolution;
+  if (opts.resolution) responseFormat.resolution = opts.resolution;
 
   const json = await fetchGoogleJson<JsonObject>(
     {

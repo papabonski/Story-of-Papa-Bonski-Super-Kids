@@ -1,6 +1,6 @@
 # Panduan Instalasi Lengkap — Vercel + Supabase
 
-Panduan langkah demi langkah untuk menjalankan aplikasi **Genius Kids** dari nol
+Panduan langkah demi langkah untuk menjalankan aplikasi **Papa Bonski Super Kids** dari nol
 hingga online di Vercel. Aplikasi ini sekarang bukan hanya pembuat cerita AI,
 tetapi juga platform storybook anak yang mendukung profil anak reusable, review
 teks sebelum generate gambar/audio, share link privat, export PDF/ZIP, progress
@@ -82,8 +82,8 @@ memakai **KIE Nano Banana** yang gratis untuk pemula.
 
 **Pilihan B — Clone ke komputer:**
 ```bash
-git clone https://github.com/<akun-anda>/hellokids.git
-cd hellokids
+git clone https://github.com/<akun-anda>/papa-bonski-super-kids.git
+cd papa-bonski-super-kids
 npm install
 ```
 

@@ -50,21 +50,21 @@ export const brand: Brand = {
   name: "Papa Bonski Super Kids",
   tagline: "Cerita Cerdas untuk Anak Hebat,",
   subtagline: "dari Kisah Personal Mereka Sendiri.",
-  logoEmoji: "🧠",
+  logoEmoji: "🐻",
   logoSrc: "/logo.png",
   defaultLocale: "id",
-  // Palette derived from the Genius Kids logo: bright blue primary, playful
-  // yellow + pink accents, deep navy ink, cool-white surfaces.
+  // Palette derived from the Papa Bonski logo: warm orange primary, sunny
+  // yellow accent, friendly brown ink, and soft cream surfaces.
   colors: {
-    primary: "37 99 235", // vivid blue (book / "g")
-    secondary: "236 72 153", // playful pink ("i")
-    accent: "250 204 21", // sunny yellow ("n")
-    surface: "246 249 255", // cool white
-    surfaceSoft: "237 242 252",
+    primary: "232 103 16", // Papa Bonski orange
+    secondary: "127 61 30", // warm bear brown
+    accent: "249 181 28", // sunny yellow
+    surface: "255 250 240", // warm cream
+    surfaceSoft: "255 243 220",
     surfaceCard: "255 255 255",
-    ink: "30 42 82", // deep navy ("kids")
-    inkSoft: "85 96 125",
-    inkFaint: "154 163 188",
+    ink: "91 45 23", // deep warm brown
+    inkSoft: "124 83 58",
+    inkFaint: "170 133 105",
   },
   links: {
     website: undefined,

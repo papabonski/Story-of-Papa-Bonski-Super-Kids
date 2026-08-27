@@ -1,4 +1,4 @@
-const CACHE_NAME = "hellokids-pwa-v2";
+const CACHE_NAME = "papa-bonski-super-kids-pwa-v2";
 const APP_SHELL = ["/", "/create", "/collection", "/offline", "/manifest.webmanifest"];
 
 function offlineHtml() {

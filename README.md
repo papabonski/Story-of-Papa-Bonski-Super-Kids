@@ -1,4 +1,4 @@
-# Mykarakids — White-Label Personalized Kids' Storybook Generator
+# Papa Bonski Super Kids — White-Label Personalized Kids' Storybook Generator
 
 Generate a **personalized flipbook storybook** where the child is the hero:
 AI illustrations (consistent character from the child's photo), narration text
@@ -8,19 +8,6 @@ deployed to **Vercel + Supabase**. The latest version adds reusable child
 profiles, text review before image/audio generation, private share links,
 PDF/ZIP export, reading progress, PWA install, English digital stories, a
 server-side job queue, and an admin white-label dashboard.
-
-## Install cepat (tanpa coding, untuk dijual)
-
-Pembeli non-teknis bisa install sendiri dalam ~10 menit — tidak perlu
-Node.js, SQL Editor, atau push GitHub manual. Deploy otomatis lewat Vercel,
-lalu selesaikan sisanya di halaman `/setup` bawaan aplikasi (setup database
-1 klik, cek anonymous auth, tes API key).
-
-👉 Lihat **[`PANDUAN-CEPAT.md`](./PANDUAN-CEPAT.md)** untuk langkah lengkapnya,
-termasuk cara menyiapkan tombol "Deploy with Vercel" kalau kamu jual ulang
-produk ini.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=GANTI_DENGAN_URL_GITHUB_REPO_KAMU&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,GEMINI_API_KEY,STORY_WORKER_SECRET&envDescription=Cara%20dapatkan%20semua%20key%20ini%20ada%20di%20PANDUAN-CEPAT.md&project-name=mykarakids&repository-name=mykarakids)
 
 ## Stack
 
@@ -103,3 +90,40 @@ See [`DEPLOY.md`](./DEPLOY.md) for the Vercel + Supabase setup.
 
 Supabase setup is consolidated in one idempotent migration:
 `supabase/migrations/0001_init.sql`.
+
+## Commercial Edition V4
+
+Untuk paket penjualan, mulai dari `PAPA-BONSKI-V3-COMMERCIAL-EDITION.md`.
+
+- `npm run setup` — wizard konfigurasi seller/customer.
+- `/owner` — Commercial Readiness / Owner Center.
+- `/install` — halaman install PWA untuk customer.
+- `npm run commercial:check` — cek kelengkapan struktur paket.
+- Windows dapat mulai dari `INSTALL-PAPA-BONSKI-WINDOWS.bat`.
+
+
+## V4 — Seller / Licensing & Deployment
+
+- `npm run seller:init` — buat seller signing keys (sekali saja).
+- `npm run seller:license` — buat license customer bertanda tangan digital.
+- `/seller` — Seller Center.
+- `/license` — status license.
+- `/seller/deploy` — Deploy with Vercel jika template repository telah diset.
+- `npm run deploy:vercel` — jalur deployment production via Vercel CLI.
+
+Lihat `PAPA-BONSKI-V4-SELLER-LICENSING-DEPLOYMENT.md`.
+
+## V5.2 — Customer Login & Automatic Onboarding
+Commercial customer flow is now: OrderHero paid webhook → customer/subscription → `/login` magic link → `/onboarding` auto-claim by verified purchase email → `/app` → PWA install. Run migration `0003_v52_customer_onboarding.sql` and configure Supabase Auth redirect URL for `/auth/callback`.
+
+## V5.3 — papabonski.com Sales Website & Funnel Tracking
+- `/` sekarang menjadi website brand Papa Bonski.
+- `/super-kids` menjadi landing page penjualan aplikasi.
+- `/thank-you` menjadi halaman pasca-pembelian/login handoff.
+- UTM/fbclid capture + first-party `funnel_events`.
+- Optional Meta Pixel melalui `NEXT_PUBLIC_META_PIXEL_ID`.
+- Checkout Super Kids diarahkan melalui `NEXT_PUBLIC_SUPER_KIDS_CHECKOUT_URL`.
+- Jalankan migration `0004_v53_funnel_tracking.sql` setelah migration V5.2.
+
+## V5.4 — OrderHero Live Integration
+Lihat `PAPA-BONSKI-V5.4-ORDERHERO-LIVE-INTEGRATION.md`. Seller diagnostics tersedia di `/seller/orderhero`; migration terbaru `0005_v54_orderhero_live_integration.sql`.

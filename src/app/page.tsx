@@ -1,100 +1,13 @@
 import Link from "next/link";
-import { t } from "@/lib/i18n";
-import BrandLogo from "@/components/ui/BrandLogo";
-import Onboarding, { HowToButton } from "@/components/onboarding/Onboarding";
-import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
+import Image from "next/image";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
+import FunnelTracker from "@/components/marketing/FunnelTracker";
 
-export const dynamic = "force-dynamic";
-
-export default async function LandingPage() {
-  const brand = await getRuntimeBrand();
-
-  return (
-    <main className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-6">
-      {/* Soft decorative blobs (brand-tinted, gently floating) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <span className="float-slow absolute -left-16 top-10 h-40 w-40 rounded-full bg-brand-accent/25 blur-2xl" />
-        <span className="float absolute right-[-3rem] top-24 h-52 w-52 rounded-full bg-brand-primary/15 blur-3xl" />
-        <span className="float-slow absolute bottom-8 left-8 h-40 w-40 rounded-full bg-brand-secondary/15 blur-2xl" style={{ animationDelay: "1.5s" }} />
-        <span className="float absolute bottom-24 right-10 h-28 w-28 rounded-full bg-brand-accent/20 blur-2xl" style={{ animationDelay: "0.8s" }} />
-      </div>
-
-      {/* Twinkling sparkles */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 text-xl">
-        <span className="sparkle absolute left-8 top-24">✨</span>
-        <span className="sparkle absolute right-10 top-16" style={{ animationDelay: "0.6s" }}>⭐</span>
-        <span className="sparkle absolute left-1/2 top-10" style={{ animationDelay: "1.2s" }}>🌟</span>
-        <span className="sparkle absolute bottom-28 left-12" style={{ animationDelay: "0.9s" }}>✨</span>
-        <span className="sparkle absolute bottom-16 right-16" style={{ animationDelay: "1.6s" }}>⭐</span>
-      </div>
-
-      <div className="relative z-10 w-full max-w-sm text-center">
-        <BrandLogo brand={brand} />
-        <p className="anim-fade-up d2 mt-3 text-sm leading-relaxed text-ink-soft">
-          {brand.tagline}
-          <br />
-          {brand.subtagline}
-        </p>
-
-        {/* Personal-story actions */}
-        <div className="mt-8 flex flex-col gap-3">
-          <Link href="/create" className="btn-primary anim-fade-up d3 pulse-glow w-full">
-            ✨ {t("landing.ctaCreate")}
-          </Link>
-          <Link href="/collection" className="btn-secondary anim-fade-up d4 w-full">
-            📚 {t("landing.ctaCollection")}
-          </Link>
-        </div>
-
-        {/* Separate highlight: the ready-made English catalogue is a different
-            kind of content, so it gets its own labelled section and the accent
-            colour rather than sitting as a third look-alike button. */}
-        <div className="anim-fade-up d5 mt-7 flex items-center gap-3" aria-hidden>
-          <span className="h-px flex-1 bg-ink-faint/30" />
-          <span className="text-[0.65rem] font-extrabold uppercase tracking-[0.16em] text-ink-faint">
-            {t("landing.digitalDivider")}
-          </span>
-          <span className="h-px flex-1 bg-ink-faint/30" />
-        </div>
-
-        <Link href="/cerita/video" className="btn-accent anim-fade-up d5 mt-3">
-          <span className="logo-shine" aria-hidden />
-          <span className="relative">🎬 {t("landing.ctaDigital")}</span>
-          <span className="blink relative rounded-full bg-brand-secondary px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-wider text-white shadow-sm">
-            {t("landing.digitalBadge")}
-          </span>
-        </Link>
-
-        <p className="anim-fade-up d6 mt-2 text-[0.7rem] font-semibold text-ink-faint">
-          {t("landing.digitalHint")}
-        </p>
-
-        <PwaInstallPrompt />
-
-        <p className="mt-8 flex items-center justify-center gap-2 text-xs text-ink-faint">
-          <HowToButton />
-          {brand.links?.website && (
-            <>
-              <span>·</span>
-              <a href={brand.links.website} className="hover:text-ink-soft">
-                {brand.name}
-              </a>
-            </>
-          )}
-          {brand.links?.support && (
-            <>
-              <span>·</span>
-              <a href={brand.links.support} className="hover:text-ink-soft">
-                Bantuan
-              </a>
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* First-run walkthrough (shows once, replayable via "Cara pakai"). */}
-      <Onboarding />
-    </main>
-  );
-}
+export const dynamic="force-dynamic";
+export default async function Home(){const brand=await getRuntimeBrand();return <main className="min-h-screen bg-surface text-ink">
+<FunnelTracker event="BrandHomeView" />
+<section className="px-5 py-8"><div className="mx-auto max-w-6xl"><nav className="flex items-center justify-between"><div className="flex items-center gap-3"><Image src={brand.logoSrc||"/logo.png"} alt={brand.name} width={56} height={56} className="rounded-2xl"/><b className="text-xl">Papa Bonski</b></div><div className="flex gap-3 text-sm font-extrabold"><Link href="/login">Login</Link><Link href="/super-kids" className="rounded-full bg-brand-primary px-4 py-2 text-white">Super Kids</Link></div></nav>
+<div className="grid items-center gap-10 py-16 md:grid-cols-2"><div><p className="text-sm font-black uppercase tracking-[.18em] text-brand-primary">Belajar • Bermain • Bertumbuh</p><h1 className="mt-4 text-5xl font-extrabold leading-tight">Temani si kecil belajar dengan cara yang lebih personal dan menyenangkan.</h1><p className="mt-5 max-w-xl text-lg text-ink-soft">Papa Bonski menghadirkan cerita personal, English learning, aktivitas edukatif, buku digital, dan pengalaman belajar keluarga dalam satu ekosistem.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/super-kids" className="btn-primary">Kenali Super Kids</Link><Link href="/login" className="btn-secondary">Sudah membeli? Login</Link></div></div>
+<div className="rounded-[2.5rem] bg-surface-card p-7 shadow-xl ring-1 ring-black/5"><div className="rounded-[2rem] bg-brand-primary/10 p-7"><p className="text-sm font-extrabold text-brand-primary">PRODUK UTAMA</p><h2 className="mt-2 text-3xl font-extrabold">Papa Bonski Super Kids</h2><p className="mt-3 text-ink-soft">Cerita personal untuk anak, audio, flipbook, parent guide, dan English Learning.</p><Link href="/super-kids" className="mt-6 inline-flex rounded-full bg-brand-primary px-6 py-3 font-extrabold text-white">Lihat Selengkapnya →</Link></div></div></div>
+<div className="grid gap-4 pb-16 md:grid-cols-3">{[["✨","Cerita Personal","Cerita dibuat sesuai profil, usia, dan kebutuhan anak."],["🎬","English Learning","Video, vocabulary, audio, PDF dan kuis."],["🎨","Produk Edukatif","Buku mewarnai, worksheet, dan materi belajar Papa Bonski."]].map(([i,t,d])=><div key={t} className="rounded-3xl bg-surface-card p-6 ring-1 ring-black/5"><div className="text-3xl">{i}</div><h3 className="mt-3 text-xl font-extrabold">{t}</h3><p className="mt-2 text-sm text-ink-soft">{d}</p></div>)}</div>
+</div></section></main>}

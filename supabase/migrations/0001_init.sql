@@ -1,5 +1,5 @@
 -- ============================================================================
---  MYKARAKIDS — DATABASE SCHEMA (consolidated)
+--  PAPA BONSKI SUPER KIDS — DATABASE SCHEMA (consolidated)
 --  Run this once in the Supabase SQL Editor (or via the Supabase CLI).
 --  Tables: children, stories, scenes, story_jobs, white_label_settings
 --  Plus: RLS + storage buckets & policies.
