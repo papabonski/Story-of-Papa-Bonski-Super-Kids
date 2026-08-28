@@ -47,7 +47,7 @@ export default async function AccessPage() {
             <ol className="mt-3 space-y-2 text-ink-soft">
               <li><b className="text-ink">1.</b> Tekan tombol Akses Produk.</li>
               <li><b className="text-ink">2.</b> Masukkan email yang digunakan saat membeli.</li>
-              <li><b className="text-ink">3.</b> Buka magic link yang dikirim ke email.</li>
+              <li><b className="text-ink">3.</b> Masukkan kode OTP 6 digit dari email Papa Bonski.</li>
               <li><b className="text-ink">4.</b> Akses Super Kids akan diverifikasi otomatis.</li>
             </ol>
           </div>
