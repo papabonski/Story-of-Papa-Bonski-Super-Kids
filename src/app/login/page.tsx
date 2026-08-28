@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={112} height={112} className="mx-auto rounded-3xl" />
         <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">Customer Login</p>
         <h1 className="mt-2 text-3xl font-extrabold">Masuk ke {brand.name}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-ink-soft">Tidak perlu mengingat password. Kami kirim link masuk aman ke email yang digunakan saat membeli.</p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-soft">Tidak perlu password dan tidak perlu membuka magic link. Kami kirim kode OTP 6 digit ke email yang digunakan saat membeli.</p>
       </div>
       <LoginForm initialEmail={params.email || ""} nextPath={safeNext} />
       <p className="mt-5 text-center text-xs text-ink-soft">Belum membeli? <Link className="font-extrabold text-brand-primary hover:underline" href="/">Lihat Papa Bonski</Link></p>
