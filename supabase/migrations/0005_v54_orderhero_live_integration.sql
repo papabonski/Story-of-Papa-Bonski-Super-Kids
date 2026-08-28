@@ -22,6 +22,13 @@ create index if not exists webhook_events_received_at_idx on public.webhook_even
 create index if not exists webhook_events_external_order_idx on public.webhook_events(external_order_id);
 create index if not exists orders_buyer_email_idx on public.orders(lower(buyer_email));
 
+-- Required by the OrderHero paid-order upsert target.
+-- The live Supabase database also carries this constraint as
+-- orders_provider_external_order_id_key.
+alter table public.orders
+  add constraint orders_provider_external_order_id_key
+  unique (provider, external_order_id);
+
 -- Optional seed. Replace/add mapping after seeing the real OrderHero product identifier.
 insert into public.orderhero_product_mappings(match_type,match_value,product_sku,plan_code,notes)
 values ('sku','PBSK-SUPER-KIDS','PBSK-SUPER-KIDS','PBSK-PREMIUM-1Y','Default Papa Bonski Super Kids mapping')
