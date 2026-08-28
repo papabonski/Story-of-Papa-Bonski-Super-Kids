@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
+export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" }: { initialEmail?: string; nextPath?: string }) {
   const [email, setEmail] = useState(initialEmail);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -15,9 +15,11 @@ export default function LoginForm({ initialEmail = "" }: { initialEmail?: string
     try {
       const supabase = createSupabaseBrowserClient();
       const origin = window.location.origin;
+      const safeNext = nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/onboarding";
+      const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: `${origin}/auth/callback?next=/onboarding`, shouldCreateUser: true },
+        options: { emailRedirectTo: callbackUrl, shouldCreateUser: true },
       });
       if (error) throw error;
       setMessage("Link masuk sudah dikirim. Buka email Bunda, lalu tekan tombol/link dari Papa Bonski.");
