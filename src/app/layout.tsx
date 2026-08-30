@@ -49,6 +49,12 @@ export default async function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: brandVars }}
         />
+        <script
+          id="pwa-install-prompt-capture"
+          dangerouslySetInnerHTML={{
+            __html: `window.__PWA_INSTALL_PROMPT__=window.__PWA_INSTALL_PROMPT__||null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__PWA_INSTALL_PROMPT__=e;window.dispatchEvent(new Event('pwa-install-prompt-ready'));});`,
+          }}
+        />
         {/* Kid-friendly display + body fonts. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
