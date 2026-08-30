@@ -15,7 +15,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: brand.name,
     short_name: brand.name,
     description: `${brand.tagline} ${brand.subtagline}`,
-    start_url: "/",
+    start_url: "/app",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
