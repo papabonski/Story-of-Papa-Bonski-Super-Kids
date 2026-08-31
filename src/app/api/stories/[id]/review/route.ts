@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { visualPromptFromNarration } from "@/lib/ai/story";
 import { enqueueStoryJob } from "@/lib/jobs/story-queue";
+import { STORY_WORKER_HEADER } from "@/lib/jobs/worker-auth";
 import type { StoryRow } from "@/lib/database.types";
 
 export const runtime = "nodejs";
@@ -12,6 +13,13 @@ type ReviewScene = {
   index?: unknown;
   narration?: unknown;
   imagePrompt?: unknown;
+};
+
+type WorkerKickResult = {
+  attempted: boolean;
+  ok: boolean;
+  status?: number;
+  error?: string;
 };
 
 function cleanText(value: unknown): string | null {
@@ -24,6 +32,47 @@ function cleanQuestions(value: unknown): string[] {
     .map((item) => (typeof item === "string" ? item.trim() : ""))
     .filter(Boolean)
     .slice(0, 6);
+}
+
+async function kickStoryWorker(req: Request): Promise<WorkerKickResult> {
+  const secret = process.env.STORY_WORKER_SECRET;
+  if (!secret) {
+    return {
+      attempted: false,
+      ok: false,
+      error: "STORY_WORKER_SECRET belum dikonfigurasi.",
+    };
+  }
+  if (process.env.STORY_WORKER_AUTOKICK === "false") {
+    return {
+      attempted: false,
+      ok: false,
+      error: "STORY_WORKER_AUTOKICK=false.",
+    };
+  }
+
+  try {
+    // Process one job immediately. Keeping the limit at one makes the approval
+    // request predictable while the normal queue polling can continue the rest.
+    const res = await fetch(new URL("/api/jobs/process", req.url), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        [STORY_WORKER_HEADER]: secret,
+      },
+      body: JSON.stringify({ limit: 1, workerId: "review-autokick" }),
+      cache: "no-store",
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const error = typeof json.error === "string" ? json.error : res.ok ? undefined : res.statusText;
+    return { attempted: true, ok: res.ok, status: res.status, error };
+  } catch (error) {
+    return {
+      attempted: true,
+      ok: false,
+      error: error instanceof Error ? error.message : "Worker autokick gagal.",
+    };
+  }
 }
 
 export async function POST(
@@ -62,6 +111,7 @@ export async function POST(
   const doa = body.doa ?? {};
   const questions = cleanQuestions(body.questions);
   const approve = body.approve === true;
+  const approvedAt = approve ? new Date().toISOString() : null;
   const storyUpdate: Partial<StoryRow> = {
     title,
     opener_text: opener,
@@ -71,8 +121,8 @@ export async function POST(
     doa_translation: cleanText(doa.translation),
     parent_activity: cleanText(body.activity),
     parent_questions: questions,
-    text_approved_at: approve ? new Date().toISOString() : null,
-    status: "generating_assets",
+    text_approved_at: approvedAt,
+    status: approve ? "generating_assets" : "generating_text",
     error_message: null,
   };
   if (opener !== story.opener_text) {
@@ -111,6 +161,7 @@ export async function POST(
     if (sceneErr) return NextResponse.json({ error: sceneErr.message }, { status: 500 });
   }
 
+  let workerKick: WorkerKickResult | null = null;
   if (approve) {
     try {
       await enqueueStoryJob(supabase, {
@@ -125,11 +176,16 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // Start processing from the approval request itself. The job remains safely
+    // queued even if this kick fails, so a transient worker issue never loses it.
+    workerKick = await kickStoryWorker(req);
   }
 
   return NextResponse.json({
     ok: true,
     approved: approve,
-    textApprovedAt: approve ? new Date().toISOString() : null,
+    textApprovedAt: approvedAt,
+    workerKick,
   });
 }
