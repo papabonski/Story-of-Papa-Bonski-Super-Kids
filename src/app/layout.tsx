@@ -21,7 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: runtimeBrand.logoSrc ?? emojiFaviconDataUrl(runtimeBrand.logoEmoji),
-      apple: "/icons/icon-192.png",
+      shortcut: runtimeBrand.logoSrc ?? "/logo.png",
+      apple: "/apple-touch-icon.png",
     },
   };
 }
@@ -55,7 +56,6 @@ export default async function RootLayout({
             __html: `window.__PWA_INSTALL_PROMPT__=window.__PWA_INSTALL_PROMPT__||null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__PWA_INSTALL_PROMPT__=e;window.dispatchEvent(new Event('pwa-install-prompt-ready'));});`,
           }}
         />
-        {/* Kid-friendly display + body fonts. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
