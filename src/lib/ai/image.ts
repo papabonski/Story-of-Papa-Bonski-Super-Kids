@@ -187,11 +187,13 @@ export async function generateSceneImage(opts: {
   }
 
   try {
+    // Google AI Studio's current image response_format accepts aspect_ratio but
+    // rejects the Nano-Banana-style `resolution` field. Keep resolution for KIE
+    // only so Gemini image generation uses a supported request schema.
     return await generateGoogleImage({
       model: providers.image.model,
       prompt,
       aspectRatio: providers.image.aspectRatio,
-      resolution: providers.image.resolution,
       reference: opts.reference,
     });
   } catch (error) {
