@@ -12,6 +12,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const fallbackIcon = brand.logoSrc ?? emojiFaviconDataUrl(brand.logoEmoji);
 
   return {
+    id: "/",
     name: brand.name,
     short_name: brand.name,
     description: `${brand.tagline} ${brand.subtagline}`,
