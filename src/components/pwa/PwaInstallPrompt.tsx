@@ -23,8 +23,8 @@ function isStandalone(): boolean {
 export default function PwaInstallPrompt() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const [preparing, setPreparing] = useState(true);
+  const [installing, setInstalling] = useState(false);
 
   const isIos = useMemo(() => {
     if (typeof navigator === "undefined") return false;
@@ -53,6 +53,7 @@ export default function PwaInstallPrompt() {
     function onInstalled() {
       setInstalled(true);
       setPromptEvent(null);
+      setInstalling(false);
       window.__PWA_INSTALL_PROMPT__ = null;
     }
 
@@ -71,53 +72,66 @@ export default function PwaInstallPrompt() {
     };
   }, []);
 
-  if (installed || dismissed) return null;
-
   async function install() {
     const currentPrompt = promptEvent ?? window.__PWA_INSTALL_PROMPT__ ?? null;
     if (!currentPrompt) return;
 
-    await currentPrompt.prompt();
-    const choice = await currentPrompt.userChoice.catch(() => null);
-    if (choice?.outcome === "accepted") setInstalled(true);
-    setPromptEvent(null);
-    window.__PWA_INSTALL_PROMPT__ = null;
+    setInstalling(true);
+    try {
+      await currentPrompt.prompt();
+      const choice = await currentPrompt.userChoice.catch(() => null);
+      if (choice?.outcome === "accepted") setInstalled(true);
+    } finally {
+      setPromptEvent(null);
+      setInstalling(false);
+      window.__PWA_INSTALL_PROMPT__ = null;
+    }
+  }
+
+  if (installed) {
+    return (
+      <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-200">
+        <p className="text-sm font-extrabold text-emerald-800">✓ Papa Bonski Super Kids sudah terpasang</p>
+        <p className="mt-1 text-xs font-semibold text-emerald-700">Buka dari icon Papa Bonski di Home Screen.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="anim-fade-up d4 mt-5 rounded-card bg-surface-card p-4 text-left shadow-sm ring-1 ring-black/[0.06]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-extrabold text-ink">Install di HP atau tablet</p>
-          <p className="mt-1 text-xs leading-relaxed text-ink-soft">
-            Pasang Papa Bonski Super Kids ke Home Screen agar dapat dibuka seperti aplikasi biasa.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setDismissed(true)}
-          aria-label="Tutup"
-          className="rounded-full px-2 text-lg leading-none text-ink-faint hover:text-ink"
-        >
-          ×
-        </button>
+    <div className="mt-5 rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-black/[0.06] sm:p-5">
+      <div className="text-center">
+        <p className="text-base font-extrabold text-ink">Siap dipasang di perangkat ini</p>
+        <p className="mx-auto mt-1 max-w-sm text-xs font-semibold leading-relaxed text-ink-soft">
+          Install tidak mengubah akun atau paket Anda. Aplikasi tetap memakai akses member Papa Bonski yang sama.
+        </p>
       </div>
 
       {promptEvent ? (
-        <button type="button" onClick={install} className="btn-primary mt-3 w-full">
-          Install Papa Bonski Super Kids
+        <button
+          type="button"
+          onClick={install}
+          disabled={installing}
+          className="btn-primary mt-4 w-full py-3 text-base disabled:cursor-wait disabled:opacity-70"
+        >
+          {installing ? "Membuka pilihan install…" : "Install Papa Bonski Super Kids"}
         </button>
       ) : isIos ? (
-        <ol className="mt-3 space-y-1.5 text-xs font-semibold leading-relaxed text-ink-soft">
-          <li>1. Tap tombol Share di Safari.</li>
-          <li>2. Pilih Add to Home Screen.</li>
-          <li>3. Tap Add untuk memasang aplikasi.</li>
-        </ol>
+        <div className="mt-4 rounded-2xl bg-surface px-4 py-4 text-sm font-semibold leading-relaxed text-ink-soft">
+          <p className="font-extrabold text-ink">iPhone / iPad</p>
+          <ol className="mt-2 space-y-1.5">
+            <li>1. Buka halaman ini dengan Safari.</li>
+            <li>2. Tekan tombol Share.</li>
+            <li>3. Pilih Add to Home Screen, lalu Add.</li>
+          </ol>
+        </div>
       ) : preparing ? (
-        <p className="mt-3 text-xs font-semibold leading-relaxed text-ink-soft">Menyiapkan tombol install…</p>
+        <button type="button" disabled className="btn-primary mt-4 w-full py-3 opacity-70">
+          Menyiapkan tombol install…
+        </button>
       ) : (
-        <div className="mt-3 rounded-xl bg-surface px-3 py-3 text-xs font-semibold leading-relaxed text-ink-soft">
-          Tombol install otomatis belum tersedia di browser ini. Buka menu ⋮ Chrome lalu pilih <b>Install app</b> atau <b>Add to Home screen</b>.
+        <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-4 text-sm font-semibold leading-relaxed text-amber-900 ring-1 ring-amber-200">
+          <p className="font-extrabold">Tombol otomatis belum tersedia.</p>
+          <p className="mt-1">Di Chrome, tekan menu <b>⋮</b> lalu pilih <b>Install app</b> atau <b>Add to Home screen</b>.</p>
         </div>
       )}
     </div>
