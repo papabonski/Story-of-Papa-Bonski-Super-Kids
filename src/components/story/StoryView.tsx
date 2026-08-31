@@ -196,14 +196,13 @@ function retryDelayFrom(json: ApiJson, fallback: number): number {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
-/** A placeholder SVG (saved during a past quota outage) is regenerable. */
-function isPlaceholderImage(url: string | null): boolean {
-  return !!url && url.split("?")[0].endsWith(".svg");
-}
-
-/** An image still needs generating when it's empty or a placeholder. */
+/**
+ * A saved image path counts as complete for the automatic workflow.
+ * Quota fallback SVGs can still be regenerated explicitly later, but must not
+ * keep the story stuck forever in the illustration step.
+ */
 function slotNeedsImage(url: string | null): boolean {
-  return !url || isPlaceholderImage(url);
+  return !url;
 }
 
 /** Does this scene still need its single page image? */
