@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { requireStoryWorker, STORY_WORKER_HEADER } from "@/lib/jobs/worker-auth";
-import { isPlaceholderPath, sceneImagePaths } from "@/lib/scene";
+import { sceneImagePaths } from "@/lib/scene";
 import type { Database, StoryJobRow } from "@/lib/database.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -33,6 +33,8 @@ async function claimNextJob(admin: AdminClient, workerId: string): Promise<Story
     .select("*")
     .eq("status", "queued")
     .lte("available_at", new Date().toISOString())
+    .order("attempts", { ascending: true })
+    .order("available_at", { ascending: true })
     .order("created_at", { ascending: true })
     .limit(5);
   if (error) throw new Error(error.message);
@@ -151,7 +153,7 @@ async function markFailed(admin: AdminClient, job: StoryJobRow, message: string)
 
 function sceneNeedsImage(scene: { image_path: string | null; image_paths: (string | null)[] }): boolean {
   const [path] = sceneImagePaths(scene);
-  return !path || isPlaceholderPath(path);
+  return !path;
 }
 
 async function processTextJob(req: Request, admin: AdminClient, job: StoryJobRow) {
