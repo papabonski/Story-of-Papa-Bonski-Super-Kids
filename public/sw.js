@@ -1,5 +1,5 @@
-const CACHE_NAME = "papa-bonski-super-kids-pwa-v2";
-const APP_SHELL = ["/", "/create", "/collection", "/offline", "/manifest.webmanifest"];
+const CACHE_NAME = "papa-bonski-super-kids-pwa-v3";
+const APP_SHELL = ["/", "/create", "/collection", "/offline"];
 
 function offlineHtml() {
   return new Response(
@@ -68,6 +68,14 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+
+  // Always fetch the web app manifest fresh. Caching an older manifest can
+  // preserve an obsolete start_url and make a newly installed PWA open the
+  // public landing page instead of the member app.
+  if (url.pathname === "/manifest.webmanifest") {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(
