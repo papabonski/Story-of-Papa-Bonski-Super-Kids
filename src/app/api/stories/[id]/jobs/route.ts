@@ -3,13 +3,13 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { enqueueStoryJob } from "@/lib/jobs/story-queue";
 import { STORY_WORKER_HEADER } from "@/lib/jobs/worker-auth";
-import { isPlaceholderPath, sceneImagePaths } from "@/lib/scene";
+import { sceneImagePaths } from "@/lib/scene";
 
 export const runtime = "nodejs";
 
 function sceneNeedsImage(scene: { image_path: string | null; image_paths: (string | null)[] }): boolean {
   const [path] = sceneImagePaths(scene);
-  return !path || isPlaceholderPath(path);
+  return !path;
 }
 
 function computeStep(opts: {
