@@ -93,7 +93,7 @@ begin
   end if;
 
   insert into public.story_credit_usage(customer_id, user_id, story_id, source)
-  values (p_customer_id, p_user_id, p_story_id, 'credit');
+  values (p_customer_id, p_user_id, p_story_id, 'included');
 
   v_used := v_used + 1;
 
