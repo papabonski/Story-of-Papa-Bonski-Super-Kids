@@ -278,9 +278,19 @@ export type Database = {
       activations: V5CommerceTable;
       funnel_events: V5CommerceTable;
       orderhero_product_mappings: V5CommerceTable;
+      story_credit_usage: V5CommerceTable;
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      reserve_story_credit: {
+        Args: { p_customer_id: string; p_user_id: string; p_story_id: string };
+        Returns: { ok: boolean; story_limit: number; used: number; remaining: number }[];
+      };
+      release_story_credit: {
+        Args: { p_customer_id: string; p_story_id: string };
+        Returns: boolean;
+      };
+    };
     Enums: {
       story_status: StoryStatus;
       scene_status: SceneStatus;
