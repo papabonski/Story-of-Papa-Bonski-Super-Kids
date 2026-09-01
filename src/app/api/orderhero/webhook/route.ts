@@ -5,6 +5,8 @@ import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } fr
 export const runtime = "nodejs";
 
 const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
+const STORY_TOPUP_SKU = "PBSK-STORY-CREDIT-1";
+const STORY_TOPUP_NAME = "Papa Bonski - Tambah 1 Cerita";
 
 function safeHeaders(req:Request){
   const allowed=[
@@ -49,7 +51,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ok:true,ignored:true,status:n.status});
     }
 
-    let productSku=n.productSku || "PBSK-SUPER-KIDS";
+    const isStoryTopup =
+      String(n.productSku || "").trim().toUpperCase() === STORY_TOPUP_SKU ||
+      String(n.productName || "").trim().toLowerCase() === STORY_TOPUP_NAME.toLowerCase();
+    const topupCredits = isStoryTopup ? 1 : 0;
+
+    let productSku=n.productSku || (isStoryTopup ? STORY_TOPUP_SKU : "PBSK-SUPER-KIDS");
     let planCode=process.env.ORDERHERO_DEFAULT_PLAN||"PBSK-PREMIUM-1Y";
 
     // Canonical V5.4 mapping for the live OrderHero Papa Bonski Super Kids product.
@@ -85,6 +92,33 @@ export async function POST(req: Request) {
       paid_at:n.paidAt || new Date().toISOString()
     },{onConflict:"provider,external_order_id"}).select("id").single();
     if(orderError) throw orderError;
+
+    // Paid story top-ups add credits only. They do not renew/extend the base plan.
+    // The unique order_id constraint makes webhook retries idempotent.
+    if (topupCredits > 0) {
+      const grant = await db.from("story_credit_grants").upsert({
+        customer_id: customerId,
+        order_id: order.id,
+        credits: topupCredits,
+        product_sku: STORY_TOPUP_SKU,
+        source: "orderhero_topup",
+      }, { onConflict: "order_id" });
+      if (grant.error) throw grant.error;
+
+      await db.from("webhook_events").update({
+        status:"processed",
+        processed_at:new Date().toISOString(),
+        normalized:{...n,eventName:eventName ?? n.eventName,productSku:STORY_TOPUP_SKU,creditsAdded:topupCredits}
+      }).eq("id",event.id);
+
+      return NextResponse.json({
+        ok:true,
+        creditsAdded:topupCredits,
+        customerId,
+        orderId:order.id,
+        productSku:STORY_TOPUP_SKU
+      });
+    }
 
     const {data:plan}=await db.from("plans").select("id,duration_days,code").eq("code",planCode).eq("active",true).maybeSingle();
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
