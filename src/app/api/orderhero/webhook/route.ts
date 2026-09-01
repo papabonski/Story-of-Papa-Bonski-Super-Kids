@@ -85,6 +85,23 @@ export async function POST(req: Request) {
 
     let customerId:string|undefined;
     if(n.email){ const {data}=await db.from("customers").select("id").ilike("email",n.email).maybeSingle(); customerId=data?.id; }
+
+    // Top-ups belong to an existing Papa Bonski member account. Do not create
+    // orphan customers/credits when the checkout email does not match a member.
+    if(!customerId && topupCredits > 0){
+      await db.from("webhook_events").update({
+        status:"needs_mapping",
+        error:"Top-up requires an existing Papa Bonski customer with the same email.",
+        processed_at:new Date().toISOString()
+      }).eq("id",event.id);
+      return NextResponse.json({
+        ok:true,
+        accepted:true,
+        needsMapping:true,
+        reason:"topup_customer_not_found"
+      },{status:202});
+    }
+
     if(!customerId){
       const {data,error}=await db.from("customers").insert({name:n.name||"Customer Papa Bonski",email:n.email||null,whatsapp:n.phone||null,status:"active"}).select("id").single();
       if(error) throw error; customerId=data.id;
