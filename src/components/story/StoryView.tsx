@@ -44,6 +44,7 @@ type JobInfo = {
   maxAttempts: number;
   lastError: string | null;
   createdAt: string | null;
+  updatedAt: string | null;
 };
 type WorkerKickInfo = {
   attempted: boolean;
@@ -329,6 +330,7 @@ function jobInfoFromStatus(json: ApiJson): JobInfo | null {
     maxAttempts: Number(job.max_attempts) || Number(job.maxAttempts) || 0,
     lastError: optionalText(job.last_error) ?? optionalText(job.lastError),
     createdAt: optionalText(job.created_at) ?? optionalText(job.createdAt),
+    updatedAt: optionalText(job.updated_at) ?? optionalText(job.updatedAt),
   };
 }
 
@@ -1173,10 +1175,15 @@ function jobStatusLabel(job: JobInfo): string {
 }
 
 function queuedTooLong(job: JobInfo | null): boolean {
-  if (!job || job.status !== "queued" || job.attempts > 0 || !job.createdAt) return false;
-  const createdMs = Date.parse(job.createdAt);
-  if (!Number.isFinite(createdMs)) return false;
-  return Date.now() - createdMs > 90_000;
+  if (!job || job.status !== "queued" || job.attempts > 0) return false;
+  // A job can return to queued with attempts reset to 0 after each successful
+  // image/audio step. Use its latest update time, not its original creation time,
+  // so an actively progressing story is never mislabelled as "never picked up".
+  const activityAt = job.updatedAt ?? job.createdAt;
+  if (!activityAt) return false;
+  const activityMs = Date.parse(activityAt);
+  if (!Number.isFinite(activityMs)) return false;
+  return Date.now() - activityMs > 90_000;
 }
 
 function workerQueueWarning(worker: WorkerInfo | null, staleQueue: boolean): string | null {
