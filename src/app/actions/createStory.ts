@@ -1,6 +1,6 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient, createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { BUCKET_CHILD_PHOTOS, childPhotoPath } from "@/lib/storage";
 import { enqueueStoryJob } from "@/lib/jobs/story-queue";
@@ -68,6 +68,21 @@ export async function createStory(
   }
 
   let storyId: string;
+  let quotaAdmin: ReturnType<typeof createSupabaseAdminClient> | null = null;
+  let quotaReservation: { customerId: string; storyId: string } | null = null;
+
+  async function releaseQuotaReservation() {
+    if (!quotaAdmin || !quotaReservation) return;
+    try {
+      await (quotaAdmin as any).rpc("release_story_credit", {
+        p_customer_id: quotaReservation.customerId,
+        p_story_id: quotaReservation.storyId,
+      });
+    } catch {
+      // Best effort only. The reservation remains auditable if cleanup fails.
+    }
+    quotaReservation = null;
+  }
 
   try {
     const userId = await getOrCreateUserId();
@@ -174,12 +189,44 @@ export async function createStory(
       // reference photo (illustration falls back to a described character).
     }
 
-    // 3) Insert the story (status = pending; generation happens on the story page).
+    // 3) Reserve one permanent story credit BEFORE creating/enqueuing the story.
+    // If the account is already at its limit, we stop here so Gemini is never called.
+    storyId = crypto.randomUUID();
+
+    if (requireCustomerQuota && quotaAdmin && quotaCustomerId) {
+      const { data: quotaRows, error: quotaErr } = await (quotaAdmin as any).rpc(
+        "reserve_story_credit",
+        {
+          p_customer_id: quotaCustomerId,
+          p_user_id: userId,
+          p_story_id: storyId,
+        }
+      );
+
+      if (quotaErr) {
+        throw new Error(`Gagal memeriksa kuota cerita: ${quotaErr.message}`);
+      }
+
+      const quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
+      if (!quota?.ok) {
+        const limit = Number(quota?.story_limit) || 2;
+        const used = Number(quota?.used) || limit;
+        return {
+          error: `Kuota cerita akun ini sudah habis (${used}/${limit}). Beli kredit cerita tambahan untuk membuat cerita baru.`,
+          storyId: null,
+        };
+      }
+
+      quotaReservation = { customerId: quotaCustomerId, storyId };
+    }
+
+    // 4) Insert the story (status = pending; generation happens on the story page).
     const theme = settings.themeCatalog.find((item) => item.id === themeId);
     const sub = theme?.subThemes.find((item) => item.id === subThemeId);
     const { data: story, error: storyErr } = await supabase
       .from("stories")
       .insert({
+        id: storyId,
         user_id: userId,
         child_id: child.id,
         theme_id: themeId,
@@ -239,6 +286,7 @@ export async function createStory(
       throw queueError;
     }
   } catch (error) {
+    await releaseQuotaReservation();
     const message = error instanceof Error ? error.message : "Gagal membuat cerita.";
     return { error: message, storyId: null };
   }
