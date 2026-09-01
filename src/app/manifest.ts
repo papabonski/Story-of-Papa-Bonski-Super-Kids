@@ -26,28 +26,16 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     categories: ["education", "kids", "books"],
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: "/icons/icon-192.png?v=4",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: "/icons/icon-512.png?v=4",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
-      },
-      {
-        src: "/icons/maskable-192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/icons/maskable-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
       },
       {
         src: fallbackIcon,
@@ -68,14 +56,14 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         short_name: "Buat",
         description: "Buat cerita personal baru",
         url: "/create",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "/icons/icon-192.png?v=4", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Koleksi Cerita",
         short_name: "Koleksi",
         description: "Buka koleksi cerita",
         url: "/collection",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "/icons/icon-192.png?v=4", sizes: "192x192", type: "image/png" }],
       },
     ],
   };
