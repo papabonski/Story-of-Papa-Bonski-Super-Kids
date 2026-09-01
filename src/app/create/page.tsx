@@ -5,16 +5,21 @@ import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BUCKET_CHILD_PHOTOS } from "@/lib/storage";
 import { getWhiteLabelSettings } from "@/lib/white-label/settings";
+import { getStoryQuotaForUser } from "@/lib/story-quota";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatePage() {
-  const [profiles, settings] = await Promise.all([loadChildProfiles(), getWhiteLabelSettings()]);
+  const [profiles, settings, quota] = await Promise.all([
+    loadChildProfiles(),
+    getWhiteLabelSettings(),
+    loadStoryQuota(),
+  ]);
 
   return (
     <main className="min-h-[100dvh] bg-surface">
       <AppHeader backHref="/" title={t("header.createTitle")} />
-      <CreateWizard profiles={profiles} themes={settings.themeCatalog} />
+      <CreateWizard profiles={profiles} themes={settings.themeCatalog} quota={quota} />
     </main>
   );
 }
@@ -52,5 +57,15 @@ async function loadChildProfiles() {
     );
   } catch {
     return [];
+  }
+}
+
+
+async function loadStoryQuota() {
+  try {
+    const userId = await getOrCreateUserId();
+    return await getStoryQuotaForUser(userId);
+  } catch {
+    return null;
   }
 }
