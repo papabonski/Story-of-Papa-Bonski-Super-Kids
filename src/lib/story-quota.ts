@@ -35,7 +35,7 @@ export async function getStoryQuotaForUser(userId: string): Promise<StoryQuotaSt
 
   if (subscriptionError) throw new Error(subscriptionError.message);
 
-  let limit = 0;
+  let baseLimit = 0;
   if (subscription?.plan_id) {
     const { data: plan, error: planError } = await admin
       .from("plans")
@@ -44,8 +44,19 @@ export async function getStoryQuotaForUser(userId: string): Promise<StoryQuotaSt
       .eq("active", true)
       .maybeSingle();
     if (planError) throw new Error(planError.message);
-    limit = Number(plan?.story_limit) || 0;
+    baseLimit = Number(plan?.story_limit) || 0;
   }
+
+  const { data: grants, error: grantsError } = await admin
+    .from("story_credit_grants")
+    .select("credits")
+    .eq("customer_id", membership.customer_id);
+  if (grantsError) throw new Error(grantsError.message);
+  const extraCredits = (grants ?? []).reduce(
+    (sum: number, row: { credits?: number | null }) => sum + (Number(row.credits) || 0),
+    0,
+  );
+  const limit = baseLimit + extraCredits;
 
   const { count, error: countError } = await admin
     .from("story_credit_usage")
