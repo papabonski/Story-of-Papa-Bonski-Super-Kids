@@ -6,6 +6,11 @@ import { BUCKET_CHILD_PHOTOS, childPhotoPath } from "@/lib/storage";
 import { enqueueStoryJob } from "@/lib/jobs/story-queue";
 import { getWhiteLabelSettings } from "@/lib/white-label/settings";
 import {
+  getStoryQuotaForUser,
+  reserveStoryCreditForUser,
+  releaseStoryCredit,
+} from "@/lib/story-quota";
+import {
   illustrationStylePresets,
   storyLanguageLevels,
 } from "../../../config/themes";
@@ -69,23 +74,42 @@ export async function createStory(
     const supabase = await createSupabaseServerClient();
     const settings = await getWhiteLabelSettings();
 
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    const { count: monthlyStoryCount, error: monthlyErr } = await supabase
-      .from("stories")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .gte("created_at", monthStart.toISOString());
-    if (monthlyErr) throw new Error(monthlyErr.message);
-    if (
-      settings.limits.storiesPerUserPerMonth > 0 &&
-      (monthlyStoryCount ?? 0) >= settings.limits.storiesPerUserPerMonth
-    ) {
-      return {
-        error: `Limit ${settings.limits.storiesPerUserPerMonth} cerita bulan ini sudah tercapai.`,
-        storyId: null,
-      };
+    // Commercial customers use a permanent per-account credit ledger.
+    // Deleting a story does not restore a consumed credit.
+    const accountQuota = await getStoryQuotaForUser(userId);
+    if (accountQuota) {
+      if (accountQuota.limit <= 0) {
+        return {
+          error: "Paket akun ini belum memiliki kuota cerita aktif.",
+          storyId: null,
+        };
+      }
+      if (accountQuota.remaining <= 0) {
+        return {
+          error: `Kuota ${accountQuota.limit} cerita untuk akun ini sudah habis (${accountQuota.used}/${accountQuota.limit} terpakai). Cerita tambahan perlu dibeli.`,
+          storyId: null,
+        };
+      }
+    } else {
+      // Legacy/non-customer installs keep the existing monthly white-label limit.
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const { count: monthlyStoryCount, error: monthlyErr } = await supabase
+        .from("stories")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", monthStart.toISOString());
+      if (monthlyErr) throw new Error(monthlyErr.message);
+      if (
+        settings.limits.storiesPerUserPerMonth > 0 &&
+        (monthlyStoryCount ?? 0) >= settings.limits.storiesPerUserPerMonth
+      ) {
+        return {
+          error: `Limit ${settings.limits.storiesPerUserPerMonth} cerita bulan ini sudah tercapai.`,
+          storyId: null,
+        };
+      }
     }
 
     // 1) Reuse an existing child profile, or create a new reusable profile.
@@ -176,12 +200,44 @@ export async function createStory(
     }
     storyId = story.id;
 
-    await enqueueStoryJob(supabase, {
-      storyId,
-      userId,
-      phase: "text",
-      metadata: { source: "create_story" },
-    });
+    // Reserve the account credit BEFORE any AI generation is enqueued.
+    // The database function serializes reservations per customer, so two
+    // simultaneous taps cannot spend more credits than the plan allows.
+    let reservation;
+    try {
+      reservation = await reserveStoryCreditForUser(userId, storyId);
+    } catch (quotaError) {
+      await supabase.from("stories").delete().eq("id", storyId);
+      throw quotaError;
+    }
+
+    if (reservation.managed && !reservation.ok) {
+      await supabase.from("stories").delete().eq("id", storyId);
+      return {
+        error: `Kuota ${reservation.limit} cerita untuk akun ini sudah habis (${reservation.used}/${reservation.limit} terpakai). Cerita tambahan perlu dibeli.`,
+        storyId: null,
+      };
+    }
+
+    try {
+      await enqueueStoryJob(supabase, {
+        storyId,
+        userId,
+        phase: "text",
+        metadata: { source: "create_story" },
+      });
+    } catch (queueError) {
+      // Do not charge a story credit when generation never entered the queue.
+      if (reservation.managed && reservation.customerId) {
+        try {
+          await releaseStoryCredit(reservation.customerId, storyId);
+        } catch {
+          // Best effort cleanup; preserve the original queue error below.
+        }
+      }
+      await supabase.from("stories").delete().eq("id", storyId);
+      throw queueError;
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Gagal membuat cerita.";
     return { error: message, storyId: null };
