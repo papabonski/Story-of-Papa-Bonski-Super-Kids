@@ -35,9 +35,11 @@ export type ChildProfile = {
 export default function CreateWizard({
   profiles = [],
   themes = defaultThemes,
+  quota = null,
 }: {
   profiles?: ChildProfile[];
   themes?: Theme[];
+  quota?: { limit: number; used: number; remaining: number } | null;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const router = useRouter();
@@ -198,6 +200,34 @@ export default function CreateWizard({
           style={{ width: step === 1 ? "50%" : "100%" }}
         />
       </div>
+
+      {quota && (
+        <div
+          className={`mb-5 rounded-card px-4 py-3 ring-1 ${
+            quota.remaining > 0
+              ? "bg-emerald-50 text-emerald-800 ring-emerald-100"
+              : "bg-red-50 text-red-700 ring-red-100"
+          }`}
+          aria-label="Status kuota cerita"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide opacity-75">Kuota Cerita</p>
+              <p className="mt-0.5 text-sm font-extrabold">
+                {quota.used}/{quota.limit} terpakai · Sisa {quota.remaining}
+              </p>
+            </div>
+            <div className="text-2xl" aria-hidden="true">
+              {quota.remaining > 0 ? "📚" : "🔒"}
+            </div>
+          </div>
+          {quota.remaining > 0 && quota.limit > 2 && (
+            <p className="mt-2 text-xs font-semibold opacity-80">
+              Kuota tambahan sudah aktif dan siap digunakan.
+            </p>
+          )}
+        </div>
+      )}
 
       {state.error && (
         <div
