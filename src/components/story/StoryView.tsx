@@ -1043,8 +1043,17 @@ function Loader({
 
   return (
     <Centered>
-      <div className="float mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-card text-3xl shadow-sm ring-1 ring-black/[0.04]">
-        {brand.logoEmoji}
+      <div className="float mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-card shadow-sm ring-1 ring-black/[0.04]">
+        {brand.logoSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={brand.logoSrc}
+            alt={brand.name}
+            className="h-12 w-12 object-contain"
+          />
+        ) : (
+          <span className="text-3xl" aria-hidden="true">{brand.logoEmoji}</span>
+        )}
       </div>
       <h1 className="anim-fade-up max-w-sm text-xl font-extrabold text-ink">{title}</h1>
       {subtitle && <p className="max-w-xs text-sm text-ink-soft">{subtitle}</p>}
