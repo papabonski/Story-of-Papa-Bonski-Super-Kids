@@ -9,7 +9,7 @@ import {
   sceneImagePath,
   storyAssetPublicUrl,
 } from "@/lib/storage";
-import { fallbackCharacterDescription } from "@/lib/ai/story";
+import { fallbackCharacterDescription, storyVisualContinuityGuide } from "@/lib/ai/story";
 import { isStoryWorkerRequest } from "@/lib/jobs/worker-auth";
 import { isPlaceholderPath, sceneImagePaths, sceneImagePrompts } from "@/lib/scene";
 
@@ -195,6 +195,7 @@ export async function POST(
         characterDescription,
         illustrationStyle: story.illustration_style,
         narration: scene.narration_text ?? undefined,
+        continuityGuide: storyVisualContinuityGuide(id),
         reference,
       });
     } catch (imageError) {
