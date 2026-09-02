@@ -144,9 +144,40 @@ export async function POST(req: Request) {
       });
     }
 
-    const {data:plan}=await db.from("plans").select("id,duration_days,code").eq("code",planCode).eq("active",true).maybeSingle();
+    const {data:plan}=await db.from("plans").select("id,duration_days,code,story_limit").eq("code",planCode).eq("active",true).maybeSingle();
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
-    const expires=new Date(Date.now()+(plan.duration_days||365)*86400000).toISOString();
+
+    // A repeat purchase of the base package must be additive, not destructive:
+    // - extend access from the customer's furthest existing expiry (or from now if expired)
+    // - add the package's included story quota again as credits
+    // This keeps a second purchase fair for an existing member.
+    const {data:previousSub,error:previousSubError}=await db
+      .from("subscriptions")
+      .select("id,expires_at")
+      .eq("customer_id",customerId)
+      .neq("source_order_id",order.id)
+      .order("expires_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+    if(previousSubError) throw previousSubError;
+
+    const nowMs=Date.now();
+    const previousExpiryMs=previousSub?.expires_at ? new Date(previousSub.expires_at).getTime() : 0;
+    const renewalBaseMs=Math.max(nowMs, Number.isFinite(previousExpiryMs) ? previousExpiryMs : 0);
+    const expires=new Date(renewalBaseMs+(plan.duration_days||365)*86400000).toISOString();
+
+    const repeatPurchase=Boolean(previousSub?.id);
+    const includedCredits=repeatPurchase ? Math.max(Number(plan.story_limit)||0,0) : 0;
+    if(includedCredits>0){
+      const renewalGrant=await db.from("story_credit_grants").upsert({
+        customer_id:customerId,
+        order_id:order.id,
+        credits:includedCredits,
+        product_sku:productSku,
+        source:"orderhero_package_repeat",
+      },{onConflict:"order_id"});
+      if(renewalGrant.error) throw renewalGrant.error;
+    }
 
     const existingSub=await db.from("subscriptions").select("id").eq("source_order_id",order.id).maybeSingle();
     if(!existingSub.data){
@@ -161,8 +192,29 @@ export async function POST(req: Request) {
     }
     const existingActivation=await db.from("activations").select("id").eq("order_id",order.id).maybeSingle();
     if(!existingActivation.data) await db.from("activations").insert({customer_id:customerId,order_id:order.id,status:"active",metadata:{source:"orderhero_webhook",plan_code:plan.code,orderhero_product_id:n.externalProductId}});
-    await db.from("webhook_events").update({status:"processed",processed_at:new Date().toISOString(),normalized:{...n,eventName:eventName ?? n.eventName,productSku,planCode}}).eq("id",event.id);
-    return NextResponse.json({ok:true,activated:true,customerId,orderId:order.id,planCode});
+    await db.from("webhook_events").update({
+      status:"processed",
+      processed_at:new Date().toISOString(),
+      normalized:{
+        ...n,
+        eventName:eventName ?? n.eventName,
+        productSku,
+        planCode,
+        repeatPurchase,
+        creditsAdded:includedCredits,
+        accessExpiresAt:expires,
+      }
+    }).eq("id",event.id);
+    return NextResponse.json({
+      ok:true,
+      activated:true,
+      customerId,
+      orderId:order.id,
+      planCode,
+      repeatPurchase,
+      creditsAdded:includedCredits,
+      accessExpiresAt:expires,
+    });
   } catch(e:any){
     await db.from("webhook_events").update({status:"error",error:String(e?.message||e),processed_at:new Date().toISOString()}).eq("id",event.id);
     return NextResponse.json({ok:false,error:"processing_failed"},{status:500});
