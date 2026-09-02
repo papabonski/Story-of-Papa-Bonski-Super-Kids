@@ -36,14 +36,15 @@ export default async function AppHeader({
           {backHref ? (
             <Link
               href={backHref}
-              aria-label={t("header.back")}
+              aria-label={backHref === "/app" ? t("header.home") : t("header.back")}
+              title={backHref === "/app" ? t("header.home") : t("header.back")}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-card text-lg text-ink-soft ring-1 ring-black/[0.05] transition hover:text-ink active:scale-90"
             >
-              ←
+              {backHref === "/app" ? "🏠" : "←"}
             </Link>
           ) : (
             <Link
-              href="/"
+              href="/app"
               aria-label={t("header.home")}
               className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary/10 text-base transition active:scale-90"
             >
