@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 export default function CheckoutButton({label="Mulai Papa Bonski Super Kids",className=""}:{label?:string;className?:string}){
   const href=useMemo(()=>{
-    const base=process.env.NEXT_PUBLIC_SUPER_KIDS_CHECKOUT_URL || "/login";
+    const base=process.env.NEXT_PUBLIC_SUPER_KIDS_CHECKOUT_URL || "https://papabonski.orderhero.id/form/papa-bonski-super-kids";
     if(typeof window==="undefined"||base.startsWith("/")) return base;
     try{
       const u=new URL(base);
