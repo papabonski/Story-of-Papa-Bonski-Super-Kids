@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateUserId } from "@/lib/supabase/auth";
-import { rewriteStoryScene, type SceneRewriteMode } from "@/lib/ai/story";
+import { rewriteStoryScene, storyVisualContinuityGuide, type SceneRewriteMode } from "@/lib/ai/story";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -72,6 +72,7 @@ export async function POST(
       previousNarration: rows.find((scene) => scene.index === index - 1)?.narration_text,
       nextNarration: rows.find((scene) => scene.index === index + 1)?.narration_text,
       characterDescription: story.character_snapshot,
+      visualContinuityGuide: storyVisualContinuityGuide(id),
       languageLevel: story.language_level,
     });
 
