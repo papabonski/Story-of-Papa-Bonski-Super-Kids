@@ -38,15 +38,14 @@ export default async function AccessPage() {
           </p>
           <h1 className="mt-2 text-3xl font-extrabold">Papa Bonski Super Kids</h1>
           <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-            Sudah membeli? Masuk menggunakan <b>email yang sama seperti saat pembelian</b>.
-            Sistem akan memverifikasi pembelian dan membuka akses secara otomatis.
+            Sudah membeli? Masuk menggunakan <b>Email Penerima</b> yang didaftarkan sebelum checkout. Email Pembeli hanya digunakan untuk transaksi.
           </p>
 
           <div className="mt-6 rounded-2xl bg-white p-5 text-left text-sm ring-1 ring-black/[0.06]">
             <div className="font-extrabold">Cara masuk:</div>
             <ol className="mt-3 space-y-2 text-ink-soft">
               <li><b className="text-ink">1.</b> Tekan tombol Akses Produk.</li>
-              <li><b className="text-ink">2.</b> Masukkan email yang digunakan saat membeli.</li>
+              <li><b className="text-ink">2.</b> Masukkan Email Penerima / email login Papa Bonski.</li>
               <li><b className="text-ink">3.</b> Masukkan kode OTP 6 digit dari email Papa Bonski.</li>
               <li><b className="text-ink">4.</b> Akses Super Kids akan diverifikasi otomatis.</li>
             </ol>
