@@ -17,6 +17,6 @@ export default async function CustomerAppPage() {
       <Link href="/install" className="rounded-2xl bg-white p-5 font-extrabold ring-1 ring-black/[0.06]">📲 Install Aplikasi<div className="mt-1 text-xs font-semibold text-ink-soft">Pasang Papa Bonski di Home Screen.</div></Link>
     </div></div>
     <div className="mt-5"><PwaInstallPrompt /></div>
-    <div className="mt-5 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05]">Paket: <b className="text-ink">{access.planName || "Super Kids"}</b>{access.expiresAt ? <> · Aktif sampai <b className="text-ink">{new Date(access.expiresAt).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}</b></> : null}</div>
+    <div className="mt-5 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05]">Status akun: <b className="text-emerald-700">Aktif</b>{access.expiresAt ? <> · Masa akses sampai <b className="text-ink">{new Date(access.expiresAt).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}</b></> : null}</div>
   </div></main>;
 }
