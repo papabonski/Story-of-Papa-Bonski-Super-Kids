@@ -26,7 +26,7 @@ export default function DigitalStoryListPage() {
 
   return (
     <main className="min-h-[100dvh] bg-surface">
-      <AppHeader wide backHref="/" title="Cerita Anak Digital" />
+      <AppHeader wide backHref="/app" title="Cerita Anak Digital" />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden border-b border-black/[0.04] bg-gradient-to-b from-brand-primary/[0.07] to-transparent">
