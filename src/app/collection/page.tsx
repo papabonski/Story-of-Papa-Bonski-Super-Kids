@@ -42,7 +42,7 @@ export default async function CollectionPage() {
   if (list.length === 0) {
     return (
       <main className="flex min-h-[100dvh] flex-col bg-surface">
-        <AppHeader backHref="/" title={t("collection.title")} />
+        <AppHeader backHref="/app" title={t("collection.title")} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
           <div className="float text-6xl">📚</div>
           <p className="anim-fade-up max-w-xs text-sm text-ink-soft">{t("collection.empty")}</p>
@@ -132,7 +132,7 @@ export default async function CollectionPage() {
 
   return (
     <main className="min-h-[100dvh] bg-surface">
-      <AppHeader backHref="/" title={t("collection.title")} right={<NewStoryAction />} />
+      <AppHeader backHref="/app" title={t("collection.title")} right={<NewStoryAction />} />
 
       <div className="mx-auto w-full max-w-6xl px-5 py-6 lg:px-8">
         <section className="anim-fade-up mb-6">
