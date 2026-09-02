@@ -38,6 +38,8 @@ export type StoryInput = {
   languageLevel: string;
   /** Visual description of the child, kept consistent across all scenes. */
   characterDescription: string;
+  /** Fixed wardrobe / recurring adult / recurring-room guide for this story. */
+  visualContinuityGuide?: string;
   sceneCount: number;
   qualityFeedback?: string;
 };
@@ -49,6 +51,26 @@ export type StoryQualityReport = {
   issues: string[];
   suggestions: string[];
 };
+
+const STORY_OUTFITS = [
+  "a soft teal long-sleeve top with dark navy trousers",
+  "a warm coral long-sleeve top with dark navy trousers",
+  "a mustard-yellow long-sleeve top with deep brown trousers",
+  "a sky-blue long-sleeve top with charcoal trousers",
+] as const;
+
+export function storyVisualContinuityGuide(storyId: string): string {
+  let hash = 0;
+  for (const ch of storyId) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const outfit = STORY_OUTFITS[hash % STORY_OUTFITS.length];
+
+  return [
+    `MAIN CHILD OUTFIT: the child wears ${outfit} in every scene; never change its colors or clothing unless the narration explicitly says the child changes clothes.`,
+    "RECURRING MOTHER: whenever Ibu appears, keep exactly the same mother in every scene: same face and skin tone, cream hijab, muted teal long-sleeve blouse, and dark navy skirt; never add/remove the hijab or change clothing colors.",
+    "CHILD BEDROOM: whenever a scene is in the child's bedroom, keep the same room: warm cream walls, wooden bed on the right with the same patchwork quilt, bookshelf on the left, window on the right, soft rug, and the same furniture positions and color palette.",
+    "TIMELINE: assume the illustrated scenes happen in one continuous day unless the narration explicitly says a new day or a clothing change.",
+  ].join(" ");
+}
 
 function languageLevelGuide(level: string, ageWord: string): string {
   if (level === "toddler") {
@@ -78,6 +100,7 @@ TOKOH UTAMA (WAJIB jadi karakter utama dan pahlawan cerita):
 - Jenis kelamin: ${genderWord}
 - Usia: ${ageWord}
 - Penampilan (jaga KONSISTEN di semua adegan): ${input.characterDescription}
+${input.visualContinuityGuide ? `- Kunci kontinuitas visual: ${input.visualContinuityGuide}` : ""}
 
 LEVEL BAHASA:
 ${languageLevelGuide(input.languageLevel, ageWord)}
@@ -103,6 +126,7 @@ KETENTUAN:
 - Nilai Islami & ADAB dijalin ALAMI lewat perbuatan dan percakapan, bukan ceramah: tunjukkan contoh konkret seperti mengucap salam, "Bismillah" sebelum mulai, "Alhamdulillah" saat senang, jujur, sabar, meminta maaf & memaafkan, berbakti pada orang tua, atau berbagi. Sebut Allah dengan wajar sesuai konteks, dan tampilkan momen ${input.childName} berdoa/berdzikir pendek di saat yang pas dalam cerita.
 - "opener" memperkenalkan ${input.childName} dengan hangat dan menggugah rasa ingin tahu (seperti "Kenalkan, ini ${input.childName}...").
 - Setiap adegan punya "imagePrompts": array berisi TEPAT 1 prompt BAHASA INGGRIS untuk 1 ilustrasi halaman tersebut. Prompt harus menggambarkan PERSIS momen utama yang diceritakan di "narration" adegan itu, mencakup tokoh, aksi, emosi, benda penting, dan latar yang disebut di narasi (jangan menambah adegan/objek yang tidak ada di narasi). Prompt harus mendeskripsikan apa yang dilakukan ${input.childName}, ekspresi wajahnya, dan latar tempatnya, sambil menjaga penampilan ${input.childName} tetap sama persis di seluruh cerita. Jadikan ${input.childName} satu-satunya tokoh anak utama yang jelas. Jangan ada teks/tulisan/angka di dalam gambar.
+- KONSISTENSI VISUAL WAJIB: untuk outfit anak, penampilan/pakaian Ibu yang berulang, dan kamar anak yang berulang, gunakan DESKRIPSI BAHASA INGGRIS YANG SAMA PERSIS pada setiap imagePrompt ketika elemen itu muncul. Jangan mengganti warna baju, jilbab, furnitur, posisi ranjang/rak/jendela, atau palet kamar hanya untuk variasi visual.
 - "moral": pesan moral singkat yang selaras dengan nilai Islami.
 - "doa": pilih SATU doa/dzikir pendek yang sahih dan relevan dengan tema. Sertakan teks Arab, transliterasi latin, dan terjemahan Indonesia yang akurat.
 - "parentGuide.activity": satu aktivitas bermain peran/percakapan untuk orang tua & anak.
@@ -287,6 +311,7 @@ CEK WAJIB:
 4. Nama anak konsisten sebagai tokoh utama.
 5. Nilai Islami/adab terasa alami lewat tindakan/dialog, tidak terlalu menggurui atau seperti ceramah.
 6. Parent guide praktis dan pertanyaannya sesuai isi cerita.
+7. Image prompt konsisten secara visual: outfit anak tidak berubah tanpa alasan cerita, Ibu yang berulang mempertahankan wajah/jilbab/pakaian yang sama, dan kamar anak yang sama mempertahankan tata letak, furnitur, serta warna yang sama. Jika ada perubahan tanpa alasan naratif, set passed=false.
 
 MASALAH TERHITUNG OLEH SISTEM:
 ${localIssues.length ? localIssues.map((issue) => `- ${issue}`).join("\n") : "- Tidak ada"}
@@ -370,6 +395,7 @@ export async function rewriteStoryScene(input: {
   previousNarration?: string | null;
   nextNarration?: string | null;
   characterDescription: string | null;
+  visualContinuityGuide?: string;
   languageLevel?: string | null;
 }): Promise<{ narration: string; imagePrompt: string }> {
   const genderWord =
@@ -388,6 +414,7 @@ KONTEKS CERITA:
     age: input.age,
     gender: input.gender,
   })}
+${input.visualContinuityGuide ? `- Kunci kontinuitas visual: ${input.visualContinuityGuide}` : ""}
 - Tema: ${input.themeLabel ?? "-"}
 - Sub tema: ${input.subThemeLabel ?? "-"}
 - Adegan: ${input.sceneIndex + 1} dari ${input.sceneCount}
@@ -402,6 +429,7 @@ KETENTUAN:
 - Sertakan dialog natural jika cocok.
 - Balas HANYA JSON valid.
 - "imagePrompt" harus Bahasa Inggris, tepat menggambarkan momen utama adegan ini, menjaga karakter konsisten, tanpa teks/tulisan/angka di gambar.
+- Jika outfit anak, Ibu, atau kamar pernah muncul pada cerita ini, pertahankan detail dan warna yang sama persis sesuai kunci kontinuitas visual; jangan membuat variasi baru.
 
 Struktur:
 {
