@@ -74,7 +74,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
       <button type="button" disabled={loading} onClick={()=>{ setStep("email"); setToken(""); setError(null); setMessage(null); }} className="btn-secondary w-full disabled:opacity-60">Ganti Email / Minta Kode Baru</button>
       {message && <div className="rounded-2xl bg-green-50 p-4 text-sm font-semibold text-green-800">✅ {message}</div>}
       {error && <div className="rounded-2xl bg-red-50 p-4 text-sm font-semibold text-red-800">⚠️ {error}</div>}
-      <p className="text-center text-xs text-ink-soft">Supabase menerapkan jeda keamanan antar pengiriman OTP. Jika diminta menunggu, tunggu sekitar 1 menit sebelum meminta kode baru.</p>
+      <p className="text-center text-xs text-ink-soft">Demi keamanan, ada jeda singkat antar pengiriman kode. Jika diminta menunggu, tunggu sekitar 1 menit sebelum meminta kode baru.</p>
     </form>;
   }
 
@@ -82,7 +82,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
     <div>
       <label className="text-sm font-extrabold">Email saat membeli</label>
       <input value={email} onChange={e=>setEmail(e.target.value)} type="email" required autoComplete="email" placeholder="bunda@email.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none ring-brand-primary/20 focus:ring-4" />
-      <p className="mt-2 text-xs text-ink-soft">Gunakan email yang sama dengan transaksi OrderHero agar akses dapat ditemukan otomatis.</p>
+      <p className="mt-2 text-xs text-ink-soft">Gunakan email yang sama seperti saat pembelian agar akses dapat ditemukan otomatis.</p>
     </div>
     <button disabled={loading} className="btn-primary w-full disabled:opacity-60">{loading ? "Mengirim…" : "Kirim Kode OTP"}</button>
     {message && <div className="rounded-2xl bg-green-50 p-4 text-sm font-semibold text-green-800">✅ {message}</div>}
