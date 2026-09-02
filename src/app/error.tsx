@@ -28,17 +28,6 @@ export default function GlobalError({
       </h1>
       <p className="anim-fade-up d1 max-w-xs text-sm text-ink-soft">{t("common.errorBody")}</p>
 
-      {error?.message && (
-        <p className="anim-fade-up d2 max-w-sm break-words rounded-xl bg-surface-soft px-3 py-2 text-xs text-ink-faint">
-          {error.message}
-        </p>
-      )}
-      {error?.digest && (
-        <p className="anim-fade-up d2 text-[11px] font-semibold text-ink-faint">
-          Kode error: {error.digest}
-        </p>
-      )}
-
       <div className="anim-fade-up d3 mt-3 flex gap-3">
         <button onClick={reset} className="btn-primary">
           {t("common.tryAgain")}
