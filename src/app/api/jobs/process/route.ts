@@ -33,8 +33,8 @@ async function claimNextJob(admin: AdminClient, workerId: string): Promise<Story
     .select("*")
     .eq("status", "queued")
     .lte("available_at", new Date().toISOString())
-    .order("attempts", { ascending: true })
     .order("available_at", { ascending: true })
+    .order("attempts", { ascending: true })
     .order("created_at", { ascending: true })
     .limit(5);
   if (error) throw new Error(error.message);
@@ -227,12 +227,23 @@ async function processAudioJob(req: Request, admin: AdminClient, job: StoryJobRo
     .order("index", { ascending: true });
   if (error) throw new Error(error.message);
 
-  const nextScene = (scenes ?? []).find((scene) => !scene.audio_path);
+  const missingScenes = (scenes ?? []).filter((scene) => !scene.audio_path);
+  const nextScene = missingScenes[0];
   if (nextScene) {
     const result = await callStoryEndpoint(req, `/api/stories/${job.story_id}/generate-audio`, {
       kind: "scene",
       index: nextScene.index,
     });
+
+    // When this was the final missing audio and generation succeeded, finish the
+    // story immediately. This avoids leaving a fully readable story labelled as
+    // "generating" until another worker kick happens.
+    if (!result.retryAfterMs && missingScenes.length === 1) {
+      await admin.from("stories").update({ status: "ready", error_message: null }).eq("id", job.story_id);
+      await markCompleted(admin, job);
+      return;
+    }
+
     await markQueued(admin, job, {
       phase: "audio",
       delayMs: result.retryAfterMs ?? 0,
