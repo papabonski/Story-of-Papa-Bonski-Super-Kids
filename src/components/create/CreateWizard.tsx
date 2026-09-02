@@ -16,8 +16,8 @@ import { t } from "@/lib/i18n";
 import type { Gender } from "@/lib/database.types";
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024; // 10 MB
-const STORY_TOPUP_3_URL = "https://papabonski.orderhero.id/form/papa-bonski-tambah-3-cerita";
-const STORY_TOPUP_8_URL = "https://papabonski.orderhero.id/form/papa-bonski-tambah-8-cerita";
+const STORY_TOPUP_3_URL = "/super-kids/checkout";
+const STORY_TOPUP_8_URL = "/super-kids/checkout";
 const initialCreateStoryState: CreateStoryState = {
   error: null,
   storyId: null,
@@ -243,8 +243,6 @@ export default function CreateWizard({
               <div className="grid grid-cols-2 gap-2">
                 <a
                   href={STORY_TOPUP_3_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="rounded-card bg-white px-3 py-3 text-center ring-1 ring-red-200 transition active:scale-95"
                 >
                   <span className="block text-sm font-extrabold text-brand-primary">+3 Cerita</span>
@@ -252,8 +250,6 @@ export default function CreateWizard({
                 </a>
                 <a
                   href={STORY_TOPUP_8_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="rounded-card bg-brand-primary px-3 py-3 text-center text-white transition active:scale-95"
                 >
                   <span className="block text-sm font-extrabold">+8 Cerita</span>
@@ -261,8 +257,7 @@ export default function CreateWizard({
                 </a>
               </div>
               <p className="mt-3 text-xs font-medium text-red-700/80">
-                Gunakan email yang sama dengan akun Papa Bonski. Setelah pembayaran berhasil,
-                kembali ke aplikasi lalu muat ulang halaman ini.
+                Tambahan cerita harus menggunakan Email Penerima / email login Papa Bonski yang akan menerima kuota. Setelah pembayaran berhasil, kembali ke aplikasi lalu muat ulang halaman ini.
               </p>
             </div>
           )}
