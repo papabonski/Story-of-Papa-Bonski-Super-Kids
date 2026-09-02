@@ -139,7 +139,7 @@ export default async function CollectionPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="mb-2 inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 ring-1 ring-emerald-100">
-                Tersimpan di Supabase
+                Tersimpan Aman
               </p>
           <h1 className="text-2xl font-extrabold text-ink">📚 {t("collection.title")}</h1>
           <p className="mt-0.5 text-sm text-ink-soft">
