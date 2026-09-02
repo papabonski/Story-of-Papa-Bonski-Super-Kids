@@ -20,8 +20,8 @@ export default async function OnboardingPage() {
     <Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={104} height={104} className="mx-auto rounded-3xl" />
     <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">Aktivasi Akses</p>
     <h1 className="mt-2 text-2xl font-extrabold">Pembelian belum ditemukan</h1>
-    <p className="mt-3 text-sm leading-relaxed text-ink-soft">Kami sudah memverifikasi email <b>{user.email}</b>, tetapi belum menemukan transaksi Papa Bonski Super Kids yang aktif dengan email tersebut.</p>
-    <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-900"><b>Yang bisa dilakukan:</b><br/>1. Pastikan email ini sama dengan email saat pembelian.<br/>2. Jika baru membayar, tunggu sebentar lalu muat ulang halaman.<br/>3. Jika tetap belum aktif, hubungi Papa Bonski dan sertakan bukti pembayaran atau nomor pesanan.</div>
+    <p className="mt-3 text-sm leading-relaxed text-ink-soft">Kami sudah memverifikasi Email Penerima <b>{user.email}</b>, tetapi belum menemukan akses Papa Bonski Super Kids yang aktif untuk email tersebut.</p>
+    <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-900"><b>Yang bisa dilakukan:</b><br/>1. Pastikan email ini adalah Email Penerima yang didaftarkan sebelum checkout.<br/>2. Jika baru membayar, tunggu sebentar lalu muat ulang halaman.<br/>3. Jika tetap belum aktif, hubungi Papa Bonski dan sertakan bukti pembayaran atau nomor pesanan.</div>
     <Link href="/login" className="btn-secondary mt-6">Gunakan Email Lain</Link>
   </div></main>;
 
