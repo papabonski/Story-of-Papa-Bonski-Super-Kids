@@ -1,12 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import RetailPurchaseGate from "@/components/marketing/RetailPurchaseGate";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function RetailCheckoutPage() {
-  const brand = await getRuntimeBrand();
+  const [brand, supabase] = await Promise.all([
+    getRuntimeBrand(),
+    createSupabaseServerClient(),
+  ]);
+  const { data: { user } } = await supabase.auth.getUser();
+  const initialEmail = user && !user.is_anonymous ? (user.email || "") : "";
 
   return <main className="min-h-[100dvh] bg-surface px-5 py-8 text-ink">
     <div className="mx-auto max-w-lg">
@@ -20,18 +26,18 @@ export default async function RetailCheckoutPage() {
 
       <div className="rounded-[2rem] bg-surface-card p-6 shadow-xl ring-1 ring-black/[0.06] sm:p-8">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary">Sebelum checkout</p>
-        <h1 className="mt-2 text-3xl font-extrabold">Cek email pembelian</h1>
+        <h1 className="mt-2 text-3xl font-extrabold">Tentukan Email Penerima</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-          Jika email sudah memiliki Paket Super Kids 1, kami akan menampilkan pilihan supaya Anda bisa memilih paket ulang atau hanya menambah kuota cerita.
+          Email Penerima adalah email yang akan memiliki lisensi, kuota cerita, koleksi, dan digunakan untuk login OTP. Email Pembeli akan diisi terpisah di halaman pembayaran OrderHero.
         </p>
 
         <div className="mt-7">
-          <RetailPurchaseGate />
+          <RetailPurchaseGate initialEmail={initialEmail} />
         </div>
       </div>
 
       <p className="mt-5 text-center text-xs leading-relaxed text-ink-faint">
-        Pengecekan ini hanya digunakan untuk menentukan pilihan pembelian yang sesuai.
+        Jika membeli sebagai hadiah, masukkan email orang tua atau wali yang akan menggunakan Papa Bonski.
       </p>
     </div>
   </main>;
