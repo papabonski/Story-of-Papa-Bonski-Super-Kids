@@ -56,7 +56,7 @@ export default async function SuperKids(){
         <div className="rounded-[2.5rem] bg-surface-card p-5 shadow-xl ring-1 ring-black/5">
           <div className="rounded-[2rem] bg-gradient-to-br from-brand-primary/15 to-brand-accent/20 p-7">
             <div className="mx-auto max-w-sm rounded-3xl bg-white p-6 shadow-lg">
-              <p className="text-xs font-black uppercase tracking-wider text-brand-primary">Paket Papa Bonski</p>
+              <p className="text-xs font-black uppercase tracking-wider text-brand-primary">Paket Super Kids 1</p>
               <h2 className="mt-2 text-3xl font-extrabold">Rp50.000</h2>
               <p className="mt-1 text-sm font-bold text-ink-soft">Akses 1 tahun + 2 cerita personal</p>
               <div className="mt-5 space-y-2 text-sm">
