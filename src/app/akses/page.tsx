@@ -34,11 +34,11 @@ export default async function AccessPage() {
             priority
           />
           <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">
-            Akses Resmi Customer
+            Akses Member
           </p>
           <h1 className="mt-2 text-3xl font-extrabold">Papa Bonski Super Kids</h1>
           <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-            Sudah membeli? Masuk menggunakan <b>email yang sama saat checkout OrderHero</b>.
+            Sudah membeli? Masuk menggunakan <b>email yang sama seperti saat pembelian</b>.
             Sistem akan memverifikasi pembelian dan membuka akses secara otomatis.
           </p>
 
@@ -57,7 +57,7 @@ export default async function AccessPage() {
           </Link>
 
           <p className="mt-5 text-xs leading-relaxed text-ink-soft">
-            Link ini boleh disimpan atau dibagikan, tetapi konten premium hanya dapat dibuka oleh akun dengan pembelian aktif.
+            Link ini boleh disimpan atau dibagikan, tetapi fitur Papa Bonski hanya dapat dibuka oleh akun dengan akses aktif.
           </p>
         </div>
       </div>
