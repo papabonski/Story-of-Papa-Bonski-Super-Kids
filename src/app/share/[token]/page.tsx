@@ -7,7 +7,7 @@ import { sceneImagePaths } from "@/lib/scene";
 
 export const dynamic = "force-dynamic";
 
-function LoadError({ message }: { message: string }) {
+function LoadError({ message = "Link cerita belum bisa dibuka saat ini. Silakan coba lagi beberapa saat." }: { message?: string }) {
   return (
     <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 bg-surface px-6 text-center">
       <div className="text-5xl">🔒</div>
@@ -37,7 +37,7 @@ export default async function SharePage({
       .eq("share_token", token)
       .maybeSingle();
 
-    if (storyErr) return <LoadError message={storyErr.message} />;
+    if (storyErr) return <LoadError />;
     if (!story) notFound();
     if (!story.text_approved_at) {
       return <LoadError message="Cerita ini masih dalam tahap review dan belum dibagikan untuk dibaca." />;
@@ -197,14 +197,7 @@ export default async function SharePage({
       </main>
     );
   } catch (error) {
-    return (
-      <LoadError
-        message={
-          error instanceof Error
-            ? error.message
-            : "Konfigurasi server belum lengkap untuk membuka link privat."
-        }
-      />
-    );
+    console.error(error);
+    return <LoadError />;
   }
 }
