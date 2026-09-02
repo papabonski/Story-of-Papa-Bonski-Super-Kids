@@ -41,26 +41,6 @@ export default function GlobalError({
         <p style={{ maxWidth: "22rem", fontSize: "0.875rem", color: "#55607d" }}>
           Maaf, terjadi kesalahan. Coba lagi sebentar ya.
         </p>
-        {error?.message && (
-          <p
-            style={{
-              maxWidth: "26rem",
-              wordBreak: "break-word",
-              borderRadius: "0.75rem",
-              background: "#edf2fc",
-              padding: "0.5rem 0.75rem",
-              fontSize: "0.75rem",
-              color: "#9aa3bc",
-            }}
-          >
-            {error.message}
-          </p>
-        )}
-        {error?.digest && (
-          <p style={{ fontSize: "11px", fontWeight: 600, color: "#9aa3bc" }}>
-            Kode error: {error.digest}
-          </p>
-        )}
         <button
           onClick={reset}
           style={{
