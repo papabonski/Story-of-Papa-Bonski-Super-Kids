@@ -80,9 +80,9 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
 
   return <form onSubmit={requestOtp} className="mt-6 space-y-4 text-left">
     <div>
-      <label className="text-sm font-extrabold">Email saat membeli</label>
-      <input value={email} onChange={e=>setEmail(e.target.value)} type="email" required autoComplete="email" placeholder="bunda@email.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none ring-brand-primary/20 focus:ring-4" />
-      <p className="mt-2 text-xs text-ink-soft">Gunakan email yang sama seperti saat pembelian agar akses dapat ditemukan otomatis.</p>
+      <label className="text-sm font-extrabold">Email Penerima / Email Login Papa Bonski</label>
+      <input value={email} onChange={e=>setEmail(e.target.value)} type="email" required autoComplete="email" placeholder="penerima@email.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none ring-brand-primary/20 focus:ring-4" />
+      <p className="mt-2 text-xs text-ink-soft">Gunakan Email Penerima yang didaftarkan sebelum checkout. Email inilah yang memiliki akses dan digunakan untuk login OTP.</p>
     </div>
     <button disabled={loading} className="btn-primary w-full disabled:opacity-60">{loading ? "Mengirim…" : "Kirim Kode OTP"}</button>
     {message && <div className="rounded-2xl bg-green-50 p-4 text-sm font-semibold text-green-800">✅ {message}</div>}
