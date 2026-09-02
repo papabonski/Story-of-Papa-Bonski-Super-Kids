@@ -491,7 +491,7 @@ export default function StoryView({ data }: { data: StoryViewData }) {
       if (nextStep === "error") throw new Error(message ?? "Job cerita gagal diproses.");
       if (nextStep === "review" || nextStep === "ready") window.location.reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal mengecek worker.");
+      setError(e instanceof Error ? e.message : "Gagal melanjutkan proses cerita.");
       setStep("error");
     } finally {
       setKickBusy(false);
@@ -653,8 +653,8 @@ export default function StoryView({ data }: { data: StoryViewData }) {
         kickBusy={kickBusy}
         details={[
           "Ilustrasi dibuat bertahap per halaman.",
-          "Halaman ini boleh ditutup; cerita tetap diproses di background.",
-          "Kalau provider gambar sedang antre, sistem akan mencoba lagi otomatis.",
+          "Halaman ini boleh ditutup; cerita tetap diproses otomatis.",
+          "Jika proses gambar sedang ramai, sistem akan mencoba lagi otomatis.",
         ]}
       />
     );
@@ -673,7 +673,7 @@ export default function StoryView({ data }: { data: StoryViewData }) {
         kickBusy={kickBusy}
         details={[
           "Audio dibuat setelah ilustrasi siap.",
-          "Cerita tetap lanjut diproses walaupun browser ditutup.",
+          "Cerita tetap lanjut diproses walaupun halaman ditutup.",
           "Buka Koleksi Cerita nanti untuk mengecek hasil akhirnya.",
         ]}
       />
@@ -1105,7 +1105,7 @@ function Loader({
           )}
           {jobInfo?.lastError && (
             <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-              Percobaan terakhir: {jobInfo.lastError}
+              Proses sempat tertunda. Sistem akan mencoba lagi otomatis.
             </p>
           )}
           {workerWarning && (
@@ -1118,7 +1118,7 @@ function Loader({
                   disabled={kickBusy}
                   className="mt-2 rounded-xl bg-white px-3 py-2 text-[11px] font-extrabold text-red-700 ring-1 ring-red-100 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {kickBusy ? "Mengecek worker..." : "Cek worker sekarang"}
+                  {kickBusy ? "Mencoba lagi..." : "Coba lanjutkan proses"}
                 </button>
               )}
             </div>
@@ -1196,28 +1196,18 @@ function queuedTooLong(job: JobInfo | null): boolean {
 }
 
 function workerQueueWarning(worker: WorkerInfo | null, staleQueue: boolean): string | null {
-  if (!worker) return staleQueue ? "Antrean belum diambil server. Coba buka Koleksi Cerita lagi sebentar lagi." : null;
-  if (!worker.configured) {
-    return "Worker background belum dikonfigurasi. Admin perlu mengisi STORY_WORKER_SECRET di Vercel lalu redeploy.";
-  }
-  if (!worker.autokick && !worker.cronConfigured) {
-    return "Worker otomatis sedang dimatikan dan cron belum dikonfigurasi. Admin perlu mengaktifkan autokick atau cron worker.";
+  if (!staleQueue) return null;
+  if (!worker) return "Proses cerita membutuhkan sedikit lebih lama. Cerita tetap tersimpan dan aman.";
+  if (!worker.configured || (!worker.autokick && !worker.cronConfigured)) {
+    return "Proses otomatis sedang tertunda. Cerita tetap tersimpan; silakan coba lagi beberapa saat.";
   }
   if (worker.lastKick?.attempted && !worker.lastKick.ok) {
-    const status = worker.lastKick.status ? ` HTTP ${worker.lastKick.status}` : "";
-    const error = worker.lastKick.error ? `: ${worker.lastKick.error}` : ".";
-    return `Autokick worker gagal${status}${error}`;
+    return "Proses cerita sempat terhenti. Silakan coba lanjutkan proses.";
   }
-  if (worker.lastKick && !worker.lastKick.attempted && worker.lastKick.error && staleQueue) {
-    return `Autokick worker tidak berjalan: ${worker.lastKick.error}`;
+  if (worker.lastKick && !worker.lastKick.attempted && worker.lastKick.error) {
+    return "Proses cerita belum bergerak. Silakan coba lanjutkan proses.";
   }
-  if (staleQueue) {
-    if (worker.lastKick?.ok) {
-      return "Worker sudah dipanggil, tetapi antrean belum berubah status. Cek log /api/jobs/process di Vercel untuk melihat error provider AI atau database.";
-    }
-    return "Antrean belum diambil server. Cerita tetap tersimpan, tetapi admin perlu mengecek worker background atau cron.";
-  }
-  return null;
+  return "Cerita masih dalam antrean. Silakan tunggu sebentar atau coba lanjutkan proses.";
 }
 
 function OpenerView({
