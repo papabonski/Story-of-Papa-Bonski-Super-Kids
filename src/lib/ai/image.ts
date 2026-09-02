@@ -146,6 +146,7 @@ export async function generateSceneImage(opts: {
   illustrationStyle?: string | null;
   /** The page's narration text — anchors the picture to what the story says. */
   narration?: string;
+  continuityGuide?: string;
   reference?: Reference;
 }): Promise<SceneImage> {
   const providers = await getRuntimeProviders();
@@ -156,6 +157,7 @@ export async function generateSceneImage(opts: {
     "Show ONE single child as the obvious main character — centered, well-lit, and emotive. " +
     "Keep this child's appearance EXACTLY the same in every scene (same face, skin tone, " +
     `hair, and outfit): ${opts.characterDescription}. ` +
+    (opts.continuityGuide ? `STRICT VISUAL CONTINUITY LOCK FOR THIS STORY: ${opts.continuityGuide} ` : "") +
     (opts.reference
       ? "Match the child's face and features closely to the provided reference photo. "
       : "") +
