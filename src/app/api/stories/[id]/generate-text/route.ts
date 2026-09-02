@@ -5,6 +5,7 @@ import {
   generateStoryScript,
   validateStoryQuality,
   fallbackCharacterDescription,
+  storyVisualContinuityGuide,
   type StoryInput,
 } from "@/lib/ai/story";
 import { analyzeChildPhoto } from "@/lib/ai/image";
@@ -133,6 +134,7 @@ export async function POST(
       situation: story.situation,
       languageLevel: story.language_level ?? "auto",
       characterDescription,
+      visualContinuityGuide: storyVisualContinuityGuide(id),
       sceneCount,
     };
 
