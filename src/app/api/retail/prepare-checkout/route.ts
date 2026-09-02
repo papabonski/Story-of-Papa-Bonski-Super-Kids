@@ -1,0 +1,71 @@
+import crypto from "node:crypto";
+import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
+
+const CHECKOUTS: Record<string,string> = {
+  "PBSK-SUPER-KIDS": "https://papabonski.orderhero.id/form/papa-bonski-super-kids",
+  "PBSK-STORY-CREDIT-3": "https://papabonski.orderhero.id/form/papa-bonski-tambah-3-cerita",
+  "PBSK-STORY-CREDIT-8": "https://papabonski.orderhero.id/form/papa-bonski-tambah-8-cerita",
+};
+
+function normalizeEmail(value: unknown) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function cleanAttribution(value: unknown) {
+  const input = value && typeof value === "object" ? value as Record<string,unknown> : {};
+  const out: Record<string,string> = {};
+  for (const key of ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","fbclid"]) {
+    const v = String(input[key] || "").trim().slice(0, 500);
+    if (v) out[key] = v;
+  }
+  return out;
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const recipientEmail = normalizeEmail(body?.recipientEmail);
+    const productSku = String(body?.productSku || "").trim().toUpperCase();
+    const checkoutBase = CHECKOUTS[productSku];
+
+    if (!recipientEmail || !recipientEmail.includes("@") || recipientEmail.length > 254) {
+      return NextResponse.json({ ok:false, error:"recipient_email_invalid" }, { status:400 });
+    }
+    if (!checkoutBase) {
+      return NextResponse.json({ ok:false, error:"product_invalid" }, { status:400 });
+    }
+
+    const attribution = cleanAttribution(body?.attribution);
+    const token = crypto.randomUUID().replace(/-/g, "");
+    const db = createSupabaseAdminClient();
+    const { error } = await db.from("webhook_events").insert({
+      provider: "retail_checkout",
+      event_key: token,
+      status: "pending",
+      payload: {
+        recipient_email: recipientEmail,
+        product_sku: productSku,
+        attribution,
+        created_at: new Date().toISOString(),
+      },
+      normalized: {
+        recipientEmail,
+        productSku,
+      },
+    });
+    if (error) throw error;
+
+    const url = new URL(checkoutBase);
+    for (const key of ["utm_source","utm_medium","utm_campaign","utm_term","fbclid"]) {
+      if (attribution[key]) url.searchParams.set(key, attribution[key]);
+    }
+    url.searchParams.set("utm_content", `pbint_${token}`);
+
+    return NextResponse.json({ ok:true, url:url.toString() });
+  } catch {
+    return NextResponse.json({ ok:false, error:"prepare_failed" }, { status:500 });
+  }
+}
