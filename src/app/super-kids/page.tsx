@@ -105,7 +105,7 @@ export default async function SuperKids(){
         <h2 className="mx-auto mt-2 max-w-2xl text-center text-3xl font-extrabold">4 langkah sederhana dari pembelian hingga cerita siap dinikmati.</h2>
         <div className="mt-9 grid gap-4 md:grid-cols-4">
           {[
-            ["1","Beli & login","Setelah pembayaran, login memakai email yang sama dan kode OTP 6 digit."],
+            ["1","Tentukan Email Penerima","Email Penerima menjadi pemilik akses dan digunakan untuk login OTP."],
             ["2","Buat profil anak","Isi nama, usia, foto, dan karakter anak untuk digunakan kembali."],
             ["3","Pilih kebutuhan","Pilih tema atau masalah anak hari ini, lalu review teks ceritanya."],
             ["4","Baca & dengarkan","Setelah disetujui, ilustrasi dan audio dibuat untuk flipbook."],
@@ -139,7 +139,7 @@ export default async function SuperKids(){
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-black uppercase tracking-widest opacity-80">Siap membuat cerita pertama?</p>
         <h2 className="mt-3 text-4xl font-extrabold">Mulai dengan 2 cerita personal untuk si kecil.</h2>
-        <p className="mx-auto mt-4 max-w-xl opacity-90">Akses 1 tahun. Setelah pembayaran, login menggunakan email pembelian dan kode OTP 6 digit.</p>
+        <p className="mx-auto mt-4 max-w-xl opacity-90">Akses 1 tahun. Setelah pembayaran, login menggunakan Email Penerima dan kode OTP 6 digit.</p>
         <CheckoutButton label="Beli Sekarang — Rp50.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
       </div>
     </section>
@@ -150,8 +150,9 @@ export default async function SuperKids(){
         <div className="mt-6 space-y-3">
           {[
             ["Apa yang saya dapat setelah membeli?","Akses Papa Bonski Super Kids selama 1 tahun dan kuota awal 2 cerita personal."],
-            ["Bagaimana saya masuk setelah membeli?","Gunakan email yang sama seperti saat pembelian. Papa Bonski akan mengirim kode OTP 6 digit untuk masuk."],
-            ["Kalau 2 cerita sudah terpakai?","Anda dapat membeli tambahan kuota cerita langsung dari dalam aplikasi saat dibutuhkan."],
+            ["Bagaimana saya masuk setelah membeli?","Gunakan Email Penerima yang didaftarkan sebelum checkout. Papa Bonski akan mengirim kode OTP 6 digit ke email tersebut."],
+            ["Bisa dibelikan untuk orang lain?","Bisa. Masukkan Email Penerima milik orang tua atau wali yang akan menggunakan Papa Bonski. Email Pembeli boleh berbeda."],
+            ["Kalau 2 cerita sudah terpakai?","Anda dapat membeli tambahan kuota cerita untuk Email Penerima yang sudah memiliki akun."],
             ["Apakah harus install dari Play Store?","Tidak. Papa Bonski dapat dibuka langsung dan juga dipasang ke layar utama HP atau tablet."],
             ["Apakah bisa dipakai di HP dan tablet?","Ya. Papa Bonski dirancang agar nyaman digunakan di HP, tablet, dan laptop."],
           ].map(([q,a])=>
