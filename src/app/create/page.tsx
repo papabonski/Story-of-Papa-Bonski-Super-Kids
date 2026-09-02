@@ -18,7 +18,7 @@ export default async function CreatePage() {
 
   return (
     <main className="min-h-[100dvh] bg-surface">
-      <AppHeader backHref="/" title={t("header.createTitle")} />
+      <AppHeader backHref="/app" title={t("header.createTitle")} />
       <CreateWizard profiles={profiles} themes={settings.themeCatalog} quota={quota} />
     </main>
   );
