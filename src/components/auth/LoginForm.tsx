@@ -20,12 +20,30 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
     e.preventDefault();
     setLoading(true); setError(null); setMessage(null);
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const prepareResponse = await fetch("/api/auth/prepare-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+      const prepareResult = await prepareResponse.json().catch(() => null);
+
+      if (!prepareResponse.ok) {
+        throw new Error(
+          prepareResult?.error ||
+            "Email Penerima belum siap untuk login. Pastikan email sama dengan yang didaftarkan sebelum checkout.",
+        );
+      }
+
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: { shouldCreateUser: true },
+        email: normalizedEmail,
+        options: { shouldCreateUser: false },
       });
       if (error) throw error;
+
+      setEmail(normalizedEmail);
       setStep("otp");
       setMessage("Kode OTP sudah dikirim. Masukkan 6 digit kode dari email Papa Bonski di bawah ini.");
     } catch (e: any) {
@@ -53,7 +71,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
   if (step === "otp") {
     return <form onSubmit={verifyOtp} className="mt-6 space-y-4 text-left">
       <div className="rounded-2xl bg-orange-50 p-4 text-sm text-orange-950 ring-1 ring-orange-100">
-        Kode dikirim ke <b>{email}</b>. Jangan gunakan link konfirmasi lama; cukup masukkan kode 6 digit dari email terbaru.
+        Kode dikirim ke <b>{email}</b>. Masukkan kode OTP 6 digit dari email terbaru Papa Bonski.
       </div>
       <div>
         <label className="text-sm font-extrabold">Kode OTP 6 digit</label>
