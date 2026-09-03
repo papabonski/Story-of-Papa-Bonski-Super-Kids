@@ -16,8 +16,8 @@ import { t } from "@/lib/i18n";
 import type { Gender } from "@/lib/database.types";
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024; // 10 MB
-const STORY_TOPUP_3_URL = "/super-kids/checkout";
-const STORY_TOPUP_8_URL = "/super-kids/checkout";
+const STORY_TOPUP_3_URL = "/api/retail/member-topup?sku=PBSK-STORY-CREDIT-3";
+const STORY_TOPUP_8_URL = "/api/retail/member-topup?sku=PBSK-STORY-CREDIT-8";
 const initialCreateStoryState: CreateStoryState = {
   error: null,
   storyId: null,
@@ -270,7 +270,7 @@ export default function CreateWizard({
                 </a>
               </div>
               <p className="mt-3 text-xs font-medium text-red-700/80">
-                Tambahan cerita harus menggunakan Email Penerima / email login Papa Bonski yang akan menerima kuota. Setelah pembayaran berhasil, kembali ke aplikasi lalu muat ulang halaman ini.
+                Top-up otomatis masuk ke akun member yang sedang login. Email apa pun yang muncul di OrderHero tidak menentukan pemilik kuota. Setelah pembayaran berhasil, kembali ke aplikasi lalu muat ulang halaman ini.
               </p>
             </div>
           )}
