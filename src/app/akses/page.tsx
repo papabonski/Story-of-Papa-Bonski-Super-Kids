@@ -51,7 +51,7 @@ export default async function AccessPage() {
             </ol>
           </div>
 
-          <Link href="/login?next=/onboarding" className="btn-primary mt-6 w-full">
+          <Link href="/login" className="btn-primary mt-6 w-full">
             Akses Papa Bonski Super Kids →
           </Link>
 
