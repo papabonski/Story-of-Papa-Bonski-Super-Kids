@@ -110,7 +110,7 @@ export async function POST(req: Request) {
     let intent:any=null;
     if(intentToken){
       const {data,error}=await db.from("webhook_events")
-        .select("id,status,payload")
+        .select("id,status,payload,received_at")
         .eq("provider","retail_checkout")
         .eq("event_key",intentToken)
         .maybeSingle();
@@ -118,8 +118,32 @@ export async function POST(req: Request) {
       intent=data;
     }
 
-    const intendedSku=String(intent?.payload?.product_sku || "").trim().toUpperCase();
     const actualSku=String(topupSku || productSku || "").trim().toUpperCase();
+
+    // OrderHero form webhooks currently do not reliably echo the UTM content
+    // token that links a payment back to our pre-checkout recipient intent.
+    // Safe fallback: only auto-link when the paid SKU has exactly one pending
+    // retail intent in the last 24 hours. If there is any ambiguity, keep the
+    // payment in needs_mapping rather than risk assigning credits to the wrong
+    // member.
+    if(!intent){
+      const cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
+      const {data:candidates,error:candidateError}=await db.from("webhook_events")
+        .select("id,status,payload,received_at")
+        .eq("provider","retail_checkout")
+        .eq("status","pending")
+        .gte("received_at",cutoff)
+        .order("received_at",{ascending:false})
+        .limit(50);
+      if(candidateError) throw candidateError;
+
+      const matching=(candidates || []).filter((candidate:any) =>
+        String(candidate?.payload?.product_sku || "").trim().toUpperCase() === actualSku
+      );
+      if(matching.length===1) intent=matching[0];
+    }
+
+    const intendedSku=String(intent?.payload?.product_sku || "").trim().toUpperCase();
     if(intendedSku && intendedSku !== actualSku){
       await db.from("webhook_events").update({
         status:"needs_mapping",
