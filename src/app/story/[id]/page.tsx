@@ -107,7 +107,7 @@ export default async function StoryPage({
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-surface">
-      <AppHeader backHref="/collection" title={storyTitle ?? t("header.storyTitle")} />
+      <AppHeader backHref="/app" title={storyTitle ?? t("header.storyTitle")} />
       <div className="flex flex-1 flex-col">
         <StoryView data={data} />
       </div>
