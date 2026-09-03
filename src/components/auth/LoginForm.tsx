@@ -3,7 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" }: { initialEmail?: string; nextPath?: string }) {
+export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { initialEmail?: string; nextPath?: string }) {
   const [email, setEmail] = useState(initialEmail);
   const [token, setToken] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -12,7 +12,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/onboarding" 
   const [error, setError] = useState<string | null>(null);
 
   const safeNext = useMemo(
-    () => nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/onboarding",
+    () => nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/app",
     [nextPath],
   );
 
