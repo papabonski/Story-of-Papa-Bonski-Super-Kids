@@ -5,11 +5,13 @@ import { getRuntimeBrand } from "@/lib/white-label/settings";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ email?: string; next?: string }> }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string; next?: string }>;
+}) {
   const brand = await getRuntimeBrand();
   const params = await searchParams;
-  const requestedNext = params.next || "/onboarding";
-  const safeNext = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/onboarding";
 
   return <main className="min-h-[100dvh] bg-surface px-5 py-10 text-ink"><div className="mx-auto max-w-md">
     <div className="rounded-[2rem] bg-surface-card p-7 shadow-xl ring-1 ring-black/[0.06]">
@@ -19,7 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <h1 className="mt-2 text-3xl font-extrabold">Masuk ke {brand.name}</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">Masukkan Email Penerima yang didaftarkan sebelum checkout. Kami akan mengirim kode OTP 6 digit ke email tersebut untuk masuk.</p>
       </div>
-      <LoginForm initialEmail={params.email || ""} nextPath={safeNext} />
+      <LoginForm initialEmail={params.email || ""} nextPath="/app" />
       <p className="mt-5 text-center text-xs text-ink-soft">Belum membeli? <Link className="font-extrabold text-brand-primary hover:underline" href="/">Lihat Papa Bonski</Link></p>
     </div>
   </div></main>;
