@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -27,9 +27,20 @@ function cleanAttribution(value: unknown) {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const recipientEmail = normalizeEmail(body?.recipientEmail);
+    let recipientEmail = normalizeEmail(body?.recipientEmail);
     const productSku = String(body?.productSku || "").trim().toUpperCase();
     const checkoutBase = CHECKOUTS[productSku];
+
+    // A top-up initiated while a member is signed in always belongs to that
+    // member account. This prevents the buyer email entered on OrderHero from
+    // accidentally becoming the recipient when the two emails differ.
+    if (productSku === "PBSK-STORY-CREDIT-3" || productSku === "PBSK-STORY-CREDIT-8") {
+      const supabase = await createSupabaseServerClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && !user.is_anonymous && user.email) {
+        recipientEmail = normalizeEmail(user.email);
+      }
+    }
 
     if (!recipientEmail || !recipientEmail.includes("@") || recipientEmail.length > 254) {
       return NextResponse.json({ ok:false, error:"recipient_email_invalid" }, { status:400 });
@@ -41,6 +52,23 @@ export async function POST(req: Request) {
     const attribution = cleanAttribution(body?.attribution);
     const token = crypto.randomUUID().replace(/-/g, "");
     const db = createSupabaseAdminClient();
+
+    // Keep only the newest pending intent for this recipient + SKU. Older
+    // abandoned attempts would otherwise make webhook recovery ambiguous if
+    // OrderHero omits our UTM token.
+    await db.from("webhook_events")
+      .update({
+        status: "ignored",
+        error: "Superseded by a newer checkout intent.",
+        processed_at: new Date().toISOString(),
+      })
+      .eq("provider", "retail_checkout")
+      .eq("status", "pending")
+      .contains("payload", {
+        recipient_email: recipientEmail,
+        product_sku: productSku,
+      });
+
     const { error } = await db.from("webhook_events").insert({
       provider: "retail_checkout",
       event_key: token,
