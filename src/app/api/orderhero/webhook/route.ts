@@ -250,7 +250,7 @@ export async function POST(req: Request) {
       },{status:202});
     }
 
-    const buyerIsRecipient=Boolean(buyerEmail && buyerEmail === recipientEmail);
+    const buyerIsRecipient=!isTopup && Boolean(buyerEmail && buyerEmail === recipientEmail);
     const {data:customer,error:customerLookupError}=await db.from("customers")
       .select("id")
       .ilike("email",recipientEmail)
@@ -260,6 +260,24 @@ export async function POST(req: Request) {
     if(customerLookupError) throw customerLookupError;
 
     let customerId:string|undefined=customer?.id;
+
+    if(isTopup){
+      const intendedCustomerId=String(intent?.payload?.customer_id || "").trim();
+      if(intendedCustomerId && customerId && intendedCustomerId !== customerId){
+        await db.from("webhook_events").update({
+          status:"needs_mapping",
+          error:"Signed-in top-up intent customer does not match recipient account.",
+          processed_at:new Date().toISOString(),
+          normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:topupSku}
+        }).eq("id",event.id);
+        return NextResponse.json({
+          ok:true,
+          accepted:true,
+          needsMapping:true,
+          reason:"topup_customer_mismatch"
+        },{status:202});
+      }
+    }
 
     if(!customerId && topupCredits > 0){
       await db.from("webhook_events").update({
