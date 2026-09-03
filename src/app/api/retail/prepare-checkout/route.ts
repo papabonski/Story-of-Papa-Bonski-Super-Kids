@@ -30,16 +30,24 @@ export async function POST(req: Request) {
     let recipientEmail = normalizeEmail(body?.recipientEmail);
     const productSku = String(body?.productSku || "").trim().toUpperCase();
     const checkoutBase = CHECKOUTS[productSku];
+    const isTopup =
+      productSku === "PBSK-STORY-CREDIT-3" ||
+      productSku === "PBSK-STORY-CREDIT-8";
+    let authUserId: string | null = null;
 
-    // A top-up initiated while a member is signed in always belongs to that
-    // member account. This prevents the buyer email entered on OrderHero from
-    // accidentally becoming the recipient when the two emails differ.
-    if (productSku === "PBSK-STORY-CREDIT-3" || productSku === "PBSK-STORY-CREDIT-8") {
+    // Top-up ownership is derived ONLY from the authenticated member session.
+    // Never fall back to an email supplied by the browser or by OrderHero.
+    if (isTopup) {
       const supabase = await createSupabaseServerClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (user && !user.is_anonymous && user.email) {
-        recipientEmail = normalizeEmail(user.email);
+      if (!user || user.is_anonymous || !user.email) {
+        return NextResponse.json(
+          { ok: false, error: "topup_login_required" },
+          { status: 401 },
+        );
       }
+      authUserId = user.id;
+      recipientEmail = normalizeEmail(user.email);
     }
 
     if (!recipientEmail || !recipientEmail.includes("@") || recipientEmail.length > 254) {
@@ -67,6 +75,7 @@ export async function POST(req: Request) {
       .contains("payload", {
         recipient_email: recipientEmail,
         product_sku: productSku,
+        ...(isTopup ? { intent_type: "member_topup" } : {}),
       });
 
     const { error } = await db.from("webhook_events").insert({
@@ -74,12 +83,15 @@ export async function POST(req: Request) {
       event_key: token,
       status: "pending",
       payload: {
+        intent_type: isTopup ? "member_topup" : "recipient_purchase",
+        auth_user_id: authUserId,
         recipient_email: recipientEmail,
         product_sku: productSku,
         attribution,
         created_at: new Date().toISOString(),
       },
       normalized: {
+        intentType: isTopup ? "member_topup" : "recipient_purchase",
         recipientEmail,
         productSku,
       },
