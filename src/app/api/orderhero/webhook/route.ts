@@ -106,11 +106,54 @@ export async function POST(req: Request) {
       }
     }
 
+    const actualSku=String(topupSku || productSku || "").trim().toUpperCase();
+    const isTopup=topupCredits > 0;
+
+    // Duplicate OrderHero deliveries are common. If this order already granted
+    // top-up credits, treat the new delivery as a duplicate instead of trying
+    // to resolve ownership again.
+    if(isTopup && n.externalOrderId){
+      const {data:existingOrder,error:existingOrderError}=await db.from("orders")
+        .select("id,customer_id,product_sku")
+        .eq("provider","orderhero")
+        .eq("external_order_id",n.externalOrderId)
+        .maybeSingle();
+      if(existingOrderError) throw existingOrderError;
+
+      if(existingOrder?.id){
+        const {data:existingGrant,error:existingGrantError}=await db.from("story_credit_grants")
+          .select("id,credits")
+          .eq("order_id",existingOrder.id)
+          .maybeSingle();
+        if(existingGrantError) throw existingGrantError;
+
+        if(existingGrant?.id){
+          const {data:existingCustomer}=await db.from("customers")
+            .select("email")
+            .eq("id",existingOrder.customer_id)
+            .maybeSingle();
+          await db.from("webhook_events").update({
+            status:"processed",
+            processed_at:new Date().toISOString(),
+            normalized:{
+              ...n,
+              eventName:eventName ?? n.eventName,
+              productSku:existingOrder.product_sku,
+              recipientEmail:existingCustomer?.email ?? null,
+              creditsAdded:existingGrant.credits,
+              duplicate:true
+            }
+          }).eq("id",event.id);
+          return NextResponse.json({ok:true,duplicate:true,orderId:existingOrder.id});
+        }
+      }
+    }
+
     const intentToken=intentTokenFromContent(n.utm?.content);
     let intent:any=null;
     if(intentToken){
       const {data,error}=await db.from("webhook_events")
-        .select("id,status,payload,received_at")
+        .select("id,status,payload,received_at,external_order_id")
         .eq("provider","retail_checkout")
         .eq("event_key",intentToken)
         .maybeSingle();
@@ -118,29 +161,54 @@ export async function POST(req: Request) {
       intent=data;
     }
 
-    const actualSku=String(topupSku || productSku || "").trim().toUpperCase();
-
-    // OrderHero form webhooks currently do not reliably echo the UTM content
-    // token that links a payment back to our pre-checkout recipient intent.
-    // Safe fallback: only auto-link when the paid SKU has exactly one pending
-    // retail intent in the last 24 hours. If there is any ambiguity, keep the
-    // payment in needs_mapping rather than risk assigning credits to the wrong
-    // member.
+    // OrderHero currently does not reliably return our UTM intent token.
+    // For top-ups, ownership must still come ONLY from a signed-in member
+    // intent created by Papa Bonski. If exactly one recent intent for this SKU
+    // exists, it is safe to recover it. Zero or multiple candidates are held
+    // for manual mapping rather than using the OrderHero email.
     if(!intent){
-      const cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
+      const windowMs=isTopup ? 30*60*1000 : 24*60*60*1000;
+      const cutoff=new Date(Date.now()-windowMs).toISOString();
       const {data:candidates,error:candidateError}=await db.from("webhook_events")
-        .select("id,status,payload,received_at")
+        .select("id,status,payload,received_at,external_order_id")
         .eq("provider","retail_checkout")
         .eq("status","pending")
         .gte("received_at",cutoff)
         .order("received_at",{ascending:false})
-        .limit(50);
+        .limit(100);
       if(candidateError) throw candidateError;
 
-      const matching=(candidates || []).filter((candidate:any) =>
-        String(candidate?.payload?.product_sku || "").trim().toUpperCase() === actualSku
-      );
-      if(matching.length===1) intent=matching[0];
+      const matching=(candidates || []).filter((candidate:any) => {
+        const candidateSku=String(candidate?.payload?.product_sku || "").trim().toUpperCase();
+        if(candidateSku !== actualSku) return false;
+        if(!isTopup) return true;
+        return String(candidate?.payload?.intent_type || "") === "member_topup";
+      });
+
+      if(matching.length===1){
+        intent=matching[0];
+      } else if(isTopup){
+        const reason=matching.length===0 ? "topup_intent_missing" : "topup_intent_ambiguous";
+        await db.from("webhook_events").update({
+          status:"needs_mapping",
+          error:matching.length===0
+            ? "Top-up payment has no signed-in member intent. OrderHero email was intentionally ignored."
+            : "Top-up payment matches multiple signed-in member intents. OrderHero email was intentionally ignored.",
+          processed_at:new Date().toISOString(),
+          normalized:{...n,eventName:eventName ?? n.eventName,productSku:topupSku}
+        }).eq("id",event.id);
+        return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason},{status:202});
+      }
+    }
+
+    if(isTopup && String(intent?.payload?.intent_type || "") !== "member_topup"){
+      await db.from("webhook_events").update({
+        status:"needs_mapping",
+        error:"Top-up requires a signed-in member intent. OrderHero email was intentionally ignored.",
+        processed_at:new Date().toISOString(),
+        normalized:{...n,eventName:eventName ?? n.eventName,productSku:topupSku}
+      }).eq("id",event.id);
+      return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason:"topup_intent_invalid"},{status:202});
     }
 
     const intendedSku=String(intent?.payload?.product_sku || "").trim().toUpperCase();
@@ -161,14 +229,25 @@ export async function POST(req: Request) {
     }
 
     const buyerEmail=normalizeEmail(n.email);
-    const recipientEmail=normalizeEmail(intent?.payload?.recipient_email || n.email);
+    const recipientEmail=normalizeEmail(
+      isTopup
+        ? intent?.payload?.recipient_email
+        : (intent?.payload?.recipient_email || n.email)
+    );
     if(!recipientEmail){
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:"Recipient email is missing.",
+        error:isTopup
+          ? "Signed-in member recipient is missing from top-up intent."
+          : "Recipient email is missing.",
         processed_at:new Date().toISOString()
       }).eq("id",event.id);
-      return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason:"recipient_email_missing"},{status:202});
+      return NextResponse.json({
+        ok:true,
+        accepted:true,
+        needsMapping:true,
+        reason:isTopup ? "topup_recipient_missing" : "recipient_email_missing"
+      },{status:202});
     }
 
     const buyerIsRecipient=Boolean(buyerEmail && buyerEmail === recipientEmail);
