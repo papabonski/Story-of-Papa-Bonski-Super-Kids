@@ -176,7 +176,7 @@ export default function RetailPurchaseGate({
       </div>
 
       <TopupChoices
-        disabled={state === "redirecting"}
+        disabled={false}
         onThree={() => goToCheckout("PBSK-STORY-CREDIT-3")}
         onEight={() => goToCheckout("PBSK-STORY-CREDIT-8")}
       />
@@ -201,10 +201,9 @@ export default function RetailPurchaseGate({
       <button
         type="button"
         onClick={() => goToCheckout("PBSK-SUPER-KIDS")}
-        disabled={state === "redirecting"}
-        className="w-full rounded-2xl bg-brand-primary px-5 py-4 font-extrabold text-white shadow-sm disabled:cursor-wait disabled:opacity-60"
+        className="w-full rounded-2xl bg-brand-primary px-5 py-4 font-extrabold text-white shadow-sm"
       >
-        {state === "redirecting" ? "Membuka checkout..." : "Konfirmasi & Lanjut ke Checkout — Rp50.000"}
+        Konfirmasi & Lanjut ke Checkout — Rp50.000
       </button>
 
       <div className="rounded-2xl bg-surface p-4 text-sm leading-relaxed text-ink-soft">
