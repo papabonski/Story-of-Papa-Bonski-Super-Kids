@@ -82,6 +82,10 @@ export default function RetailPurchaseGate({
     }
   }
 
+  function goToMemberTopup(productSku: "PBSK-STORY-CREDIT-3" | "PBSK-STORY-CREDIT-8") {
+    window.location.assign(`/api/retail/member-topup?sku=${encodeURIComponent(productSku)}`);
+  }
+
   async function goToCheckout(productSku: ProductSku, recipientEmail = email) {
     const recipient = normalizeEmail(recipientEmail);
     setState("redirecting");
@@ -151,9 +155,9 @@ export default function RetailPurchaseGate({
       </div>
 
       <TopupChoices
-        disabled={state === "redirecting"}
-        onThree={() => goToCheckout("PBSK-STORY-CREDIT-3", memberEmail)}
-        onEight={() => goToCheckout("PBSK-STORY-CREDIT-8", memberEmail)}
+        disabled={false}
+        onThree={() => goToMemberTopup("PBSK-STORY-CREDIT-3")}
+        onEight={() => goToMemberTopup("PBSK-STORY-CREDIT-8")}
       />
 
       {error && <div className="rounded-2xl bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>}
@@ -171,15 +175,9 @@ export default function RetailPurchaseGate({
         <h2 className="mt-2 text-xl font-extrabold text-ink">Penerima:</h2>
         <p className="mt-2 break-all font-extrabold text-ink">{email}</p>
         <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-          Akun ini sudah aktif. Anda dapat menambah kuota cerita untuk email tersebut, atau gunakan Email Penerima lain untuk hadiah.
+          Akun ini sudah aktif. Untuk menambah kuota, pemilik akun tersebut harus login ke Papa Bonski lalu memilih Tambah Kuota Akun Saya. Top-up tidak dapat diberikan dari akun member lain.
         </p>
       </div>
-
-      <TopupChoices
-        disabled={false}
-        onThree={() => goToCheckout("PBSK-STORY-CREDIT-3")}
-        onEight={() => goToCheckout("PBSK-STORY-CREDIT-8")}
-      />
 
       <button type="button" onClick={resetGiftForm} className="w-full py-2 text-sm font-bold text-brand-primary hover:underline">
         Gunakan Email Penerima lain
