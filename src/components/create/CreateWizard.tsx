@@ -84,7 +84,14 @@ export default function CreateWizard({
   const [errors, setErrors] = useState<{ name?: string; age?: string; photo?: string }>({});
   const activeChildName = creatingNewProfile ? name : selectedProfile?.name ?? "";
   const activePhotoUrl = creatingNewProfile ? photoUrl : selectedProfile?.photoUrl ?? null;
-  const quotaExhausted = Boolean(state.error?.includes("Cerita tambahan perlu dibeli"));
+  const quotaIsEmpty = Boolean(quota && quota.remaining <= 0);
+  const quotaExhausted =
+    quotaIsEmpty || Boolean(state.error?.includes("Cerita tambahan perlu dibeli"));
+  const quotaAlertMessage =
+    state.error ??
+    (quotaIsEmpty && quota
+      ? `Kuota ${quota.limit} cerita untuk akun ini sudah habis (${quota.used}/${quota.limit} terpakai). Cerita tambahan perlu dibeli.`
+      : null);
 
   function selectProfile(id: string) {
     setSelectedProfileId(id);
@@ -163,7 +170,13 @@ export default function CreateWizard({
   }
 
   return (
-    <form action={formAction} className="relative mx-auto w-full max-w-md px-5 py-6">
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        if (quotaExhausted) event.preventDefault();
+      }}
+      className="relative mx-auto w-full max-w-md px-5 py-6"
+    >
       <SubmitOverlay pending={pending || !!state.storyId} />
       <input
         type="hidden"
@@ -229,12 +242,12 @@ export default function CreateWizard({
         </div>
       )}
 
-      {state.error && (
+      {quotaAlertMessage && (
         <div
           role="alert"
           className="anim-fade-up mb-5 rounded-card bg-red-50 px-4 py-3 text-sm font-semibold leading-relaxed text-red-700 ring-1 ring-red-100"
         >
-          <p>{state.error}</p>
+          <p>{quotaAlertMessage}</p>
           {quotaExhausted && (
             <div className="mt-4">
               <p className="mb-2 text-xs font-bold uppercase tracking-wide text-red-700/80">
@@ -628,7 +641,7 @@ export default function CreateWizard({
             <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1">
               {t("wizard.back")}
             </button>
-            <SubmitButton pending={pending} />
+            <SubmitButton pending={pending} disabled={quotaExhausted} />
           </div>
         </div>
       </section>
@@ -756,10 +769,15 @@ function ProfileAvatar({ profile, size }: { profile: ChildProfile; size: "sm" | 
   );
 }
 
-function SubmitButton({ pending }: { pending: boolean }) {
+function SubmitButton({ pending, disabled }: { pending: boolean; disabled: boolean }) {
   return (
-    <button type="submit" disabled={pending} className="btn-primary flex-1">
-      {pending ? "Membuat…" : `✨ ${t("wizard.create")}`}
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      aria-disabled={pending || disabled}
+      className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? "Membuat…" : disabled ? "🔒 Kuota Habis" : `✨ ${t("wizard.create")}`}
     </button>
   );
 }
