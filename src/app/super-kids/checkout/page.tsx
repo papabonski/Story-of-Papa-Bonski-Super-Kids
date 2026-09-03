@@ -47,7 +47,7 @@ export default async function RetailCheckoutPage() {
         )}
 
         <div className="mt-7">
-          <RetailPurchaseGate initialEmail={initialEmail} />
+          <RetailPurchaseGate initialEmail={initialEmail} signedInEmail={signedInMember ? (user?.email || "") : ""} />
         </div>
       </div>
 
