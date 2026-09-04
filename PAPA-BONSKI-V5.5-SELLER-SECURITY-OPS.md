@@ -32,3 +32,7 @@ V5.5 dimulai setelah V5.4 Production Live dan fokus pada pengamanan area operasi
 - Webhook replay/test console di Seller Center.
 - Health dashboard untuk `processed`, `ignored`, `needs_mapping`, dan error webhook.
 - Audit Meta Pixel/CAPI + Purchase deduplication agar tracking iklan mempunyai satu sumber kebenaran.
+
+## Preview deployment note
+
+Preview V5.5 diredeploy setelah `ADMIN_DASHBOARD_SECRET` diperbarui agar Seller Center menggunakan secret administrator terbaru.
