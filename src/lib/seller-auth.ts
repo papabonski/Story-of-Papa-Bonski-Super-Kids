@@ -1,11 +1,13 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const SELLER_COOKIE = "pb_seller_session";
 const SELLER_SESSION_TTL_SECONDS = 12 * 60 * 60;
+const DEFAULT_SELLER_ADMIN_EMAIL_SHA256 =
+  "dd5eb9eb2299c6bd8d32c7006c69a3635c70047014c596e40be59686e9cfe015";
 
 function normalizeSecret(value: string | undefined) {
   return (value ?? "").trim();
@@ -28,6 +30,23 @@ function safeEqual(left: string, right: string) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function hashEmail(value: string) {
+  return createHash("sha256").update(normalizeEmail(value)).digest("hex");
+}
+
+function allowedAdminEmailHashes() {
+  const configured = (process.env.SELLER_ADMIN_EMAIL_SHA256 ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter((value) => /^[a-f0-9]{64}$/.test(value));
+
+  return configured.length > 0 ? configured : [DEFAULT_SELLER_ADMIN_EMAIL_SHA256];
+}
+
 function signature(expiresAt: number) {
   const secret = signingSecret();
   if (!secret) return "";
@@ -40,6 +59,21 @@ export function sellerAuthConfigured() {
   return configuredSecrets().length > 0;
 }
 
+export function sellerOtpConfigured() {
+  return Boolean(
+    sellerAuthConfigured() &&
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY &&
+      allowedAdminEmailHashes().length > 0,
+  );
+}
+
+export function sellerAdminEmailAllowed(email: string) {
+  const candidate = hashEmail(email);
+  return allowedAdminEmailHashes().some((hash) => safeEqual(candidate, hash));
+}
+
 export function verifySellerSecret(submitted: string) {
   const candidate = normalizeSecret(submitted);
   if (!candidate) return false;
@@ -48,7 +82,7 @@ export function verifySellerSecret(submitted: string) {
 
 export async function createSellerSession() {
   if (!sellerAuthConfigured()) {
-    throw new Error("Seller Center belum memiliki secret admin.");
+    throw new Error("Seller Center belum memiliki secret session admin.");
   }
   const expiresAt = Math.floor(Date.now() / 1000) + SELLER_SESSION_TTL_SECONDS;
   const value = `v1.${expiresAt}.${signature(expiresAt)}`;
