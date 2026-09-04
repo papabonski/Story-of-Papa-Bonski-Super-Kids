@@ -109,10 +109,10 @@ export async function POST(req: Request) {
     const actualSku=String(topupSku || productSku || "").trim().toUpperCase();
     const isTopup=topupCredits > 0;
 
-    // Duplicate OrderHero deliveries are common. If this order already granted
-    // top-up credits, treat the new delivery as a duplicate instead of trying
-    // to resolve ownership again.
-    if(isTopup && n.externalOrderId){
+    // OrderHero can retry the same paid order with a different delivery id.
+    // If the order already produced its entitlement/grant, finish this event as
+    // an idempotent duplicate before attempting recipient resolution again.
+    if(n.externalOrderId){
       const {data:existingOrder,error:existingOrderError}=await db.from("orders")
         .select("id,customer_id,product_sku")
         .eq("provider","orderhero")
@@ -121,30 +121,55 @@ export async function POST(req: Request) {
       if(existingOrderError) throw existingOrderError;
 
       if(existingOrder?.id){
-        const {data:existingGrant,error:existingGrantError}=await db.from("story_credit_grants")
-          .select("id,credits")
-          .eq("order_id",existingOrder.id)
+        const {data:existingCustomer}=await db.from("customers")
+          .select("email")
+          .eq("id",existingOrder.customer_id)
           .maybeSingle();
-        if(existingGrantError) throw existingGrantError;
 
-        if(existingGrant?.id){
-          const {data:existingCustomer}=await db.from("customers")
-            .select("email")
-            .eq("id",existingOrder.customer_id)
+        if(isTopup){
+          const {data:existingGrant,error:existingGrantError}=await db.from("story_credit_grants")
+            .select("id,credits")
+            .eq("order_id",existingOrder.id)
             .maybeSingle();
-          await db.from("webhook_events").update({
-            status:"processed",
-            processed_at:new Date().toISOString(),
-            normalized:{
-              ...n,
-              eventName:eventName ?? n.eventName,
-              productSku:existingOrder.product_sku,
-              recipientEmail:existingCustomer?.email ?? null,
-              creditsAdded:existingGrant.credits,
-              duplicate:true
-            }
-          }).eq("id",event.id);
-          return NextResponse.json({ok:true,duplicate:true,orderId:existingOrder.id});
+          if(existingGrantError) throw existingGrantError;
+
+          if(existingGrant?.id){
+            await db.from("webhook_events").update({
+              status:"processed",
+              processed_at:new Date().toISOString(),
+              normalized:{
+                ...n,
+                eventName:eventName ?? n.eventName,
+                productSku:existingOrder.product_sku,
+                recipientEmail:existingCustomer?.email ?? null,
+                creditsAdded:existingGrant.credits,
+                duplicate:true
+              }
+            }).eq("id",event.id);
+            return NextResponse.json({ok:true,duplicate:true,orderId:existingOrder.id});
+          }
+        } else {
+          const {data:existingSub,error:existingSubError}=await db.from("subscriptions")
+            .select("id,expires_at")
+            .eq("source_order_id",existingOrder.id)
+            .maybeSingle();
+          if(existingSubError) throw existingSubError;
+
+          if(existingSub?.id){
+            await db.from("webhook_events").update({
+              status:"processed",
+              processed_at:new Date().toISOString(),
+              normalized:{
+                ...n,
+                eventName:eventName ?? n.eventName,
+                productSku:existingOrder.product_sku,
+                recipientEmail:existingCustomer?.email ?? null,
+                accessExpiresAt:existingSub.expires_at,
+                duplicate:true
+              }
+            }).eq("id",event.id);
+            return NextResponse.json({ok:true,duplicate:true,orderId:existingOrder.id});
+          }
         }
       }
     }
@@ -162,13 +187,12 @@ export async function POST(req: Request) {
     }
 
     // OrderHero currently does not reliably return our UTM intent token.
-    // For top-ups, ownership must still come ONLY from a signed-in member
-    // intent created by Papa Bonski. If exactly one recent intent for this SKU
-    // exists, it is safe to recover it. Zero or multiple candidates are held
-    // for manual mapping rather than using the OrderHero email.
+    // Ownership must therefore come ONLY from a recent Papa Bonski checkout
+    // intent of the correct type. If recovery is not unique, hold the payment
+    // for manual mapping instead of ever falling back to the OrderHero buyer.
+    const expectedIntentType=isTopup ? "member_topup" : "recipient_purchase";
     if(!intent){
-      const windowMs=isTopup ? 30*60*1000 : 24*60*60*1000;
-      const cutoff=new Date(Date.now()-windowMs).toISOString();
+      const cutoff=new Date(Date.now()-30*60*1000).toISOString();
       const {data:candidates,error:candidateError}=await db.from("webhook_events")
         .select("id,status,payload,received_at,external_order_id")
         .eq("provider","retail_checkout")
@@ -180,35 +204,38 @@ export async function POST(req: Request) {
 
       const matching=(candidates || []).filter((candidate:any) => {
         const candidateSku=String(candidate?.payload?.product_sku || "").trim().toUpperCase();
-        if(candidateSku !== actualSku) return false;
-        if(!isTopup) return true;
-        return String(candidate?.payload?.intent_type || "") === "member_topup";
+        const candidateType=String(candidate?.payload?.intent_type || "");
+        return candidateSku===actualSku && candidateType===expectedIntentType;
       });
 
       if(matching.length===1){
         intent=matching[0];
-      } else if(isTopup){
-        const reason=matching.length===0 ? "topup_intent_missing" : "topup_intent_ambiguous";
+      } else {
+        const prefix=isTopup ? "topup" : "recipient";
+        const reason=matching.length===0 ? `${prefix}_intent_missing` : `${prefix}_intent_ambiguous`;
         await db.from("webhook_events").update({
           status:"needs_mapping",
           error:matching.length===0
-            ? "Top-up payment has no signed-in member intent. OrderHero email was intentionally ignored."
-            : "Top-up payment matches multiple signed-in member intents. OrderHero email was intentionally ignored.",
+            ? `${isTopup ? "Top-up" : "Base-package"} payment has no recent Papa Bonski checkout intent. OrderHero buyer email was intentionally ignored.`
+            : `${isTopup ? "Top-up" : "Base-package"} payment matches multiple recent Papa Bonski checkout intents. OrderHero buyer email was intentionally ignored.`,
           processed_at:new Date().toISOString(),
-          normalized:{...n,eventName:eventName ?? n.eventName,productSku:topupSku}
+          normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
         }).eq("id",event.id);
         return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason},{status:202});
       }
     }
 
-    if(isTopup && String(intent?.payload?.intent_type || "") !== "member_topup"){
+    if(String(intent?.payload?.intent_type || "") !== expectedIntentType){
+      const reason=isTopup ? "topup_intent_invalid" : "recipient_intent_invalid";
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:"Top-up requires a signed-in member intent. OrderHero email was intentionally ignored.",
+        error:isTopup
+          ? "Top-up requires a signed-in member intent. OrderHero buyer email was intentionally ignored."
+          : "Base-package purchase requires a recipient_purchase intent. OrderHero buyer email was intentionally ignored.",
         processed_at:new Date().toISOString(),
-        normalized:{...n,eventName:eventName ?? n.eventName,productSku:topupSku}
+        normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
       }).eq("id",event.id);
-      return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason:"topup_intent_invalid"},{status:202});
+      return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason},{status:202});
     }
 
     const intendedSku=String(intent?.payload?.product_sku || "").trim().toUpperCase();
@@ -229,17 +256,13 @@ export async function POST(req: Request) {
     }
 
     const buyerEmail=normalizeEmail(n.email);
-    const recipientEmail=normalizeEmail(
-      isTopup
-        ? intent?.payload?.recipient_email
-        : (intent?.payload?.recipient_email || n.email)
-    );
+    const recipientEmail=normalizeEmail(intent?.payload?.recipient_email);
     if(!recipientEmail){
       await db.from("webhook_events").update({
         status:"needs_mapping",
         error:isTopup
           ? "Signed-in member recipient is missing from top-up intent."
-          : "Recipient email is missing.",
+          : "Recipient email is missing from the Papa Bonski checkout intent.",
         processed_at:new Date().toISOString()
       }).eq("id",event.id);
       return NextResponse.json({
@@ -302,14 +325,27 @@ export async function POST(req: Request) {
     }
 
     if(!customerId){
-      const {data,error}=await db.from("customers").insert({
+      const insertedCustomer=await db.from("customers").insert({
         name: buyerIsRecipient ? (n.name||"Member Papa Bonski") : "Member Papa Bonski",
         email: recipientEmail,
         whatsapp: buyerIsRecipient ? (n.phone||null) : null,
         status:"active"
       }).select("id").single();
-      if(error) throw error;
-      customerId=data.id;
+
+      if(insertedCustomer.error?.code==="23505"){
+        const {data:racedCustomer,error:racedCustomerError}=await db.from("customers")
+          .select("id")
+          .ilike("email",recipientEmail)
+          .order("created_at",{ascending:true})
+          .limit(1)
+          .maybeSingle();
+        if(racedCustomerError) throw racedCustomerError;
+        if(!racedCustomer?.id) throw insertedCustomer.error;
+        customerId=racedCustomer.id;
+      } else {
+        if(insertedCustomer.error) throw insertedCustomer.error;
+        customerId=insertedCustomer.data.id;
+      }
     } else {
       const update:Record<string,unknown>={
         status:"active",
@@ -379,7 +415,7 @@ export async function POST(req: Request) {
 
     const nowIso=new Date().toISOString();
     const {data:activeSub,error:activeSubError}=await db.from("subscriptions")
-      .select("id,expires_at")
+      .select("id,expires_at,source_order_id")
       .eq("customer_id",customerId)
       .eq("status","active")
       .gt("expires_at",nowIso)
@@ -388,10 +424,33 @@ export async function POST(req: Request) {
       .maybeSingle();
     if(activeSubError) throw activeSubError;
 
-    // One recipient email owns one active retail license. A second base-package
-    // payment for the same active recipient is held for resolution rather than
-    // silently extending or merging it into the existing account.
+    // A retry for this exact paid order is idempotent. A different paid base
+    // package for an already-active recipient remains a business exception.
     if(activeSub?.id){
+      if(activeSub.source_order_id===order.id){
+        await db.from("webhook_events").update({
+          status:"processed",
+          processed_at:new Date().toISOString(),
+          normalized:{
+            ...n,
+            eventName:eventName ?? n.eventName,
+            productSku,
+            planCode,
+            recipientEmail,
+            accessExpiresAt:activeSub.expires_at,
+            duplicate:true
+          }
+        }).eq("id",event.id);
+        if(intent?.id){
+          await db.from("webhook_events").update({
+            status:"processed",
+            processed_at:new Date().toISOString(),
+            external_order_id:n.externalOrderId
+          }).eq("id",intent.id);
+        }
+        return NextResponse.json({ok:true,duplicate:true,orderId:order.id});
+      }
+
       await db.from("webhook_events").update({
         status:"needs_mapping",
         error:"Recipient email already has an active Paket Super Kids 1. Choose story top-up or a different recipient email.",
@@ -431,30 +490,50 @@ export async function POST(req: Request) {
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
 
     const expires=new Date(Date.now()+(plan.duration_days||365)*86400000).toISOString();
+    let accessExpiresAt=expires;
 
-    const existingSub=await db.from("subscriptions").select("id").eq("source_order_id",order.id).maybeSingle();
-    if(!existingSub.data){
+    const existingSub=await db.from("subscriptions")
+      .select("id,expires_at")
+      .eq("source_order_id",order.id)
+      .maybeSingle();
+    if(existingSub.error) throw existingSub.error;
+
+    if(existingSub.data?.id){
+      accessExpiresAt=existingSub.data.expires_at || expires;
+    } else {
       const sub=await db.from("subscriptions").insert({
         customer_id:customerId,
         plan_id:plan.id,
         source_order_id:order.id,
         status:"active",
         expires_at:expires
-      });
-      if(sub.error) throw sub.error;
+      }).select("id,expires_at").single();
+
+      if(sub.error?.code==="23505"){
+        const racedSub=await db.from("subscriptions")
+          .select("id,expires_at")
+          .eq("source_order_id",order.id)
+          .maybeSingle();
+        if(racedSub.error) throw racedSub.error;
+        if(!racedSub.data?.id) throw sub.error;
+        accessExpiresAt=racedSub.data.expires_at || expires;
+      } else {
+        if(sub.error) throw sub.error;
+        accessExpiresAt=sub.data.expires_at || expires;
+      }
     }
 
     const entitlement=await db.from("entitlements").upsert({
       customer_id:customerId,
       key:"super_kids_access",
       value:true,
-      expires_at:expires
+      expires_at:accessExpiresAt
     },{onConflict:"customer_id,key"});
     if(entitlement.error) throw entitlement.error;
 
     const attribution=intent?.payload?.attribution || n.utm;
     if(attribution && Object.values(attribution).some(Boolean)) {
-      await db.from("attributions").insert({
+      const attributionInsert=await db.from("attributions").insert({
         customer_id:customerId,
         order_id:order.id,
         utm_source:attribution.utm_source ?? attribution.source,
@@ -465,11 +544,13 @@ export async function POST(req: Request) {
         fbclid:attribution.fbclid,
         landing_path:attribution.landing_path ?? attribution.landingPath
       });
+      if(attributionInsert.error && attributionInsert.error.code!=="23505") throw attributionInsert.error;
     }
 
     const existingActivation=await db.from("activations").select("id").eq("order_id",order.id).maybeSingle();
+    if(existingActivation.error) throw existingActivation.error;
     if(!existingActivation.data){
-      await db.from("activations").insert({
+      const activation=await db.from("activations").insert({
         customer_id:customerId,
         order_id:order.id,
         status:"active",
@@ -480,6 +561,7 @@ export async function POST(req: Request) {
           recipient_email:recipientEmail
         }
       });
+      if(activation.error && activation.error.code!=="23505") throw activation.error;
     }
 
     await db.from("webhook_events").update({
@@ -491,7 +573,7 @@ export async function POST(req: Request) {
         productSku,
         planCode,
         recipientEmail,
-        accessExpiresAt:expires,
+        accessExpiresAt,
       }
     }).eq("id",event.id);
 
@@ -509,7 +591,7 @@ export async function POST(req: Request) {
       customerId,
       orderId:order.id,
       planCode,
-      accessExpiresAt:expires,
+      accessExpiresAt,
     });
   } catch(e:any){
     await db.from("webhook_events").update({
