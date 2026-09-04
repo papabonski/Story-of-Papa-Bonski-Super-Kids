@@ -47,6 +47,15 @@ function allowedAdminEmailHashes() {
   return configured.length > 0 ? configured : [DEFAULT_SELLER_ADMIN_EMAIL_SHA256];
 }
 
+export function safeSellerAdminNextPath(value?: string | null) {
+  const candidate = String(value ?? "");
+  if (!candidate.startsWith("/") || candidate.startsWith("//")) return "/seller";
+  const allowedRoots = ["/seller", "/admin", "/setup", "/owner"];
+  return allowedRoots.some((root) => candidate === root || candidate.startsWith(`${root}/`))
+    ? candidate
+    : "/seller";
+}
+
 function signature(expiresAt: number) {
   const secret = signingSecret();
   if (!secret) return "";
@@ -91,7 +100,7 @@ export async function createSellerSession() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/seller",
+    path: "/",
     maxAge: SELLER_SESSION_TTL_SECONDS,
   });
 }
@@ -102,7 +111,7 @@ export async function clearSellerSession() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/seller",
+    path: "/",
     maxAge: 0,
   });
 }
@@ -120,6 +129,6 @@ export async function hasSellerSession() {
 
 export async function requireSellerSession(nextPath = "/seller") {
   if (await hasSellerSession()) return;
-  const safeNext = nextPath.startsWith("/seller") && !nextPath.startsWith("//") ? nextPath : "/seller";
+  const safeNext = safeSellerAdminNextPath(nextPath);
   redirect(`/seller/login?next=${encodeURIComponent(safeNext)}`);
 }
