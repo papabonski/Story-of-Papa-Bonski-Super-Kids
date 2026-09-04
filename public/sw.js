@@ -1,4 +1,4 @@
-const CACHE_NAME = "papa-bonski-super-kids-pwa-v4";
+const CACHE_NAME = "papa-bonski-super-kids-pwa-v5";
 const APP_SHELL = ["/", "/create", "/collection", "/offline"];
 
 function offlineHtml() {
@@ -79,7 +79,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: "no-store" })
         .then((response) => {
           event.waitUntil(safeCachePut(request, response));
           return response;
