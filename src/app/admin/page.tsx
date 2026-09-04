@@ -1,19 +1,21 @@
 import Link from "next/link";
 import AdminSettingsForm from "@/components/admin/AdminSettingsForm";
 import { getWhiteLabelSettings } from "@/lib/white-label/settings";
+import { requireSellerSession } from "@/lib/seller-auth";
 import { resetWhiteLabelSettings } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
+  await requireSellerSession("/admin");
   const settings = await getWhiteLabelSettings();
 
   return (
     <main className="min-h-[100dvh] bg-surface">
       <header className="sticky top-0 z-30 border-b border-black/[0.05] bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-3">
-          <Link href="/" className="text-sm font-bold text-ink-soft hover:text-ink">
-            ← App
+          <Link href="/seller/system" className="text-sm font-bold text-ink-soft hover:text-ink">
+            ← System Readiness
           </Link>
           <form action={resetWhiteLabelSettings} className="flex items-center gap-2">
             <input
