@@ -3,6 +3,14 @@
 import { FormEvent, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
+function safeAdminNextPath(value: string) {
+  if (!value.startsWith("/") || value.startsWith("//")) return "/seller";
+  const allowedRoots = ["/seller", "/admin", "/setup", "/owner"];
+  return allowedRoots.some((root) => value === root || value.startsWith(`${root}/`))
+    ? value
+    : "/seller";
+}
+
 export default function SellerOtpLogin({
   nextPath = "/seller",
   disabled = false,
@@ -17,10 +25,7 @@ export default function SellerOtpLogin({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const safeNext = useMemo(
-    () => (nextPath.startsWith("/seller") && !nextPath.startsWith("//") ? nextPath : "/seller"),
-    [nextPath],
-  );
+  const safeNext = useMemo(() => safeAdminNextPath(nextPath), [nextPath]);
 
   async function requestOtp(event: FormEvent) {
     event.preventDefault();
