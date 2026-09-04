@@ -1,13 +1,9 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import SellerOtpLogin from "@/components/seller/SellerOtpLogin";
-import { hasSellerSession, sellerOtpConfigured } from "@/lib/seller-auth";
+import { hasSellerSession, safeSellerAdminNextPath, sellerOtpConfigured } from "@/lib/seller-auth";
 
 export const dynamic = "force-dynamic";
-
-function safeNext(value?: string) {
-  return value?.startsWith("/seller") && !value.startsWith("//") ? value : "/seller";
-}
 
 export default async function SellerLoginPage({
   searchParams,
@@ -15,7 +11,7 @@ export default async function SellerLoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const params = await searchParams;
-  const next = safeNext(params.next);
+  const next = safeSellerAdminNextPath(params.next);
   if (await hasSellerSession()) redirect(next);
   const configured = sellerOtpConfigured();
 
