@@ -45,7 +45,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
 
       setEmail(normalizedEmail);
       setStep("otp");
-      setMessage("Kode OTP sudah dikirim. Masukkan 6 digit kode dari email Papa Bonski di bawah ini.");
+      setMessage("Kode OTP sudah diminta. Jika ini login pertama dan OTP belum tiba, buka email konfirmasi akun Papa Bonski terlebih dahulu, konfirmasikan email, lalu minta kode baru.");
     } catch (e: any) {
       setError(e?.message || "Gagal mengirim kode OTP. Coba lagi.");
     } finally { setLoading(false); }
@@ -101,6 +101,9 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
       <label className="text-sm font-extrabold">Email Penerima / Email Login Papa Bonski</label>
       <input value={email} onChange={e=>setEmail(e.target.value)} type="email" required autoComplete="email" placeholder="penerima@email.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none ring-brand-primary/20 focus:ring-4" />
       <p className="mt-2 text-xs text-ink-soft">Gunakan Email Penerima yang didaftarkan sebelum checkout. Email inilah yang memiliki akses dan digunakan untuk login OTP.</p>
+    </div>
+    <div className="rounded-2xl bg-amber-50 p-4 text-xs leading-relaxed text-amber-900 ring-1 ring-amber-100">
+      <b>Login pertama?</b> Jika OTP belum masuk dan Anda menerima email konfirmasi akun Papa Bonski, klik konfirmasi email tersebut terlebih dahulu. Setelah itu kembali ke halaman ini dan minta OTP lagi.
     </div>
     <button disabled={loading} className="btn-primary w-full disabled:opacity-60">{loading ? "Mengirim…" : "Kirim Kode OTP"}</button>
     {message && <div className="rounded-2xl bg-green-50 p-4 text-sm font-semibold text-green-800">✅ {message}</div>}

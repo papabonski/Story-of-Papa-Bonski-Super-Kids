@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { requireSellerSession } from "@/lib/seller-auth";
 
-export default function DeployPage() {
+export default async function DeployPage() {
+  await requireSellerSession("/seller/deploy");
   const repo = process.env.PAPA_BONSKI_TEMPLATE_REPOSITORY_URL || "";
   const deployUrl = repo ? `https://vercel.com/new/clone?repository-url=${encodeURIComponent(repo)}` : "";
   return <main className="min-h-[100dvh] bg-surface px-5 py-10 text-ink"><div className="mx-auto max-w-2xl rounded-3xl bg-surface-card p-7 ring-1 ring-black/[0.06]">
