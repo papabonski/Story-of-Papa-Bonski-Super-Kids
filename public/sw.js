@@ -1,5 +1,20 @@
-const CACHE_NAME = "papa-bonski-super-kids-pwa-v5";
-const APP_SHELL = ["/", "/create", "/collection", "/offline"];
+const CACHE_NAME = "papa-bonski-super-kids-pwa-v6";
+const APP_SHELL = ["/offline"];
+const PRIVATE_NAV_PREFIXES = [
+  "/app",
+  "/create",
+  "/collection",
+  "/onboarding",
+  "/install",
+  "/super-kids/checkout",
+  "/story/",
+];
+
+function isPrivateNavigation(pathname) {
+  return PRIVATE_NAV_PREFIXES.some((prefix) =>
+    prefix.endsWith("/") ? pathname.startsWith(prefix) : pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
 
 function offlineHtml() {
   return new Response(
@@ -69,23 +84,25 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
 
-  // Always fetch the web app manifest fresh. Caching an older manifest can
-  // preserve an obsolete start_url and make a newly installed PWA open the
-  // public landing page instead of the member app.
   if (url.pathname === "/manifest.webmanifest") {
     event.respondWith(fetch(request, { cache: "no-store" }));
     return;
   }
 
   if (request.mode === "navigate") {
+    const privateNavigation = isPrivateNavigation(url.pathname);
     event.respondWith(
       fetch(request, { cache: "no-store" })
         .then((response) => {
-          event.waitUntil(safeCachePut(request, response));
+          if (!privateNavigation) event.waitUntil(safeCachePut(request, response));
           return response;
         })
         .catch(async () => {
-          return (await caches.match(request)) || (await caches.match("/offline")) || offlineHtml();
+          if (!privateNavigation) {
+            const cached = await caches.match(request);
+            if (cached) return cached;
+          }
+          return (await caches.match("/offline")) || offlineHtml();
         })
     );
     return;
