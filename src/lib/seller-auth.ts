@@ -7,8 +7,19 @@ import { redirect } from "next/navigation";
 const SELLER_COOKIE = "pb_seller_session";
 const SELLER_SESSION_TTL_SECONDS = 12 * 60 * 60;
 
-function configuredSecret() {
-  return process.env.ADMIN_DASHBOARD_SECRET ?? process.env.STORY_WORKER_SECRET ?? "";
+function normalizeSecret(value: string | undefined) {
+  return (value ?? "").trim();
+}
+
+function configuredSecrets() {
+  return [
+    normalizeSecret(process.env.ADMIN_DASHBOARD_SECRET),
+    normalizeSecret(process.env.STORY_WORKER_SECRET),
+  ].filter(Boolean);
+}
+
+function signingSecret() {
+  return configuredSecrets()[0] ?? "";
 }
 
 function safeEqual(left: string, right: string) {
@@ -18,7 +29,7 @@ function safeEqual(left: string, right: string) {
 }
 
 function signature(expiresAt: number) {
-  const secret = configuredSecret();
+  const secret = signingSecret();
   if (!secret) return "";
   return createHmac("sha256", secret)
     .update(`papa-bonski-seller:v1:${expiresAt}`)
@@ -26,12 +37,13 @@ function signature(expiresAt: number) {
 }
 
 export function sellerAuthConfigured() {
-  return Boolean(configuredSecret());
+  return configuredSecrets().length > 0;
 }
 
 export function verifySellerSecret(submitted: string) {
-  const secret = configuredSecret();
-  return Boolean(secret) && safeEqual(submitted, secret);
+  const candidate = normalizeSecret(submitted);
+  if (!candidate) return false;
+  return configuredSecrets().some((secret) => safeEqual(candidate, secret));
 }
 
 export async function createSellerSession() {
