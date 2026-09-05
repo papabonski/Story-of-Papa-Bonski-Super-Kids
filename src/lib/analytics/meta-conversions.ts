@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-const DEFAULT_PIXEL_ID = "1717292549605992";
+const DEFAULT_DATASET_ID = "1039294515626493";
 
 type Attribution = {
   fbclid?: string | null;
@@ -55,17 +55,18 @@ function eventSourceUrl(attribution?: Attribution | null) {
 /**
  * Sends a real paid OrderHero order to Meta Conversions API.
  *
- * Commerce processing must never depend on Meta availability, so callers should
- * treat failures as telemetry warnings rather than payment/activation failures.
- * The stable event_id lets Meta deduplicate webhook retries safely.
+ * Browser tracking and direct CAPI use different Meta object IDs in this
+ * account, so this sender intentionally targets the Dataset ID rather than the
+ * browser Pixel ID. Commerce processing must never depend on Meta availability.
+ * The stable event_id makes webhook retries safe for Meta deduplication.
  */
 export async function sendMetaPurchase(input: MetaPurchaseInput): Promise<MetaPurchaseResult> {
   const accessToken = String(process.env.META_CONVERSIONS_API_TOKEN || "").trim();
-  const pixelId = String(
-    process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID || DEFAULT_PIXEL_ID
+  const datasetId = String(
+    process.env.META_CAPI_DATASET_ID || process.env.META_DATASET_ID || DEFAULT_DATASET_ID
   ).trim();
 
-  if (!accessToken || !pixelId) return { configured: false, ok: false };
+  if (!accessToken || !datasetId) return { configured: false, ok: false };
 
   const email = normalizeEmail(input.buyerEmail);
   const eventTime = unixSeconds(input.paidAt);
@@ -100,7 +101,7 @@ export async function sendMetaPurchase(input: MetaPurchaseInput): Promise<MetaPu
   if (testCode) body.test_event_code = testCode;
 
   const version = String(process.env.META_GRAPH_API_VERSION || "v21.0").trim();
-  const endpoint = `https://graph.facebook.com/${version}/${encodeURIComponent(pixelId)}/events?access_token=${encodeURIComponent(accessToken)}`;
+  const endpoint = `https://graph.facebook.com/${version}/${encodeURIComponent(datasetId)}/events?access_token=${encodeURIComponent(accessToken)}`;
 
   try {
     const response = await fetch(endpoint, {
