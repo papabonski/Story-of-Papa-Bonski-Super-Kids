@@ -26,13 +26,14 @@ V5.6 memindahkan fokus dari pembangunan fitur aplikasi ke kesiapan penjualan: co
 
 ### Landing page
 - Headline benefit-first: “Bukan sekadar cerita. Cerita tentang anak Anda.”
-- Problem examples: susah tidur, sayur, takut sekolah, gadget
+- Everyday-routine examples: rutinitas tidur, makan sayur, persiapan sekolah, waktu layar
 - Offer lebih jelas: Rp50.000 = 2 cerita personal + akses 1 tahun
 - Trust strip: OTP email, tanpa Play Store, akses 1 tahun
 - Penjelasan Email Penerima vs Email Pembeli dibuat lebih sederhana
 - CTA berulang dan sticky mobile CTA
 - FAQ diperluas untuk mengurangi kebingungan setelah pembayaran
 - Tidak menggunakan testimonial atau klaim sosial yang belum memiliki bukti nyata
+- Copy tidak memosisikan produk sebagai diagnosis, terapi, atau solusi kondisi kesehatan/perilaku; framing memakai momen, rutinitas, tema, dan pengalaman membaca
 
 ### Checkout UX
 - Judul diubah menjadi “Siapa yang akan memakai Papa Bonski?”
@@ -46,6 +47,12 @@ V5.6 memindahkan fokus dari pembangunan fitur aplikasi ke kesiapan penjualan: co
 - `InitiateCheckout` mengirim value Rp50.000 / IDR
 - First-party event collector tetap menyimpan event ke Supabase
 - Seller Center mendapat halaman `/seller/sales`
+- Meta CAPI Preview sudah terhubung ke Dataset Papa Bonski dan connectivity test diterima Meta (`events_received=1`)
+- Real `Purchase` dikirim server-side hanya dari OrderHero paid webhook
+- CAPI `event_id` stabil per OrderHero order untuk retry safety
+- Email buyer dinormalisasi dan di-hash SHA-256 sebelum dikirim sebagai matching signal
+- CAPI timeout dibatasi 5 detik dan kegagalan Meta tidak boleh menggagalkan aktivasi customer/order
+- Endpoint connectivity test sementara sudah dihapus setelah verifikasi berhasil
 
 ### Seller Center — Sales Funnel
 Menampilkan:
@@ -81,7 +88,7 @@ Gunakan landing langsung ke `/super-kids`, bukan root brand page.
 
 Template URL:
 
-`/super-kids?utm_source=meta&utm_medium=paid_social&utm_campaign=superkids_launch&utm_content=video_problem_01`
+`/super-kids?utm_source=meta&utm_medium=paid_social&utm_campaign=superkids_launch&utm_content=routine_bedtime_01`
 
 Naming minimum:
 - `utm_source=meta`
@@ -91,16 +98,38 @@ Naming minimum:
 
 `fbclid` dibiarkan ditambahkan Meta otomatis.
 
+## Meta Data Sharing Restrictions
+Meta Events Manager pernah menampilkan peringatan `Data sharing restrictions applied`. Ini harus diperlakukan sebagai kebijakan/platform classification issue, bukan alasan untuk mencoba mengakali restriction.
+
+Tindakan V5.6:
+- browser event hanya membawa parameter commerce generik seperti product SKU, value, dan currency;
+- copy landing dan launch creative menggunakan framing momen/rutinitas, bukan klaim kesehatan atau terapi;
+- kategori yang Meta tetapkan harus diperiksa di `Events Manager → Data Source → Settings → Manage Data Source Categories`;
+- jika kategori sensitif tidak menggambarkan Papa Bonski secara akurat, gunakan mekanisme review resmi Meta;
+- status final restriction harus diketahui sebelum campaign Sales Production dinaikkan.
+
+## Custom domain readiness
+`papabonski.com` sudah dimiliki tetapi belum dihubungkan ke project Vercel. Cutover domain sengaja ditunda sampai V5.6 lolos launch gate agar domain publik tidak menunjuk ke build yang belum dipromosikan.
+
+Rencana cutover:
+1. Promote V5.6 yang sudah lulus UAT ke Production.
+2. Tambahkan `papabonski.com` dan `www.papabonski.com` ke Vercel project.
+3. Ikuti DNS record persis yang diberikan Vercel di Hostinger DNS Zone.
+4. Pilih satu canonical host dan redirect host lainnya.
+5. Set `META_EVENT_SOURCE_URL` Production ke canonical `/super-kids` bila diperlukan agar CAPI menggunakan public brand domain.
+6. Verifikasi SSL, root page, `/super-kids`, checkout, OTP, dan webhook setelah DNS aktif.
+
 ## Launch gate
 V5.6 baru boleh dipromosikan ke Production setelah:
-1. Preview build READY.
-2. Landing mobile + desktop tampil benar.
-3. CTA masuk ke Recipient Email step dengan UTM tetap ada.
-4. UTM test menghasilkan `ViewContent` dan `InitiateCheckout` di Sales Funnel.
-5. Meta Pixel Production ID sudah dikonfigurasi dan `ViewContent` terlihat di Meta Events Manager/test flow.
-6. Satu transaksi test dengan UTM menghasilkan order paid dan attribution row yang sesuai.
-7. OrderHero webhook health tetap tanpa error baru.
-8. Login member dan Seller Center tidak regresi.
+1. ✅ Preview build READY.
+2. ✅ Landing server-render dan checkout server-render tampil tanpa runtime error; visual mobile + desktop tetap perlu smoke check manusia sebelum promote.
+3. ✅ Kode CTA mempertahankan UTM/fbclid sampai Recipient Email step; UTM test dashboard tetap perlu satu smoke check.
+4. ⏳ UTM test menghasilkan `ViewContent` dan `InitiateCheckout` di Sales Funnel.
+5. ✅ Meta Pixel Preview aktif dan CAPI connectivity sudah diterima Meta; status Data Source Category/Restrictions masih perlu review.
+6. ⏳ Satu transaksi test dengan UTM menghasilkan order paid, attribution row, dan real CAPI Purchase.
+7. ✅ OrderHero webhook integration tetap non-blocking terhadap Meta dan build/runtime sehat; final paid smoke test masih diperlukan.
+8. ⏳ Login member dan Seller Center final regression smoke test.
+9. ⏳ Setelah gate 1–8 PASS, promote Production lalu lakukan cutover `papabonski.com`.
 
 ## Hal yang sengaja ditunda
 - `admin.papabonski.com`
