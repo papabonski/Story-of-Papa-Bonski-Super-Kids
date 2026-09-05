@@ -1,6 +1,21 @@
 "use client";
 import { useMemo } from "react";
 
+function emitMetaCheckout(attempt=0){
+  const w=window as any;
+  if(w.fbq){
+    w.fbq("track","InitiateCheckout",{
+      content_ids:["PBSK-SUPER-KIDS"],
+      content_name:"PBSK-SUPER-KIDS",
+      content_type:"product",
+      value:50000,
+      currency:"IDR",
+    });
+    return;
+  }
+  if(attempt<6) window.setTimeout(()=>emitMetaCheckout(attempt+1),150);
+}
+
 export default function CheckoutButton({label="Mulai Papa Bonski Super Kids",className=""}:{label?:string;className?:string}){
   const href=useMemo(()=>{
     const base="/super-kids/checkout";
@@ -15,5 +30,8 @@ export default function CheckoutButton({label="Mulai Papa Bonski Super Kids",cla
       return u.pathname+u.search;
     }catch{return base;}
   },[]);
-  return <a href={href} onClick={()=>{fetch("/api/funnel/track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({event:"InitiateCheckout",product:"PBSK-SUPER-KIDS",path:location.pathname})}).catch(()=>{}); const w=window as any;if(w.fbq)w.fbq("track","InitiateCheckout");}} className={className}>{label}</a>;
+  return <a href={href} onClick={()=>{
+    fetch("/api/funnel/track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({event:"InitiateCheckout",product:"PBSK-SUPER-KIDS",value:50000,path:location.pathname})}).catch(()=>{});
+    emitMetaCheckout();
+  }} className={className}>{label}</a>;
 }
