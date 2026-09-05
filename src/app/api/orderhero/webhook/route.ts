@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendMetaPurchase } from "@/lib/analytics/meta-conversions";
 import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } from "@/lib/commerce/orderhero";
 
 export const runtime = "nodejs";
@@ -374,6 +375,8 @@ export async function POST(req: Request) {
     },{onConflict:"provider,external_order_id"}).select("id").single();
     if(orderError) throw orderError;
 
+    const attribution=intent?.payload?.attribution || n.utm;
+
     if (topupCredits > 0) {
       const grant = await db.from("story_credit_grants").upsert({
         customer_id: customerId,
@@ -384,6 +387,16 @@ export async function POST(req: Request) {
       }, { onConflict: "order_id" });
       if (grant.error) throw grant.error;
 
+      const metaCapi=await sendMetaPurchase({
+        externalOrderId:String(n.externalOrderId),
+        buyerEmail:n.email,
+        amount:n.amount,
+        currency:n.currency,
+        productSku:topupSku,
+        paidAt:n.paidAt,
+        attribution,
+      });
+
       await db.from("webhook_events").update({
         status:"processed",
         processed_at:new Date().toISOString(),
@@ -392,7 +405,8 @@ export async function POST(req: Request) {
           eventName:eventName ?? n.eventName,
           productSku:topupSku,
           recipientEmail,
-          creditsAdded:topupCredits
+          creditsAdded:topupCredits,
+          metaCapi
         }
       }).eq("id",event.id);
 
@@ -409,7 +423,8 @@ export async function POST(req: Request) {
         creditsAdded:topupCredits,
         customerId,
         orderId:order.id,
-        productSku:topupSku
+        productSku:topupSku,
+        metaCapi:{configured:metaCapi.configured,ok:metaCapi.ok,status:metaCapi.status}
       });
     }
 
@@ -531,7 +546,6 @@ export async function POST(req: Request) {
     },{onConflict:"customer_id,key"});
     if(entitlement.error) throw entitlement.error;
 
-    const attribution=intent?.payload?.attribution || n.utm;
     if(attribution && Object.values(attribution).some(Boolean)) {
       const attributionInsert=await db.from("attributions").insert({
         customer_id:customerId,
@@ -564,6 +578,16 @@ export async function POST(req: Request) {
       if(activation.error && activation.error.code!=="23505") throw activation.error;
     }
 
+    const metaCapi=await sendMetaPurchase({
+      externalOrderId:String(n.externalOrderId),
+      buyerEmail:n.email,
+      amount:n.amount,
+      currency:n.currency,
+      productSku,
+      paidAt:n.paidAt,
+      attribution,
+    });
+
     await db.from("webhook_events").update({
       status:"processed",
       processed_at:new Date().toISOString(),
@@ -574,6 +598,7 @@ export async function POST(req: Request) {
         planCode,
         recipientEmail,
         accessExpiresAt,
+        metaCapi
       }
     }).eq("id",event.id);
 
@@ -592,6 +617,7 @@ export async function POST(req: Request) {
       orderId:order.id,
       planCode,
       accessExpiresAt,
+      metaCapi:{configured:metaCapi.configured,ok:metaCapi.ok,status:metaCapi.status}
     });
   } catch(e:any){
     await db.from("webhook_events").update({
