@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -27,6 +28,7 @@ export async function GET() {
   const version = String(process.env.META_GRAPH_API_VERSION || "v21.0").trim();
   const endpoint = `https://graph.facebook.com/${version}/${encodeURIComponent(datasetId)}/events?access_token=${encodeURIComponent(accessToken)}`;
   const eventId = `pb-capi-preview-${Date.now()}`;
+  const externalId = crypto.createHash("sha256").update("pb-capi-preview-connectivity").digest("hex");
 
   try {
     const response = await fetch(endpoint, {
@@ -39,7 +41,7 @@ export async function GET() {
           event_id: eventId,
           action_source: "website",
           event_source_url: "https://papabonski.com/super-kids",
-          user_data: {},
+          user_data: { external_id: [externalId] },
           custom_data: { source: "v5.6_preview_connectivity_check" },
         }],
       }),
