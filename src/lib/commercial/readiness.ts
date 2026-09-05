@@ -18,6 +18,9 @@ export async function getCommercialReadiness(): Promise<CommercialCheck[]> {
   const productionUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
   const customerName = process.env.PAPA_BONSKI_CUSTOMER_NAME;
   const installationId = process.env.PAPA_BONSKI_INSTALLATION_ID;
+  const licenseRequired = process.env.PAPA_BONSKI_LICENSE_REQUIRED === "true";
+  const deploymentProfileRequired = licenseRequired || Boolean(customerName || installationId);
+  const deploymentProfileComplete = Boolean(customerName && installationId);
 
   const license = verifyLicense();
 
@@ -25,8 +28,17 @@ export async function getCommercialReadiness(): Promise<CommercialCheck[]> {
     { id: "supabase", label: "Supabase", ok: !!(url && anon && service), detail: url && anon && service ? "Konfigurasi utama terisi" : "URL/anon/service role belum lengkap", action: "Jalankan Easy Setup", href: "/setup" },
     { id: "gemini", label: "Gemini AI", ok: !!gemini, detail: gemini ? "API key terisi" : "API key belum diisi", action: "Buka Setup", href: "/setup" },
     { id: "worker", label: "Story worker", ok: !!worker, detail: worker ? "Secret worker tersedia" : "Secret worker belum ada", action: "Buka Setup", href: "/setup" },
-    { id: "admin", label: "Admin", ok: !!admin, detail: admin ? "Password admin tersedia" : "Password admin belum ada", action: "Buka Admin", href: "/admin" },
-    { id: "customer", label: "Customer profile", ok: !!(customerName && installationId), detail: customerName && installationId ? `${customerName} · ${installationId}` : "Nama customer / installation ID belum diisi" },
+    { id: "admin", label: "Admin", ok: !!admin, detail: admin ? "Secret sesi Seller Center tersedia" : "Secret sesi Seller Center belum ada", action: "Buka Admin", href: "/admin" },
+    {
+      id: "customer",
+      label: "Deployment profile",
+      ok: !deploymentProfileRequired || deploymentProfileComplete,
+      detail: !deploymentProfileRequired
+        ? "Tidak diperlukan untuk deployment SaaS terpusat."
+        : deploymentProfileComplete
+          ? `${customerName} · ${installationId}`
+          : "Nama customer / installation ID belum lengkap",
+    },
     { id: "production", label: "Production URL", ok: !!productionUrl, detail: productionUrl ? productionUrl.replace(/^https?:\/\//, "") : "Isi NEXT_PUBLIC_APP_URL setelah deploy" },
     { id: "license", label: "Commercial License", ok: license.valid, detail: license.reason, action: "Lihat License", href: "/license" },
   ];
