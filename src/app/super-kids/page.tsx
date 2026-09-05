@@ -37,11 +37,11 @@ export default async function SuperKids(){
           <span className="inline-flex rounded-full bg-brand-accent/40 px-4 py-2 text-xs font-black uppercase tracking-wider">Cerita Personal untuk Anak</span>
           <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.06] sm:text-5xl lg:text-6xl">Bukan sekadar cerita. Cerita tentang anak Anda.</h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-            Ubah kebutuhan anak sehari-hari—seperti susah tidur, tidak mau sayur, takut sekolah, atau terlalu lama dengan gadget—menjadi cerita personal yang bisa dibaca dan didengarkan bersama.
+            Ubah momen anak sehari-hari—seperti membangun rutinitas tidur, semangat makan sayur, lebih siap berangkat sekolah, atau mengatur waktu layar—menjadi cerita personal yang bisa dibaca dan didengarkan bersama.
           </p>
 
           <div className="mt-7 grid gap-2 text-sm font-bold sm:grid-cols-2">
-            {["Anak menjadi tokoh utama","Cerita sesuai kebutuhan hari ini","Ilustrasi + audio narasi","Moral, doa & panduan orang tua"].map(item=>
+            {["Anak menjadi tokoh utama","Cerita sesuai momen hari ini","Ilustrasi + audio narasi","Moral, doa & panduan orang tua"].map(item=>
               <div key={item} className="flex items-center gap-2"><span className="text-emerald-600">✓</span><span>{item}</span></div>
             )}
           </div>
@@ -77,7 +77,7 @@ export default async function SuperKids(){
     <section className="border-y border-black/5 bg-white/70 px-5 py-8">
       <div className="mx-auto grid max-w-5xl gap-5 text-center sm:grid-cols-3">
         {[
-          ["💛","Lebih dekat dengan dunia anak","Cerita memakai nama, profil, dan kebutuhan yang relevan dengan si kecil."],
+          ["💛","Lebih dekat dengan dunia anak","Cerita memakai nama, profil, dan momen yang relevan dengan si kecil."],
           ["📖","Bukan hanya sekali baca","Cerita tersimpan di Koleksi dan dapat dibuka kembali selama akses aktif."],
           ["🎧","Bisa dibaca atau didengarkan","Nikmati teks, ilustrasi, dan audio narasi dalam satu pengalaman."],
         ].map(([icon,title,desc])=><div key={title}><div className="text-3xl">{icon}</div><h2 className="mt-2 font-extrabold">{title}</h2><p className="mt-1 text-sm leading-relaxed text-ink-soft">{desc}</p></div>)}
@@ -86,18 +86,18 @@ export default async function SuperKids(){
 
     <section id="contoh" className="px-5 py-16">
       <div className="mx-auto max-w-6xl">
-        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Dari masalah kecil menjadi cerita</p>
-        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Mulai dari hal yang sedang dialami anak hari ini.</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-ink-soft">Orang tua memilih kebutuhan dan tema. Papa Bonski membantu mengubahnya menjadi cerita yang terasa lebih dekat dengan kehidupan anak.</p>
+        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Dari momen sehari-hari menjadi cerita</p>
+        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Mulai dari hal yang sedang dekat dengan anak hari ini.</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-ink-soft">Orang tua memilih momen dan tema. Papa Bonski membantu mengubahnya menjadi cerita yang terasa lebih dekat dengan kehidupan anak.</p>
         <div className="mx-auto mt-9 grid max-w-5xl gap-4 md:grid-cols-2">
           <div className="rounded-[2rem] bg-gradient-to-br from-brand-primary/10 to-brand-accent/20 p-6 sm:p-8">
-            <p className="text-xs font-black text-brand-primary">CONTOH KEBUTUHAN</p>
-            <h3 className="mt-2 text-2xl font-extrabold">Hari ini, apa yang ingin dibantu melalui cerita?</h3>
+            <p className="text-xs font-black text-brand-primary">CONTOH MOMEN</p>
+            <h3 className="mt-2 text-2xl font-extrabold">Hari ini, momen apa yang ingin dijadikan cerita?</h3>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-bold">
-              <span className="rounded-xl bg-white p-3">😴 Susah tidur</span>
-              <span className="rounded-xl bg-white p-3">🥦 Tidak mau sayur</span>
-              <span className="rounded-xl bg-white p-3">🏫 Takut sekolah</span>
-              <span className="rounded-xl bg-white p-3">📱 Terlalu lama gadget</span>
+              <span className="rounded-xl bg-white p-3">🌙 Rutinitas tidur</span>
+              <span className="rounded-xl bg-white p-3">🥦 Semangat makan sayur</span>
+              <span className="rounded-xl bg-white p-3">🏫 Siap berangkat sekolah</span>
+              <span className="rounded-xl bg-white p-3">📱 Atur waktu layar</span>
             </div>
           </div>
           <div className="rounded-[2rem] bg-surface-card p-6 ring-1 ring-black/5 sm:p-8">
@@ -119,7 +119,7 @@ export default async function SuperKids(){
             ["1","Tentukan Email Penerima","Email ini menjadi pemilik akses dan dipakai untuk login OTP. Untuk diri sendiri, gunakan email Anda."],
             ["2","Selesaikan pembayaran","Di OrderHero, isi Nama, WhatsApp, dan Email Pembeli untuk transaksi."],
             ["3","Login dengan OTP","Setelah pembayaran terverifikasi, masuk memakai Email Penerima dan kode OTP 6 digit."],
-            ["4","Buat cerita pertama","Buat profil anak, pilih kebutuhan, review cerita, lalu nikmati ilustrasi dan audio."],
+            ["4","Buat cerita pertama","Buat profil anak, pilih tema, review cerita, lalu nikmati ilustrasi dan audio."],
           ].map(([n,t,d])=>
             <div key={n} className="rounded-3xl bg-surface-card p-6 shadow-sm ring-1 ring-black/5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary font-black text-white">{n}</div>
