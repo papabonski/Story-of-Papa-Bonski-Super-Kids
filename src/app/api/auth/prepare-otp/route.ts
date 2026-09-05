@@ -3,9 +3,14 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 const AUTH_PAGE_SIZE = 1000;
 const MAX_AUTH_PAGES = 50;
+const GENERIC_PROFILE_NAME = "member papa bonski";
 
 function normalizeEmail(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function normalizeProfileName(value: unknown) {
+  return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
 
 async function findAuthUserByEmail(
@@ -34,6 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
     const email = normalizeEmail(body?.email);
+    const displayName = normalizeProfileName(body?.displayName);
 
     if (!email) {
       return NextResponse.json(
@@ -42,11 +48,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (displayName && (displayName.length < 2 || displayName.length > 60)) {
+      return NextResponse.json(
+        { ok: false, error: "Nama Penerima harus terdiri dari 2–60 karakter." },
+        { status: 400 },
+      );
+    }
+
     const admin = createSupabaseAdminClient();
 
     const { data: customer, error: customerError } = await admin
       .from("customers")
-      .select("id,status")
+      .select("id,status,name")
       .ilike("email", email)
       .eq("status", "active")
       .maybeSingle();
@@ -61,6 +74,23 @@ export async function POST(request: NextRequest) {
             "Email Penerima belum memiliki akses Papa Bonski yang aktif. Pastikan email sama dengan yang didaftarkan sebelum checkout.",
         },
         { status: 404 },
+      );
+    }
+
+    const currentName = normalizeProfileName(customer.name).toLowerCase();
+    const profileNameRequired = !currentName || currentName === GENERIC_PROFILE_NAME;
+
+    // The name is deliberately NOT written here because this endpoint is
+    // unauthenticated. It is only committed after the OTP has been verified.
+    if (profileNameRequired && !displayName) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "profile_name_required",
+          error:
+            "Nama Penerima wajib diisi pada login pertama. Nama ini akan tampil di Papa Bonski dan terpisah dari nama pembeli di OrderHero.",
+        },
+        { status: 400 },
       );
     }
 
@@ -123,6 +153,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       ready: Boolean(authUser?.id),
+      profileNameRequired,
     });
   } catch (error: any) {
     console.error("prepare-otp failed", error);
