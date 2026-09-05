@@ -10,31 +10,31 @@ Suggested campaign:
 `PBSK | Sales | SuperKids | Prospecting | ID`
 
 Suggested creative naming:
-- `problem_bedtime_01`
-- `problem_gadget_01`
-- `problem_vegetable_01`
+- `routine_bedtime_01`
+- `routine_screen_time_01`
+- `routine_vegetable_01`
 - `child_hero_01`
 - `demo_flow_01`
 - `gift_parent_01`
 
 UTM example:
-`utm_source=meta&utm_medium=paid_social&utm_campaign=superkids_launch&utm_content=problem_bedtime_01`
+`utm_source=meta&utm_medium=paid_social&utm_campaign=superkids_launch&utm_content=routine_bedtime_01`
 
-## Creative Angle A — Problem first
+## Creative Angle A — Everyday routine first
 ### Hook options
-- “Si kecil susah tidur? Coba jadikan dia tokoh utama dalam cerita sebelum tidur.”
-- “Daripada terus mengingatkan soal gadget, bagaimana kalau pesannya masuk lewat cerita yang memakai nama anak sendiri?”
-- “Tidak mau makan sayur? Buat cerita yang terasa seperti memang dibuat untuk si kecil.”
+- “Jadikan rutinitas sebelum tidur lebih personal dengan cerita yang menempatkan si kecil sebagai tokoh utama.”
+- “Ingin membantu mengatur waktu layar? Bawa pesannya lewat cerita yang memakai nama anak sendiri.”
+- “Belajar menikmati sayur bisa jadi tema petualangan baru untuk si kecil.”
 
 ### Primary text
-Masalah kecil sehari-hari sering lebih mudah dibicarakan lewat cerita.
+Momen kecil sehari-hari bisa menjadi bahan cerita yang dekat dengan dunia anak.
 
-Di Papa Bonski Super Kids, orang tua memilih kebutuhan anak, lalu Papa Bonski membantu membuat cerita personal dengan nama, profil, ilustrasi, audio narasi, moral, doa, dan panduan orang tua.
+Di Papa Bonski Super Kids, orang tua memilih momen dan tema, lalu Papa Bonski membantu membuat cerita personal dengan nama, profil, ilustrasi, audio narasi, moral, doa, dan panduan orang tua.
 
 Paket awal Rp50.000 sudah termasuk 2 cerita personal + akses 1 tahun.
 
 ### Headline
-`Cerita Personal untuk Kebutuhan Anak Hari Ini`
+`Cerita Personal untuk Momen Anak Hari Ini`
 
 ### CTA
 `Pelajari Selengkapnya` atau `Beli Sekarang`
@@ -44,7 +44,7 @@ Paket awal Rp50.000 sudah termasuk 2 cerita personal + akses 1 tahun.
 “Bagaimana reaksinya ketika mendengar namanya sendiri di dalam cerita?”
 
 ### Primary text
-Bukan sekadar cerita umum. Papa Bonski membantu membuat pengalaman membaca yang memakai nama, usia, karakter, dan kebutuhan anak sebagai bagian dari cerita.
+Bukan sekadar cerita umum. Papa Bonski membantu membuat pengalaman membaca yang memakai nama, usia, karakter, dan pilihan tema anak sebagai bagian dari cerita.
 
 Baca bersama. Dengarkan audionya. Simpan di koleksi dan buka kembali kapan diperlukan.
 
@@ -55,7 +55,7 @@ Rp50.000 untuk 2 cerita personal + akses 1 tahun.
 
 ## Creative Angle C — Demo produk
 ### Storyboard 15–25 detik
-1. Screen: pilih kebutuhan anak — “Susah tidur / takut sekolah / gadget / sayur”
+1. Screen: pilih momen anak — “Rutinitas tidur / sekolah / waktu layar / sayur”
 2. Screen: isi profil anak
 3. Screen: review teks cerita
 4. Screen: tampilkan ilustrasi + flipbook
@@ -63,7 +63,7 @@ Rp50.000 untuk 2 cerita personal + akses 1 tahun.
 6. End card: `2 Cerita Personal + Akses 1 Tahun — Rp50.000`
 
 ### Voice-over concept
-“Pilih kebutuhan si kecil, buat profilnya, review ceritanya, lalu nikmati cerita personal lengkap dengan ilustrasi dan audio. Papa Bonski Super Kids, mulai Rp50.000.”
+“Pilih momen si kecil, buat profilnya, review ceritanya, lalu nikmati cerita personal lengkap dengan ilustrasi dan audio. Papa Bonski Super Kids, mulai Rp50.000.”
 
 ## Creative Angle D — Gift
 ### Hook
@@ -81,10 +81,10 @@ Cocok sebagai hadiah digital untuk keluarga dengan anak kecil.
 
 ## Short copy variants
 ### Variant 1
-Anak jadi tokoh utama. Pilih kebutuhan hari ini, lalu buat cerita personal dengan ilustrasi dan audio. 2 cerita + akses 1 tahun Rp50.000.
+Anak jadi tokoh utama. Pilih momen hari ini, lalu buat cerita personal dengan ilustrasi dan audio. 2 cerita + akses 1 tahun Rp50.000.
 
 ### Variant 2
-Susah tidur, gadget, takut sekolah, atau tidak mau sayur? Jadikan topik itu cerita personal yang terasa lebih dekat dengan anak.
+Rutinitas tidur, waktu layar, persiapan sekolah, atau belajar menikmati sayur bisa dijadikan tema cerita personal yang terasa lebih dekat dengan anak.
 
 ### Variant 3
 Nama, karakter, ilustrasi, audio, moral, dan doa dalam satu cerita personal untuk si kecil. Mulai 2 cerita Rp50.000.
@@ -97,14 +97,17 @@ Do not promise:
 - guaranteed behavior change
 - guaranteed educational outcome
 - medical/therapeutic outcomes
+- diagnosis, treatment, or claims about a child's health or psychological condition
 - fake testimonials
 - fake scarcity or countdown
 
+Gunakan framing **momen, rutinitas, tema, dan pengalaman membaca**, bukan diagnosis atau klaim bahwa produk menyelesaikan kondisi kesehatan/perilaku tertentu.
+
 ## Initial testing matrix
 Test variables separately where possible:
-- Angle: problem vs child-hero vs demo vs gift
+- Angle: everyday-routine vs child-hero vs demo vs gift
 - Format: short video vs static visual
-- Hook: bedtime vs gadget vs school vs vegetables
+- Hook: bedtime routine vs screen time vs school preparation vs vegetables
 - CTA: Learn More vs Shop Now if supported
 
 Keep landing URL and offer constant during the first creative comparison so results are easier to interpret.
@@ -128,6 +131,7 @@ Do not scale spend based only on clicks or CTR. Revenue and paid-order attributi
 - OrderHero webhook health green
 - Mobile landing checked manually
 - Payment → OTP → member access checked
+- Review `Manage Data Source Categories` in Meta Events Manager and request review if Papa Bonski is assigned to a sensitive category that does not accurately describe the product
 
 ## Creative production notes
 For static/image/video assets, use real Papa Bonski UI and product output whenever possible. Avoid implying that a generic stock child is an actual customer. Product demonstrations should show the real workflow and real story screens.
