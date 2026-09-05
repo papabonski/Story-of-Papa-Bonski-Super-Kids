@@ -109,6 +109,7 @@ export async function sendMetaPurchase(input: MetaPurchaseInput): Promise<MetaPu
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!response.ok) {
