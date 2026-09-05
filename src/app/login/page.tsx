@@ -19,7 +19,7 @@ export default async function LoginPage({
         <Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={112} height={112} className="mx-auto rounded-3xl" />
         <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">Login Member</p>
         <h1 className="mt-2 text-3xl font-extrabold">Masuk ke {brand.name}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-ink-soft">Masukkan Email Penerima yang didaftarkan sebelum checkout. Kami akan mengirim kode OTP 6 digit ke email tersebut untuk masuk.</p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-soft">Gunakan Email Penerima yang didaftarkan sebelum checkout. Pada login pertama, isi juga Nama Penerima yang ingin ditampilkan di Papa Bonski, lalu kami kirim kode OTP 6 digit ke email tersebut.</p>
       </div>
       <LoginForm initialEmail={params.email || ""} nextPath="/app" />
       <p className="mt-5 text-center text-xs text-ink-soft">Belum membeli? <Link className="font-extrabold text-brand-primary hover:underline" href="/">Lihat Papa Bonski</Link></p>
