@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const DEFAULT_PIXEL_ID = "1717292549605992";
+const DEFAULT_DATASET_ID = "1039294515626493";
 
 export async function GET() {
   if (process.env.VERCEL_ENV !== "preview") {
@@ -11,21 +11,21 @@ export async function GET() {
   }
 
   const accessToken = String(process.env.META_CONVERSIONS_API_TOKEN || "").trim();
-  const pixelId = String(
-    process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID || DEFAULT_PIXEL_ID
+  const datasetId = String(
+    process.env.META_CAPI_DATASET_ID || process.env.META_DATASET_ID || DEFAULT_DATASET_ID
   ).trim();
 
-  if (!accessToken || !pixelId) {
+  if (!accessToken || !datasetId) {
     return NextResponse.json({
       ok: false,
       configured: false,
       tokenConfigured: Boolean(accessToken),
-      pixelConfigured: Boolean(pixelId),
+      datasetConfigured: Boolean(datasetId),
     }, { status: 503 });
   }
 
   const version = String(process.env.META_GRAPH_API_VERSION || "v21.0").trim();
-  const endpoint = `https://graph.facebook.com/${version}/${encodeURIComponent(pixelId)}/events?access_token=${encodeURIComponent(accessToken)}`;
+  const endpoint = `https://graph.facebook.com/${version}/${encodeURIComponent(datasetId)}/events?access_token=${encodeURIComponent(accessToken)}`;
   const eventId = `pb-capi-preview-${Date.now()}`;
 
   try {
