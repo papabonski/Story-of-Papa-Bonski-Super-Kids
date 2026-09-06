@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 const DEFAULT_DATASET_ID = "1039294515626493";
+const DEFAULT_EVENT_SOURCE_ORIGIN = "https://www.papabonski.com";
 
 type Attribution = {
   fbclid?: string | null;
@@ -40,16 +41,17 @@ function unixSeconds(value?: string | null) {
 
 function eventSourceUrl(attribution?: Attribution | null) {
   const explicit = String(process.env.META_EVENT_SOURCE_URL || "").trim();
-  if (explicit) return explicit;
-
-  const host = String(process.env.VERCEL_PROJECT_PRODUCTION_URL || "").trim();
-  if (!host) return undefined;
-
+  const origin = explicit || DEFAULT_EVENT_SOURCE_ORIGIN;
   const rawPath = attribution?.landing_path ?? attribution?.landingPath ?? "/super-kids";
   const path = String(rawPath || "/super-kids").startsWith("/")
     ? String(rawPath || "/super-kids")
     : `/${String(rawPath)}`;
-  return `https://${host}${path}`;
+
+  try {
+    return new URL(path, origin.endsWith("/") ? origin : `${origin}/`).toString();
+  } catch {
+    return `${DEFAULT_EVENT_SOURCE_ORIGIN}${path}`;
+  }
 }
 
 /**
