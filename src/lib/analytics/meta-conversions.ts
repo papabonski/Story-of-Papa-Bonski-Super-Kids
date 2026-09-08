@@ -57,10 +57,10 @@ function eventSourceUrl(attribution?: Attribution | null) {
 /**
  * Sends a real paid OrderHero order to Meta Conversions API.
  *
- * Browser tracking and direct CAPI use different Meta object IDs in this
- * account, so this sender intentionally targets the Dataset ID rather than the
- * browser Pixel ID. Commerce processing must never depend on Meta availability.
- * The stable event_id makes webhook retries safe for Meta deduplication.
+ * Browser tracking and direct CAPI target the same Meta dataset so the complete
+ * funnel is visible in one data source. Commerce processing must never depend
+ * on Meta availability. The stable event_id makes webhook retries safe for
+ * Meta deduplication.
  */
 export async function sendMetaPurchase(input: MetaPurchaseInput): Promise<MetaPurchaseResult> {
   const accessToken = String(process.env.META_CONVERSIONS_API_TOKEN || "").trim();
