@@ -443,6 +443,19 @@ export async function POST(req: Request) {
     // package for an already-active recipient remains a business exception.
     if(activeSub?.id){
       if(activeSub.source_order_id===order.id){
+        // Retry Meta independently from commerce activation. The stable
+        // OrderHero-based event_id lets Meta deduplicate a previous success,
+        // while a previous timeout/failure gets another delivery attempt.
+        const metaCapi=await sendMetaPurchase({
+          externalOrderId:String(n.externalOrderId),
+          buyerEmail:n.email,
+          amount:n.amount,
+          currency:n.currency,
+          productSku,
+          paidAt:n.paidAt,
+          attribution,
+        });
+
         await db.from("webhook_events").update({
           status:"processed",
           processed_at:new Date().toISOString(),
@@ -453,7 +466,8 @@ export async function POST(req: Request) {
             planCode,
             recipientEmail,
             accessExpiresAt:activeSub.expires_at,
-            duplicate:true
+            duplicate:true,
+            metaCapi
           }
         }).eq("id",event.id);
         if(intent?.id){
@@ -463,7 +477,12 @@ export async function POST(req: Request) {
             external_order_id:n.externalOrderId
           }).eq("id",intent.id);
         }
-        return NextResponse.json({ok:true,duplicate:true,orderId:order.id});
+        return NextResponse.json({
+          ok:true,
+          duplicate:true,
+          orderId:order.id,
+          metaCapi:{configured:metaCapi.configured,ok:metaCapi.ok,status:metaCapi.status}
+        });
       }
 
       await db.from("webhook_events").update({
