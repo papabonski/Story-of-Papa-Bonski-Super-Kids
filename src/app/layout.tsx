@@ -5,7 +5,9 @@ import { getRuntimeBrand } from "@/lib/white-label/settings";
 import PwaRegister from "@/components/pwa/PwaRegister";
 import Script from "next/script";
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1717292549605992";
+// Keep browser events on the same Meta dataset used by the Purchase CAPI.
+// The public env var remains available for white-label deployments.
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1039294515626493";
 
 export async function generateMetadata(): Promise<Metadata> {
   const runtimeBrand = await getRuntimeBrand();
