@@ -55,20 +55,11 @@ export default async function SuperKids(){
           </div>
         </div>
 
-        <div className="rounded-[2.5rem] bg-surface-card p-5 shadow-xl ring-1 ring-black/5">
-          <div className="rounded-[2rem] bg-gradient-to-br from-brand-primary/15 to-brand-accent/25 p-6 sm:p-7">
-            <div className="mx-auto max-w-sm rounded-3xl bg-white p-6 shadow-lg">
-              <p className="text-xs font-black uppercase tracking-wider text-brand-primary">Paket Super Kids 1</p>
-              <h2 className="mt-2 text-4xl font-extrabold">Rp50.000</h2>
-              <p className="mt-1 text-sm font-bold text-ink-soft">2 cerita personal + akses 1 tahun</p>
-              <div className="mt-5 space-y-3 text-sm">
-                {["Cerita bergambar personal","Audio narasi","Moral, doa & panduan orang tua","Koleksi cerita untuk dibaca ulang","Bonus English Learning"].map(item=>
-                  <div key={item} className="flex gap-2"><span>✅</span><span className="font-semibold">{item}</span></div>
-                )}
-              </div>
-              <CheckoutButton label="Beli Papa Bonski Super Kids" className="mt-6 block rounded-2xl bg-brand-primary px-4 py-3 text-center font-extrabold text-white"/>
-              <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-faint">Bisa untuk anak sendiri atau sebagai hadiah. Email Pembeli dan Email Penerima boleh berbeda.</p>
-            </div>
+        <div className="overflow-hidden rounded-[2.5rem] bg-surface-card p-3 shadow-xl ring-1 ring-black/5 sm:p-5">
+          <Image src="/landing/contoh-cerita-sheilla.webp" alt="Contoh cerita personal Sheilla dengan ilustrasi dan audio narasi" width={1400} height={677} priority className="h-auto w-full rounded-[1.75rem]"/>
+          <div className="px-3 pb-2 pt-4 text-center">
+            <p className="text-sm font-extrabold">Contoh hasil cerita personal</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-soft">Ilustrasi, teks, dan audio narasi dinikmati dalam satu pengalaman.</p>
           </div>
         </div>
       </div>
@@ -106,6 +97,28 @@ export default async function SuperKids(){
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">Nama, usia, foto, karakter, dan pilihan tema digunakan untuk membantu membuat cerita lebih personal. Teks dapat direview sebelum ilustrasi dan audio dibuat.</p>
             <div className="mt-5 rounded-2xl bg-surface p-4 text-sm font-semibold">📖 Flipbook · 🎧 Audio · 🎨 Ilustrasi · 💛 Moral & doa</div>
           </div>
+        </div>
+        <div className="mx-auto mt-6 max-w-5xl overflow-hidden rounded-[2rem] bg-surface-card p-3 shadow-lg ring-1 ring-black/5 sm:p-5">
+          <Image src="/landing/contoh-cerita-sheilla.webp" alt="Halaman cerita personal Mata Cantik Sheilla yang Ingin Melek" width={1400} height={677} className="h-auto w-full rounded-[1.4rem]"/>
+          <p className="px-3 pb-2 pt-4 text-center text-sm font-semibold text-ink-soft">Contoh “Mata Cantik Sheilla yang Ingin Melek” — anak menjadi bagian dari cerita yang dekat dengan kesehariannya.</p>
+        </div>
+      </div>
+    </section>
+
+    <section className="bg-white/70 px-5 py-16">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Lebih dari sekadar mengganti nama</p>
+        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Orang tua memilih profil dan momen, lalu tetap memegang kendali atas ceritanya.</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center leading-relaxed text-ink-soft">Nama, usia, karakter, foto, dan situasi yang sedang dekat dengan anak menjadi bahan personalisasi. Teks dapat direview sebelum ilustrasi dan audio dibuat.</p>
+        <div className="mt-9 grid gap-5 lg:grid-cols-3">
+          {[
+            ["/landing/profil-anak.webp","1. Buat profil anak","Masukkan informasi yang membantu cerita terasa lebih dekat dengan dunia anak.","Tampilan pembuatan profil anak"],
+            ["/landing/review-cerita.webp","2. Review ceritanya","Baca dan perbaiki teks terlebih dahulu sebelum gambar dan audio diproses.","Tampilan review teks cerita"],
+            ["/landing/contoh-cerita-sheilla.webp","3. Baca dan dengarkan","Nikmati cerita bergambar, teks, dan audio narasi bersama anak.","Tampilan hasil cerita bergambar dan audio"],
+          ].map(([src,title,desc,alt])=><article key={title} className="overflow-hidden rounded-[2rem] bg-surface-card shadow-sm ring-1 ring-black/5">
+            <Image src={src} alt={alt} width={1200} height={720} className="aspect-[16/10] w-full object-cover object-top"/>
+            <div className="p-5"><h3 className="text-lg font-extrabold">{title}</h3><p className="mt-2 text-sm leading-relaxed text-ink-soft">{desc}</p></div>
+          </article>)}
         </div>
       </div>
     </section>
