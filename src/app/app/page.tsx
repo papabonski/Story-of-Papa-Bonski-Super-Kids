@@ -18,7 +18,7 @@ export default async function CustomerAppPage() {
   const quotaExhausted = Boolean(quota && quota.remaining <= 0);
 
   return <main className="min-h-[100dvh] bg-surface px-5 py-8 text-ink"><div className="mx-auto max-w-3xl">
-    <header className="flex items-center gap-3"><Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={64} height={64} className="rounded-2xl"/><div><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand-primary">Papa Bonski Member</p><h1 className="text-2xl font-extrabold">Halo, {access.customerName} 👋</h1></div></header>
+    <header className="flex items-center gap-3"><Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={64} height={64} className="rounded-2xl"/><div className="min-w-0"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand-primary">Papa Bonski Member</p><h1 className="text-2xl font-extrabold">Halo! 👋</h1><p className="mt-0.5 truncate text-sm font-semibold text-ink-soft" title={access.email}>Masuk sebagai {access.email}</p></div></header>
 
     <div className="mt-6 rounded-[2rem] bg-surface-card p-6 shadow-lg ring-1 ring-black/[0.05]"><h2 className="text-xl font-extrabold">Apa yang ingin dilakukan hari ini?</h2><div className="mt-5 grid gap-3 sm:grid-cols-2">
       <Link href="/create" className={`rounded-2xl p-5 font-extrabold shadow-sm ${quotaExhausted ? "bg-red-50 text-red-800 ring-1 ring-red-100" : "bg-brand-primary text-white"}`}>{quotaExhausted ? "🔒 Kuota Cerita Habis" : "✨ Buat Cerita Personal"}<div className={`mt-1 text-xs font-semibold ${quotaExhausted ? "text-red-700/80" : "opacity-80"}`}>{quotaExhausted ? "Tambah kuota untuk membuat cerita baru." : "Buat cerita sesuai profil dan kebutuhan anak."}</div></Link>
