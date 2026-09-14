@@ -85,7 +85,7 @@ export default async function SuperKids(){
           </div>
           <a href="#harga" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-extrabold text-brand-primary shadow-sm ring-1 ring-black/5">
             <span aria-hidden="true">☕</span>
-            <span>1 cerita personal seharga secangkir kopi</span>
+            <span>Seharga secangkir kopi saja</span>
           </a>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-ink-soft">
             <span>✓ 1 cerita personal</span><span>✓ Kuota tidak kedaluwarsa</span><span>✓ Login dengan OTP email</span>
@@ -233,9 +233,9 @@ export default async function SuperKids(){
     <section id="harga" className="scroll-mt-6 bg-brand-primary px-5 py-16 text-white">
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-black uppercase tracking-widest opacity-80">Seharga secangkir kopi ☕</p>
+          <p className="text-sm font-black uppercase tracking-widest opacity-80">Seharga secangkir kopi saja ☕</p>
           <h2 className="mt-3 text-4xl font-extrabold">Mulai dari satu cerita yang benar-benar tentang si kecil.</h2>
-          <p className="mx-auto mt-4 max-w-2xl opacity-90">Satu cangkir kopi mungkin habis hari ini. Cerita personal si kecil dapat dibaca dan didengarkan kembali bersama Bunda.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed opacity-90">Secangkir kopi memang nikmat, tetapi habis dalam sekejap. Cerita unik tentang si kecil bisa bertahan lebih lama—dibaca dan didengarkan kembali bersama keluarga.</p>
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -314,7 +314,7 @@ export default async function SuperKids(){
 
     <section className="px-5 pb-20 pt-8">
       <div className="mx-auto max-w-3xl rounded-[2.5rem] bg-gradient-to-br from-brand-accent/35 to-white p-7 text-center ring-1 ring-black/5 sm:p-10">
-        <p className="text-sm font-black uppercase tracking-widest text-brand-primary">Nilai apa yang ingin Bunda sampaikan?</p>
+        <p className="text-sm font-black uppercase tracking-widest text-brand-primary">Seharga secangkir kopi saja ☕</p>
         <h2 className="mt-3 text-3xl font-extrabold">Buat nasihat Bunda menjadi cerita milik si kecil.</h2>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">Mulai dengan satu cerita personal. Jadikan si kecil tokoh utama, lalu dampingi ia menemukan pelajarannya melalui kisah yang dekat dengan kehidupannya.</p>
         <CheckoutButton label="Buat 1 Cerita — Rp25.000" className="mt-7 inline-flex rounded-full bg-brand-primary px-7 py-4 font-extrabold text-white shadow-lg"/>
