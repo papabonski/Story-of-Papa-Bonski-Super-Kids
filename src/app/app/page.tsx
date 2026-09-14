@@ -42,11 +42,11 @@ export default async function CustomerAppPage() {
             <p className="text-sm font-bold">Kuota sudah habis. Tambah kuota sekarang:</p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-3" className="rounded-2xl bg-white px-4 py-4 text-center ring-1 ring-red-200 transition active:scale-95">
-                <span className="block font-extrabold text-brand-primary">+3 Cerita</span>
+                <span className="block font-extrabold text-brand-primary">Paket Nambah · +3 Cerita</span>
                 <span className="mt-1 block text-xs font-bold text-ink-soft">Rp60.000</span>
               </a>
               <a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-8" className="rounded-2xl bg-brand-primary px-4 py-4 text-center text-white transition active:scale-95">
-                <span className="block font-extrabold">+8 Cerita</span>
+                <span className="block font-extrabold">Paket Rame-Rame · +8 Cerita</span>
                 <span className="mt-1 block text-xs font-bold text-white/90">Rp120.000 · Lebih hemat</span>
               </a>
             </div>
