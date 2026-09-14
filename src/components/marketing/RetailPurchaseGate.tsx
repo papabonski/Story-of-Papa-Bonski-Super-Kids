@@ -277,23 +277,23 @@ function TopupChoices({
     <button type="button" disabled={disabled} onClick={onThree} className="block w-full rounded-3xl bg-surface-card p-5 text-left shadow-sm ring-2 ring-emerald-200 hover:ring-emerald-400 disabled:opacity-60">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-extrabold text-ink">Tambah 3 Cerita</p>
+          <p className="font-extrabold text-ink">Paket Nambah · +3 Cerita</p>
           <p className="mt-1 text-sm text-ink-soft">Rp20.000 per cerita · kuota tidak kedaluwarsa.</p>
         </div>
         <b className="whitespace-nowrap text-emerald-700">Rp60.000</b>
       </div>
-      <div className="mt-4 rounded-2xl bg-emerald-600 px-4 py-3 text-center font-extrabold text-white">Pilih +3 Cerita</div>
+      <div className="mt-4 rounded-2xl bg-emerald-600 px-4 py-3 text-center font-extrabold text-white">Pilih Paket Nambah</div>
     </button>
 
     <button type="button" disabled={disabled} onClick={onEight} className="block w-full rounded-3xl bg-surface-card p-5 text-left shadow-sm ring-1 ring-black/5 hover:ring-brand-primary/40 disabled:opacity-60">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-extrabold text-ink">Tambah 8 Cerita</p>
+          <p className="font-extrabold text-ink">Paket Rame-Rame · +8 Cerita</p>
           <p className="mt-1 text-sm text-ink-soft">Paling hemat · Rp15.000 per cerita.</p>
         </div>
         <b className="whitespace-nowrap text-brand-primary">Rp120.000</b>
       </div>
-      <div className="mt-4 rounded-2xl bg-brand-primary px-4 py-3 text-center font-extrabold text-white">Pilih +8 Cerita</div>
+      <div className="mt-4 rounded-2xl bg-brand-primary px-4 py-3 text-center font-extrabold text-white">Pilih Paket Rame-Rame</div>
     </button>
   </>;
 }
