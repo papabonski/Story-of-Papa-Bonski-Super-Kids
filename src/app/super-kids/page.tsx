@@ -16,6 +16,39 @@ const benefits=[
   "Bonus video pembelajaran Bahasa Inggris",
 ];
 
+const parentConcerns=[
+  {
+    icon:"📱",
+    hook:"Gadget selalu jadi rebutan?",
+    concern:"Saat layar dimatikan, anak sulit beralih ke kegiatan lain atau cepat kesal.",
+    solution:"Jadikan screen time sebagai tema cerita. Anak diajak melihat kebiasaan layar melalui dirinya sendiri sebagai tokoh utama, lalu orang tua dapat memasukkan batas dan pesan yang ingin dibicarakan.",
+  },
+  {
+    icon:"💛",
+    hook:"Anak masih sulit mengelola emosi?",
+    concern:"Marah, sulit menunggu giliran, enggan berbagi, atau belum nyaman beradaptasi dengan teman.",
+    solution:"Pilih situasi yang sedang dialami anak dan tuangkan respons yang ingin dilatih ke dalam cerita. Cerita menjadi pembuka percakapan yang lebih dekat, bukan ceramah satu arah.",
+  },
+  {
+    icon:"🌟",
+    hook:"Anak mudah minder atau takut mencoba?",
+    concern:"Ia mulai membandingkan diri, bergantung pada pujian, atau ragu pada kemampuannya sendiri.",
+    solution:"Tempatkan anak sebagai tokoh utama yang belajar mencoba, mengenali kekuatannya, dan merasa aman dicintai. Anda dapat mereview setiap bagian sebelum ilustrasi dan audio dibuat.",
+  },
+  {
+    icon:"🥦",
+    hook:"Waktu makan dan tidur jadi perjuangan?",
+    concern:"Pilih-pilih makanan, sulit tidur teratur, atau kurang tertarik pada kebiasaan sehat.",
+    solution:"Ubah rutinitas makan, tidur, dan bergerak menjadi petualangan personal. Pesan keluarga hadir dalam pengalaman yang bisa dibaca dan didengarkan bersama.",
+  },
+  {
+    icon:"🛡️",
+    hook:"Bagaimana saat Anda tidak selalu di sisinya?",
+    concern:"Sekolah, teman, bullying, dan pengaruh luar membuat orang tua ingin membekali anak dengan pegangan yang kuat.",
+    solution:"Tuangkan nilai seperti jujur, berani berkata tidak, sopan, berempati, dan meminta bantuan ke dalam cerita yang dekat dengan dunianya.",
+  },
+];
+
 export default async function SuperKids(){
   const brand=await getRuntimeBrand();
   return <main className="min-h-screen bg-surface pb-20 text-ink md:pb-0">
@@ -75,7 +108,31 @@ export default async function SuperKids(){
       </div>
     </section>
 
-    <section id="cara-kerja" className="px-5 py-16">
+    <section className="px-5 py-16">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Yang sering membuat ibu khawatir</p>
+        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Nilai yang ingin Anda tanamkan bisa dimulai dari cerita yang dekat dengannya.</h2>
+        <p className="mx-auto mt-4 max-w-2xl text-center leading-relaxed text-ink-soft">Papa Bonski membantu mengubah momen keseharian menjadi bahan percakapan antara orang tua dan anak. Anda memilih pesannya, anak menjadi tokoh utamanya.</p>
+        <div className="mt-9 grid gap-5 md:grid-cols-2">
+          {parentConcerns.map((item,index)=><article key={item.hook} className={`rounded-[2rem] bg-surface-card p-6 shadow-sm ring-1 ring-black/5 sm:p-7 ${index===parentConcerns.length-1?"md:col-span-2 md:mx-auto md:max-w-[calc(50%-0.625rem)]":""}`}>
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-accent/25 text-2xl">{item.icon}</div>
+              <div>
+                <h3 className="text-xl font-extrabold">{item.hook}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{item.concern}</p>
+              </div>
+            </div>
+            <div className="mt-5 rounded-2xl bg-brand-primary/5 p-4">
+              <p className="text-xs font-black uppercase tracking-wider text-brand-primary">Bagaimana Papa Bonski membantu</p>
+              <p className="mt-2 text-sm font-semibold leading-relaxed">{item.solution}</p>
+            </div>
+          </article>)}
+        </div>
+        <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-relaxed text-ink-faint">Papa Bonski adalah media cerita dan pendamping percakapan keluarga, bukan pengganti bantuan profesional apabila anak mengalami masalah yang membutuhkan penanganan khusus.</p>
+      </div>
+    </section>
+
+    <section id="cara-kerja" className="bg-white/70 px-5 py-16">
       <div className="mx-auto max-w-6xl">
         <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Cerita yang dekat dengan kehidupan si kecil</p>
         <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Tuangkan nilai-nilai hidup Anda melalui momen yang sedang dekat dengannya.</h2>
