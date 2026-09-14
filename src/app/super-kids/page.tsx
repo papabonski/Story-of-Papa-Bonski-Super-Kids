@@ -74,7 +74,7 @@ export default async function SuperKids(){
           </p>
 
           <div className="mt-7 grid gap-2 text-sm font-bold sm:grid-cols-2">
-            {["Anak menjadi tokoh utama","Cerita sesuai momen hari ini","Ilustrasi + audio narasi","Moral, doa & panduan orang tua"].map(item=>
+            {["Anak menjadi tokoh utama","Cerita sesuai momen hari ini","Ilustrasi + audio narasi","Nilai pilihan Bunda"].map(item=>
               <div key={item} className="flex items-center gap-2"><span className="text-emerald-600">✓</span><span>{item}</span></div>
             )}
           </div>
