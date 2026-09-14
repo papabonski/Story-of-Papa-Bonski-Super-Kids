@@ -18,7 +18,7 @@ on conflict(order_id) do nothing;
 
 update public.plans
 set
-  name = 'Cerita Pertama',
+  name = 'Paket Cobain',
   duration_days = null,
   story_limit = 1,
   metadata = coalesce(metadata, '{}'::jsonb) || '{"app_access":true,"quota_expires":false}'::jsonb
