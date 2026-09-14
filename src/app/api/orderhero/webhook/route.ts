@@ -6,9 +6,15 @@ import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } fr
 export const runtime = "nodejs";
 
 const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
-const STORY_TOPUPS: Record<string, { credits: number; name: string }> = {
-  "PBSK-STORY-CREDIT-3": { credits: 3, name: "Papa Bonski - Tambah 3 Cerita" },
-  "PBSK-STORY-CREDIT-8": { credits: 8, name: "Papa Bonski - Tambah 8 Cerita" },
+const STORY_TOPUPS: Record<string, { credits: number; names: string[] }> = {
+  "PBSK-STORY-CREDIT-3": {
+    credits: 3,
+    names: ["Papa Bonski - Paket Nambah", "Papa Bonski - Tambah 3 Cerita"],
+  },
+  "PBSK-STORY-CREDIT-8": {
+    credits: 8,
+    names: ["Papa Bonski - Paket Rame-rame", "Papa Bonski - Tambah 8 Cerita"],
+  },
 };
 
 function safeHeaders(req:Request){
@@ -77,10 +83,10 @@ export async function POST(req: Request) {
     const normalizedName = String(n.productName || "").trim().toLowerCase();
     const topupEntry =
       STORY_TOPUPS[normalizedSku] ??
-      Object.entries(STORY_TOPUPS).find(([, item]) => item.name.toLowerCase() === normalizedName)?.[1];
+      Object.entries(STORY_TOPUPS).find(([, item]) => item.names.some((name) => name.toLowerCase() === normalizedName))?.[1];
     const topupSku =
       STORY_TOPUPS[normalizedSku] ? normalizedSku :
-      Object.entries(STORY_TOPUPS).find(([, item]) => item.name.toLowerCase() === normalizedName)?.[0];
+      Object.entries(STORY_TOPUPS).find(([, item]) => item.names.some((name) => name.toLowerCase() === normalizedName))?.[0];
     const topupCredits = topupEntry?.credits ?? 0;
 
     let productSku=n.productSku || (topupSku || "PBSK-SUPER-KIDS");
@@ -487,7 +493,7 @@ export async function POST(req: Request) {
 
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:"Recipient email already has an active Paket Super Kids 1. Choose story top-up or a different recipient email.",
+        error:"Recipient email already has an active Paket Cobain. Choose story top-up or a different recipient email.",
         processed_at:new Date().toISOString(),
         normalized:{
           ...n,
