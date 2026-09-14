@@ -83,6 +83,10 @@ export default async function SuperKids(){
             <a href="#kekhawatiran-bunda" className="btn-primary text-center">Pelajari Cara Kerjanya</a>
             <CheckoutButton label="Buat Cerita Pertama — Rp25.000" className="btn-secondary text-center"/>
           </div>
+          <a href="#harga" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-extrabold text-brand-primary shadow-sm ring-1 ring-black/5">
+            <span aria-hidden="true">☕</span>
+            <span>1 cerita personal seharga secangkir kopi</span>
+          </a>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-ink-soft">
             <span>✓ 1 cerita personal</span><span>✓ Kuota tidak kedaluwarsa</span><span>✓ Login dengan OTP email</span>
           </div>
