@@ -433,7 +433,7 @@ export async function POST(req: Request) {
       .select("id,expires_at,source_order_id")
       .eq("customer_id",customerId)
       .eq("status","active")
-      .gt("expires_at",nowIso)
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order("expires_at",{ascending:false})
       .limit(1)
       .maybeSingle();
@@ -523,7 +523,9 @@ export async function POST(req: Request) {
       .maybeSingle();
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
 
-    const expires=new Date(Date.now()+(plan.duration_days||365)*86400000).toISOString();
+    const expires=plan.duration_days
+      ? new Date(Date.now()+plan.duration_days*86400000).toISOString()
+      : null;
     let accessExpiresAt=expires;
 
     const existingSub=await db.from("subscriptions")

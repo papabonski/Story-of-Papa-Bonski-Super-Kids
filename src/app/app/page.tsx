@@ -43,7 +43,7 @@ export default async function CustomerAppPage() {
             <div className="mt-3 grid grid-cols-2 gap-3">
               <a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-3" className="rounded-2xl bg-white px-4 py-4 text-center ring-1 ring-red-200 transition active:scale-95">
                 <span className="block font-extrabold text-brand-primary">+3 Cerita</span>
-                <span className="mt-1 block text-xs font-bold text-ink-soft">Rp50.000</span>
+                <span className="mt-1 block text-xs font-bold text-ink-soft">Rp60.000</span>
               </a>
               <a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-8" className="rounded-2xl bg-brand-primary px-4 py-4 text-center text-white transition active:scale-95">
                 <span className="block font-extrabold">+8 Cerita</span>
@@ -59,7 +59,7 @@ export default async function CustomerAppPage() {
     )}
 
     <div className="mt-5"><PwaInstallPrompt /></div>
-    <div className="mt-5 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05]">Status akun: <b className="text-emerald-700">Aktif</b>{access.expiresAt ? <> · Masa akses sampai <b className="text-ink">{new Date(access.expiresAt).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}</b></> : null}</div>
+    <div className="mt-5 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05]">Status akun: <b className="text-emerald-700">Aktif</b> · Kuota cerita tidak kedaluwarsa</div>
   </div></main>;
 }
 

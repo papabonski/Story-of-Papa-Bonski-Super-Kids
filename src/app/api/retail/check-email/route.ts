@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       .eq("customer_id", customer.id)
       .eq("status", "active")
       .eq("plans.code", "PBSK-PREMIUM-1Y")
-      .gt("expires_at", now)
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
       .order("expires_at", { ascending: false })
       .limit(1)
       .maybeSingle();

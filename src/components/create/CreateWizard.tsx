@@ -259,7 +259,7 @@ export default function CreateWizard({
                   className="rounded-card bg-white px-3 py-3 text-center ring-1 ring-red-200 transition active:scale-95"
                 >
                   <span className="block text-sm font-extrabold text-brand-primary">+3 Cerita</span>
-                  <span className="block text-xs font-bold text-ink-soft">Rp50.000</span>
+                  <span className="block text-xs font-bold text-ink-soft">Rp60.000</span>
                 </a>
                 <a
                   href={STORY_TOPUP_8_URL}

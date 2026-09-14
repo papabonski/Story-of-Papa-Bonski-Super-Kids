@@ -7,8 +7,8 @@ import CheckoutButton from "@/components/marketing/CheckoutButton";
 export const dynamic="force-dynamic";
 
 const benefits=[
-  "Akses Papa Bonski Super Kids selama 1 tahun",
-  "Termasuk 2 cerita personal",
+  "Termasuk 1 cerita personal",
+  "Kuota cerita tidak kedaluwarsa",
   "Nama, usia, foto & karakter anak menjadi bahan personalisasi",
   "Ilustrasi personal + audio narasi",
   "Moral, doa & panduan orang tua",
@@ -52,7 +52,7 @@ const parentConcerns=[
 export default async function SuperKids(){
   const brand=await getRuntimeBrand();
   return <main className="min-h-screen bg-surface pb-20 text-ink md:pb-0">
-    <FunnelTracker event="ViewContent" product="PBSK-SUPER-KIDS" value={50000}/>
+    <FunnelTracker event="ViewContent" product="PBSK-SUPER-KIDS" value={25000}/>
 
     <header className="px-5 py-5">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
@@ -81,10 +81,10 @@ export default async function SuperKids(){
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <a href="#cara-kerja" className="btn-primary text-center">Pelajari Selengkapnya</a>
-            <CheckoutButton label="Dapatkan 2 Cerita — Rp50.000" className="btn-secondary text-center"/>
+            <CheckoutButton label="Buat Cerita Pertama — Rp25.000" className="btn-secondary text-center"/>
           </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-ink-soft">
-            <span>✓ Akses 1 tahun</span><span>✓ Login dengan OTP email</span><span>✓ Tidak wajib install Play Store</span>
+            <span>✓ 1 cerita personal</span><span>✓ Kuota tidak kedaluwarsa</span><span>✓ Login dengan OTP email</span>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ export default async function SuperKids(){
           <div>
             <p className="text-sm font-black uppercase tracking-widest text-brand-primary">Yang Didapat</p>
             <h2 className="mt-2 text-3xl font-extrabold">Satu paket untuk mulai membangun kebiasaan membaca yang lebih personal.</h2>
-            <p className="mt-4 leading-relaxed text-ink-soft">Paket awal memberi 2 cerita personal. Jika nanti membutuhkan cerita tambahan, top-up tersedia dari akun member yang sudah login.</p>
+            <p className="mt-4 leading-relaxed text-ink-soft">Paket awal memberi 1 cerita personal. Jika nanti membutuhkan cerita tambahan, tersedia Paket Bertumbuh +3 cerita dan Paket Keluarga +8 cerita dari akun member yang sudah login.</p>
           </div>
           <div className="space-y-3">
             {benefits.map(b=><div key={b} className="flex gap-3 rounded-2xl bg-surface-card p-4 ring-1 ring-black/5"><span>✅</span><span className="font-bold">{b}</span></div>)}
@@ -220,8 +220,8 @@ export default async function SuperKids(){
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-black uppercase tracking-widest opacity-80">Mulai dari cerita pertama</p>
         <h2 className="mt-3 text-4xl font-extrabold">Tuangkan nilai-nilai hidup Anda dalam cerita si kecil.</h2>
-        <p className="mx-auto mt-4 max-w-xl opacity-90">Dapatkan 2 cerita personal bergambar dan audio, dengan akses selama 1 tahun, hanya Rp50.000.</p>
-        <CheckoutButton label="Dapatkan 2 Cerita — Rp50.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
+        <p className="mx-auto mt-4 max-w-xl opacity-90">Dapatkan 1 cerita personal bergambar dan audio. Kuota tidak kedaluwarsa, hanya Rp25.000.</p>
+        <CheckoutButton label="Buat Cerita Pertama — Rp25.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
       </div>
     </section>
 
@@ -230,11 +230,11 @@ export default async function SuperKids(){
         <h2 className="text-center text-2xl font-extrabold">Pertanyaan yang sering ditanyakan</h2>
         <div className="mt-6 space-y-3">
           {[
-            ["Apa yang saya dapat setelah membeli?","Akses Papa Bonski Super Kids selama 1 tahun dan kuota awal 2 cerita personal, termasuk ilustrasi, audio narasi, moral, doa, panduan orang tua, koleksi, dan bonus English Learning."],
+            ["Apa yang saya dapat setelah membeli?","Kuota awal 1 cerita personal, termasuk ilustrasi, audio narasi, moral, doa, panduan orang tua, koleksi, dan bonus English Learning. Kuota cerita tidak kedaluwarsa."],
             ["Email Penerima itu apa?","Email Penerima adalah email yang memiliki akses Papa Bonski dan selalu digunakan untuk login OTP. Jika membeli untuk diri sendiri, Email Pembeli dan Email Penerima boleh sama."],
             ["Bisa dibelikan untuk orang lain?","Bisa. Tentukan Email Penerima milik orang tua atau wali yang akan menggunakan Papa Bonski. Email Pembeli di OrderHero boleh berbeda."],
             ["Apa yang terjadi setelah pembayaran?","Setelah pembayaran terverifikasi, paket otomatis diaktifkan untuk Email Penerima. Pemilik akses kemudian login dengan kode OTP 6 digit."],
-            ["Kalau 2 cerita sudah terpakai?","Pemilik akun dapat login lalu membeli tambahan +3 atau +8 cerita. Top-up masuk otomatis ke akun yang sedang login."],
+            ["Kalau cerita pertama sudah terpakai?","Pemilik akun dapat login lalu membeli Paket Bertumbuh +3 cerita seharga Rp60.000 atau Paket Keluarga +8 cerita seharga Rp120.000. Top-up masuk otomatis ke akun yang sedang login."],
             ["Apakah harus install dari Play Store?","Tidak. Papa Bonski dapat digunakan langsung dari browser dan juga dapat dipasang ke layar utama HP atau tablet."],
           ].map(([q,a])=>
             <details key={q} className="rounded-2xl bg-surface-card p-5 ring-1 ring-black/5">
@@ -248,7 +248,7 @@ export default async function SuperKids(){
 
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
       <div className="mx-auto flex max-w-lg items-center gap-3">
-        <div className="min-w-0 flex-1"><b className="block text-sm">2 cerita + akses 1 tahun</b><span className="text-xs text-ink-soft">Rp50.000</span></div>
+        <div className="min-w-0 flex-1"><b className="block text-sm">1 cerita personal</b><span className="text-xs text-ink-soft">Rp25.000 · kuota tidak kedaluwarsa</span></div>
         <CheckoutButton label="Mulai" className="rounded-full bg-brand-primary px-6 py-3 text-sm font-extrabold text-white"/>
       </div>
     </div>

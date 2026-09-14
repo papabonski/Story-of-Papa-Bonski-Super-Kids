@@ -38,7 +38,7 @@ export default async function OnboardingPage() {
         <div className="rounded-2xl bg-white p-4 ring-1 ring-black/[0.05]"><div className="text-xs font-bold text-ink-faint">ID Member</div><div className="mt-1 font-extrabold">{access.customerCode}</div></div>
         <div className="rounded-2xl bg-white p-4 ring-1 ring-black/[0.05]"><div className="text-xs font-bold text-ink-faint">Status Akun</div><div className="mt-1 font-extrabold text-emerald-700">Aktif</div></div>
       </div>
-      {access.expiresAt ? <p className="mt-3 text-xs text-ink-faint">Masa akses sampai {new Date(access.expiresAt).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}.</p> : null}
+      <p className="mt-3 text-xs text-ink-faint">Kuota cerita Anda tidak kedaluwarsa.</p>
       <div className="mt-6 flex flex-col gap-3"><Link href="/app" className="btn-primary w-full">Mulai Menggunakan Papa Bonski →</Link><Link href="/install" className="btn-secondary w-full">📲 Install di HP / Tablet</Link></div>
     </div>
   </div></main>;

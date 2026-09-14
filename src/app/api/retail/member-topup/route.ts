@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       .select("id")
       .eq("customer_id", customer.id)
       .eq("status", "active")
-      .gt("expires_at", nowIso)
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order("expires_at", { ascending: false })
       .limit(1)
       .maybeSingle();

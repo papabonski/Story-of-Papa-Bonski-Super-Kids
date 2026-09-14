@@ -65,7 +65,7 @@ function QuotaTopupPanel({ quota }: { quota: { limit: number; used: number; rema
               className="rounded-2xl bg-white px-3 py-4 text-center ring-1 ring-black/[0.08] transition active:scale-95"
             >
               <span className="block text-base font-extrabold text-brand-primary">+3 Cerita</span>
-              <span className="mt-1 block text-xs font-bold text-ink-soft">Rp50.000</span>
+              <span className="mt-1 block text-xs font-bold text-ink-soft">Rp60.000</span>
             </a>
             <a
               href={STORY_TOPUP_8_URL}
