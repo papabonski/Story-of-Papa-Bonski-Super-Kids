@@ -34,10 +34,10 @@ export default async function SuperKids(){
     <section className="px-5 pb-14 pt-6 sm:pt-10">
       <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[1.08fr_.92fr]">
         <div>
-          <span className="inline-flex rounded-full bg-brand-accent/40 px-4 py-2 text-xs font-black uppercase tracking-wider">Cerita Personal untuk Anak</span>
-          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.06] sm:text-5xl lg:text-6xl">Bukan sekadar cerita. Cerita tentang anak Anda.</h1>
+          <span className="inline-flex rounded-full bg-brand-accent/40 px-4 py-2 text-xs font-black uppercase tracking-wider">Tuangkan nilai-nilai hidup Anda untuk si kecil</span>
+          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.06] sm:text-5xl lg:text-6xl">Anak Jadi Tokoh Utama</h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-            Ubah momen anak sehari-hari—seperti membangun rutinitas tidur, semangat makan sayur, lebih siap berangkat sekolah, atau mengatur waktu layar—menjadi cerita personal yang bisa dibaca dan didengarkan bersama.
+            Jadikan si kecil kesayangan Anda tokoh utama dalam ceritanya sendiri. Pilih momen yang sedang dekat dengannya, lalu tuangkan nilai-nilai hidup Anda melalui cerita personal bergambar dan audio.
           </p>
 
           <div className="mt-7 grid gap-2 text-sm font-bold sm:grid-cols-2">
@@ -47,8 +47,8 @@ export default async function SuperKids(){
           </div>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <CheckoutButton label="Mulai 2 Cerita — Rp50.000" className="btn-primary text-center"/>
-            <a href="#contoh" className="btn-secondary text-center">Lihat Cara Kerjanya</a>
+            <a href="#cara-kerja" className="btn-primary text-center">Pelajari Selengkapnya</a>
+            <CheckoutButton label="Dapatkan 2 Cerita — Rp50.000" className="btn-secondary text-center"/>
           </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-ink-soft">
             <span>✓ Akses 1 tahun</span><span>✓ Login dengan OTP email</span><span>✓ Tidak wajib install Play Store</span>
@@ -75,15 +75,15 @@ export default async function SuperKids(){
       </div>
     </section>
 
-    <section id="contoh" className="px-5 py-16">
+    <section id="cara-kerja" className="px-5 py-16">
       <div className="mx-auto max-w-6xl">
-        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Dari momen sehari-hari menjadi cerita</p>
-        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Mulai dari hal yang sedang dekat dengan anak hari ini.</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-ink-soft">Orang tua memilih momen dan tema. Papa Bonski membantu mengubahnya menjadi cerita yang terasa lebih dekat dengan kehidupan anak.</p>
+        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Cerita yang dekat dengan kehidupan si kecil</p>
+        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Tuangkan nilai-nilai hidup Anda melalui momen yang sedang dekat dengannya.</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-ink-soft">Apakah itu kebiasaan tidurnya, kebiasaan makannya, motivasinya untuk belajar, atau cara mengatur waktu layar. Momen keseharian menjadi cerita yang lebih mudah dirasakan oleh anak.</p>
         <div className="mx-auto mt-9 grid max-w-5xl gap-4 md:grid-cols-2">
           <div className="rounded-[2rem] bg-gradient-to-br from-brand-primary/10 to-brand-accent/20 p-6 sm:p-8">
             <p className="text-xs font-black text-brand-primary">CONTOH MOMEN</p>
-            <h3 className="mt-2 text-2xl font-extrabold">Hari ini, momen apa yang ingin dijadikan cerita?</h3>
+            <h3 className="mt-2 text-2xl font-extrabold">Momen apa yang sedang dekat dengan si kecil?</h3>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-bold">
               <span className="rounded-xl bg-white p-3">🌙 Rutinitas tidur</span>
               <span className="rounded-xl bg-white p-3">🥦 Semangat makan sayur</span>
@@ -93,8 +93,8 @@ export default async function SuperKids(){
           </div>
           <div className="rounded-[2rem] bg-surface-card p-6 ring-1 ring-black/5 sm:p-8">
             <p className="text-xs font-black text-brand-primary">HASIL PENGALAMAN</p>
-            <h3 className="mt-2 text-2xl font-extrabold">Anak menjadi bagian dari ceritanya sendiri.</h3>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">Nama, usia, foto, karakter, dan pilihan tema digunakan untuk membantu membuat cerita lebih personal. Teks dapat direview sebelum ilustrasi dan audio dibuat.</p>
+            <h3 className="mt-2 text-2xl font-extrabold">Anda tetap memegang kendali atas pesan ceritanya.</h3>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">Nama, usia, foto, karakter, dan pilihan tema membantu membuat cerita lebih personal. Anda dapat mereview dan menyempurnakan cerita untuk menuangkan nilai-nilai hidup Anda sebelum ilustrasi dan audio dibuat.</p>
             <div className="mt-5 rounded-2xl bg-surface p-4 text-sm font-semibold">📖 Flipbook · 🎧 Audio · 🎨 Ilustrasi · 💛 Moral & doa</div>
           </div>
         </div>
@@ -107,13 +107,13 @@ export default async function SuperKids(){
 
     <section className="bg-white/70 px-5 py-16">
       <div className="mx-auto max-w-6xl">
-        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Lebih dari sekadar mengganti nama</p>
-        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Orang tua memilih profil dan momen, lalu tetap memegang kendali atas ceritanya.</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center leading-relaxed text-ink-soft">Nama, usia, karakter, foto, dan situasi yang sedang dekat dengan anak menjadi bahan personalisasi. Teks dapat direview sebelum ilustrasi dan audio dibuat.</p>
+        <p className="text-center text-sm font-black uppercase tracking-widest text-brand-primary">Dari nilai hidup menjadi cerita miliknya</p>
+        <h2 className="mx-auto mt-2 max-w-3xl text-center text-3xl font-extrabold">Anak bukan hanya membaca cerita—ia menjadi tokoh utama di dalamnya.</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center leading-relaxed text-ink-soft">Buat profil si kecil, pilih momen yang ingin dibicarakan, lalu review ceritanya. Setelah Anda puas, Papa Bonski menyiapkan ilustrasi dan audio untuk dinikmati bersama.</p>
         <div className="mt-9 grid gap-5 lg:grid-cols-3">
           {[
             ["/landing/profil-anak.webp","1. Buat profil anak","Masukkan informasi yang membantu cerita terasa lebih dekat dengan dunia anak.","Tampilan pembuatan profil anak"],
-            ["/landing/review-cerita.webp","2. Review ceritanya","Baca dan perbaiki teks terlebih dahulu sebelum gambar dan audio diproses.","Tampilan review teks cerita"],
+            ["/landing/review-cerita.webp","2. Tuangkan nilai hidup Anda","Review dan sempurnakan teks sebelum ilustrasi dan audio diproses.","Tampilan review teks cerita"],
             ["/landing/contoh-cerita-sheilla.webp","3. Baca dan dengarkan","Nikmati cerita bergambar, teks, dan audio narasi bersama anak.","Tampilan hasil cerita bergambar dan audio"],
           ].map(([src,title,desc,alt])=><article key={title} className="overflow-hidden rounded-[2rem] bg-surface-card shadow-sm ring-1 ring-black/5">
             <Image src={src} alt={alt} width={1200} height={720} className="aspect-[16/10] w-full object-cover object-top"/>
@@ -162,9 +162,9 @@ export default async function SuperKids(){
     <section className="bg-brand-primary px-5 py-16 text-white">
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-black uppercase tracking-widest opacity-80">Mulai dari cerita pertama</p>
-        <h2 className="mt-3 text-4xl font-extrabold">2 cerita personal + akses 1 tahun, Rp50.000.</h2>
-        <p className="mx-auto mt-4 max-w-xl opacity-90">Untuk anak sendiri atau hadiah. Setelah pembayaran terverifikasi, akses diberikan ke Email Penerima yang Anda tentukan sebelum checkout.</p>
-        <CheckoutButton label="Mulai Sekarang — Rp50.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
+        <h2 className="mt-3 text-4xl font-extrabold">Tuangkan nilai-nilai hidup Anda dalam cerita si kecil.</h2>
+        <p className="mx-auto mt-4 max-w-xl opacity-90">Dapatkan 2 cerita personal bergambar dan audio, dengan akses selama 1 tahun, hanya Rp50.000.</p>
+        <CheckoutButton label="Dapatkan 2 Cerita — Rp50.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
       </div>
     </section>
 
