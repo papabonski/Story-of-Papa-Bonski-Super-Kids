@@ -64,14 +64,14 @@ function QuotaTopupPanel({ quota }: { quota: { limit: number; used: number; rema
               href={STORY_TOPUP_3_URL}
               className="rounded-2xl bg-white px-3 py-4 text-center ring-1 ring-black/[0.08] transition active:scale-95"
             >
-              <span className="block text-base font-extrabold text-brand-primary">+3 Cerita</span>
+              <span className="block text-base font-extrabold text-brand-primary">Paket Nambah · +3 Cerita</span>
               <span className="mt-1 block text-xs font-bold text-ink-soft">Rp60.000</span>
             </a>
             <a
               href={STORY_TOPUP_8_URL}
               className="rounded-2xl bg-brand-primary px-3 py-4 text-center text-white shadow-sm transition active:scale-95"
             >
-              <span className="block text-base font-extrabold">+8 Cerita</span>
+              <span className="block text-base font-extrabold">Paket Rame-Rame · +8 Cerita</span>
               <span className="mt-1 block text-xs font-bold text-white/90">Rp120.000 · Lebih hemat</span>
             </a>
           </div>
