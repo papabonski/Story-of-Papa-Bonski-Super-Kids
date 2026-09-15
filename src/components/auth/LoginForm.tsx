@@ -16,6 +16,14 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
     () => nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/app",
     [nextPath],
   );
+  // The Mandarin checkout uses the Super Kids entitlement to verify the
+  // Rp15.000 member price. Opening the Mandarin app itself still requires the
+  // dedicated Mandarin entitlement.
+  const entitlementKey = safeNext === "/mandarin/checkout"
+    ? "super_kids_access"
+    : safeNext.startsWith("/mandarin")
+      ? "mandarin_access"
+      : "portal_access";
 
   async function requestOtp(e: FormEvent) {
     e.preventDefault();
@@ -27,7 +35,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
       const prepareResponse = await fetch("/api/auth/prepare-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail, displayName: normalizedName }),
+        body: JSON.stringify({ email: normalizedEmail, displayName: normalizedName, entitlementKey }),
       });
       const prepareResult = await prepareResponse.json().catch(() => null);
 

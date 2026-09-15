@@ -7,7 +7,7 @@ import CheckoutButton from "@/components/marketing/CheckoutButton";
 export const dynamic="force-dynamic";
 
 const benefits=[
-  "Akses Papa Bonski Super Kids selama 1 tahun",
+  "Akses Papa Bonski Super Kids seumur hidup",
   "Termasuk 2 cerita personal",
   "Nama, usia, foto & karakter anak menjadi bahan personalisasi",
   "Ilustrasi personal + audio narasi",
@@ -51,7 +51,7 @@ export default async function SuperKids(){
             <a href="#contoh" className="btn-secondary text-center">Lihat Cara Kerjanya</a>
           </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-ink-soft">
-            <span>✓ Akses 1 tahun</span><span>✓ Login dengan OTP email</span><span>✓ Tidak wajib install Play Store</span>
+            <span>✓ Akses seumur hidup</span><span>✓ Login dengan OTP email</span><span>✓ Tidak wajib install Play Store</span>
           </div>
         </div>
 
@@ -60,7 +60,7 @@ export default async function SuperKids(){
             <div className="mx-auto max-w-sm rounded-3xl bg-white p-6 shadow-lg">
               <p className="text-xs font-black uppercase tracking-wider text-brand-primary">Paket Super Kids 1</p>
               <h2 className="mt-2 text-4xl font-extrabold">Rp50.000</h2>
-              <p className="mt-1 text-sm font-bold text-ink-soft">2 cerita personal + akses 1 tahun</p>
+              <p className="mt-1 text-sm font-bold text-ink-soft">2 cerita personal + akses seumur hidup</p>
               <div className="mt-5 space-y-3 text-sm">
                 {["Cerita bergambar personal","Audio narasi","Moral, doa & panduan orang tua","Koleksi cerita untuk dibaca ulang","Bonus English Learning"].map(item=>
                   <div key={item} className="flex gap-2"><span>✅</span><span className="font-semibold">{item}</span></div>
@@ -149,7 +149,7 @@ export default async function SuperKids(){
     <section className="bg-brand-primary px-5 py-16 text-white">
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-black uppercase tracking-widest opacity-80">Mulai dari cerita pertama</p>
-        <h2 className="mt-3 text-4xl font-extrabold">2 cerita personal + akses 1 tahun, Rp50.000.</h2>
+        <h2 className="mt-3 text-4xl font-extrabold">2 cerita personal + akses seumur hidup, Rp50.000.</h2>
         <p className="mx-auto mt-4 max-w-xl opacity-90">Untuk anak sendiri atau hadiah. Setelah pembayaran terverifikasi, akses diberikan ke Email Penerima yang Anda tentukan sebelum checkout.</p>
         <CheckoutButton label="Mulai Sekarang — Rp50.000" className="mt-7 inline-flex rounded-full bg-white px-7 py-4 font-extrabold text-brand-primary shadow-lg"/>
       </div>
@@ -160,7 +160,7 @@ export default async function SuperKids(){
         <h2 className="text-center text-2xl font-extrabold">Pertanyaan yang sering ditanyakan</h2>
         <div className="mt-6 space-y-3">
           {[
-            ["Apa yang saya dapat setelah membeli?","Akses Papa Bonski Super Kids selama 1 tahun dan kuota awal 2 cerita personal, termasuk ilustrasi, audio narasi, moral, doa, panduan orang tua, koleksi, dan bonus English Learning."],
+            ["Apa yang saya dapat setelah membeli?","Akses Papa Bonski Super Kids seumur hidup dan kuota awal 2 cerita personal, termasuk ilustrasi, audio narasi, moral, doa, panduan orang tua, koleksi, dan bonus English Learning."],
             ["Email Penerima itu apa?","Email Penerima adalah email yang memiliki akses Papa Bonski dan selalu digunakan untuk login OTP. Jika membeli untuk diri sendiri, Email Pembeli dan Email Penerima boleh sama."],
             ["Bisa dibelikan untuk orang lain?","Bisa. Tentukan Email Penerima milik orang tua atau wali yang akan menggunakan Papa Bonski. Email Pembeli di OrderHero boleh berbeda."],
             ["Apa yang terjadi setelah pembayaran?","Setelah pembayaran terverifikasi, paket otomatis diaktifkan untuk Email Penerima. Pemilik akses kemudian login dengan kode OTP 6 digit."],
@@ -178,7 +178,7 @@ export default async function SuperKids(){
 
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
       <div className="mx-auto flex max-w-lg items-center gap-3">
-        <div className="min-w-0 flex-1"><b className="block text-sm">2 cerita + akses 1 tahun</b><span className="text-xs text-ink-soft">Rp50.000</span></div>
+        <div className="min-w-0 flex-1"><b className="block text-sm">2 cerita + akses seumur hidup</b><span className="text-xs text-ink-soft">Rp50.000</span></div>
         <CheckoutButton label="Mulai" className="rounded-full bg-brand-primary px-6 py-3 text-sm font-extrabold text-white"/>
       </div>
     </div>

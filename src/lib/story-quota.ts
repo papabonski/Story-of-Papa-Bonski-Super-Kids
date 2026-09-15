@@ -26,9 +26,10 @@ export async function getStoryQuotaForUser(userId: string): Promise<StoryQuotaSt
 
   const { data: subscription, error: subscriptionError } = await admin
     .from("subscriptions")
-    .select("plan_id,status,expires_at,created_at")
+    .select("plan_id,status,expires_at,created_at,plans!inner(code)")
     .eq("customer_id", membership.customer_id)
     .eq("status", "active")
+    .eq("plans.code", "PBSK-PREMIUM-1Y")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

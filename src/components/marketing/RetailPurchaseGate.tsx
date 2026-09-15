@@ -192,7 +192,7 @@ export default function RetailPurchaseGate({
         <h2 className="mt-2 text-xl font-extrabold text-ink">Paket ini akan diberikan kepada:</h2>
         <p className="mt-2 break-all rounded-2xl bg-white px-4 py-3 text-base font-extrabold text-ink ring-1 ring-emerald-200">{email}</p>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-          Email ini akan menjadi pemilik lisensi, mendapat akses 1 tahun + 2 cerita personal, dan digunakan untuk login OTP.
+          Email ini akan menjadi pemilik lisensi, mendapat akses seumur hidup + 2 cerita personal, dan digunakan untuk login OTP.
         </p>
       </div>
 
@@ -278,7 +278,7 @@ function TopupChoices({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-extrabold text-ink">Tambah 3 Cerita</p>
-          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa memperpanjang masa akses.</p>
+          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa mengubah hak akses seumur hidup.</p>
         </div>
         <b className="whitespace-nowrap text-emerald-700">Rp50.000</b>
       </div>
@@ -289,7 +289,7 @@ function TopupChoices({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-extrabold text-ink">Tambah 8 Cerita</p>
-          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa memperpanjang masa akses.</p>
+          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa mengubah hak akses seumur hidup.</p>
         </div>
         <b className="whitespace-nowrap text-brand-primary">Rp120.000</b>
       </div>

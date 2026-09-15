@@ -2,7 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "../database.types";
 
-const PROTECTED_PREFIXES = ["/app", "/create", "/collection", "/story", "/cerita/video", "/install"];
+const PORTAL_PREFIXES = ["/app", "/install"];
+const SUPER_KIDS_PREFIXES = ["/create", "/collection", "/story", "/cerita/video"];
+const MODULE_ENTITLEMENTS = ["super_kids_access", "mandarin_access"];
 const AUTH_PATHS = ["/login", "/auth/callback", "/onboarding", "/account/inactive"];
 
 export async function updateSession(request: NextRequest) {
@@ -25,20 +27,23 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
   const requireLogin = process.env.REQUIRE_CUSTOMER_LOGIN === "true";
-  const protectedPath = PROTECTED_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + "/"));
+  const isPortalPath = PORTAL_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + "/"));
+  const isSuperKidsPath = SUPER_KIDS_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + "/"));
+  const isMandarinPath = path === "/mandarin" || path === "/mandarin-game" || path.startsWith("/mandarin-game/");
+  const protectedPath = isPortalPath || isSuperKidsPath || isMandarinPath;
   const authPath = AUTH_PATHS.some(prefix => path === prefix || path.startsWith(prefix + "/"));
 
   if (requireLogin && protectedPath) {
     if (!user || user.is_anonymous) {
       const login = request.nextUrl.clone();
       login.pathname = "/login";
-      login.searchParams.set("next", path);
+      login.searchParams.set("next", isMandarinPath ? "/mandarin" : path);
       return NextResponse.redirect(login);
     }
 
-    // RLS-safe access check: authenticated customer must be linked to a tenant
-    // and hold a non-expired Super Kids entitlement. This prevents direct URL
-    // access to /create, /collection, story APIs/pages, etc.
+    // The portal is shared by every Papa Bonski module. Feature routes still
+    // require their own entitlement, while /app and /install accept any active
+    // module entitlement.
     const { data: membership } = await supabase
       .from("customer_users")
       .select("customer_id")
@@ -48,19 +53,22 @@ export async function updateSession(request: NextRequest) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";
+      onboarding.searchParams.set("next", isMandarinPath ? "/mandarin" : path);
       return NextResponse.redirect(onboarding);
     }
-    const { data: entitlement } = await supabase
+    let entitlementQuery = supabase
       .from("entitlements")
-      .select("expires_at")
-      .eq("customer_id", membership.customer_id)
-      .eq("key", "super_kids_access")
-      .maybeSingle();
-    const expired = entitlement?.expires_at ? new Date(entitlement.expires_at).getTime() <= Date.now() : false;
-    if (!entitlement || expired) {
+      .select("key")
+      .eq("customer_id", membership.customer_id);
+    entitlementQuery = isPortalPath
+      ? entitlementQuery.in("key", MODULE_ENTITLEMENTS).limit(1)
+      : entitlementQuery.eq("key", isMandarinPath ? "mandarin_access" : "super_kids_access");
+    const { data: entitlements } = await entitlementQuery;
+    if (!entitlements?.length) {
       const inactive = request.nextUrl.clone();
       inactive.pathname = "/account/inactive";
       inactive.search = "";
+      inactive.searchParams.set("product", isPortalPath ? "portal" : isMandarinPath ? "mandarin" : "super-kids");
       return NextResponse.redirect(inactive);
     }
   }

@@ -50,14 +50,13 @@ export async function GET(req: Request) {
       );
     }
 
-    const nowIso = new Date().toISOString();
     const { data: activeSub, error: subError } = await db
       .from("subscriptions")
-      .select("id")
+      .select("id,plans!inner(code)")
       .eq("customer_id", customer.id)
       .eq("status", "active")
-      .gt("expires_at", nowIso)
-      .order("expires_at", { ascending: false })
+      .eq("plans.code", "PBSK-PREMIUM-1Y")
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (subError) throw subError;

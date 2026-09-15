@@ -1,0 +1,21 @@
+{
+  "brand": {
+    "name": "Papa Bonski Mandarin",
+    "tagline": "Belajar Mandarin Seru untuk Anak · 汉语真好玩",
+    "logo": "🐻",
+    "logoImage": "assets/papa-bonski-logo.png",
+    "mascotImage": "assets/panda-mandarin.png",
+    "primary": "#A63D0B",
+    "secondary": "#D84A12"
+  },
+  "defaults": { "level": "beginner", "focus": "all", "questions": 30 },
+  "games": { "disabled": [] },
+  "admin": { "pin": "582741" },
+  "funnel": {
+    "website": "https://www.papabonski.com",
+    "productSlug": "papa-bonski-mandarin",
+    "entitlement": "papa_bonski_mandarin",
+    "checkoutProvider": "orderhero",
+    "trafficSource": "meta_ads"
+  }
+}

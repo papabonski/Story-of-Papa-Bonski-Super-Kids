@@ -1,17 +1,11 @@
 import type { MetadataRoute } from "next";
-import { emojiFaviconDataUrl, rgbToHex } from "../../config/brand";
+import { emojiFaviconDataUrl, rgbToHex } from "../../../config/brand";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 
-/**
- * PWA manifest generated from the white-label brand config, so a rebranded
- * build is installable to a phone home screen with the buyer's own name,
- * colors, and icon — no extra files to edit.
- */
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
+export async function GET() {
   const brand = await getRuntimeBrand();
   const fallbackIcon = brand.logoSrc ?? emojiFaviconDataUrl(brand.logoEmoji);
-
-  return {
+  const manifest: MetadataRoute.Manifest = {
     id: "/",
     name: brand.name,
     short_name: brand.name,
@@ -25,18 +19,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     lang: brand.defaultLocale,
     categories: ["education", "kids", "books"],
     icons: [
-      {
-        src: "/icons/icon-192.png?v=4",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/icons/icon-512.png?v=4",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any",
-      },
+      { src: "/icons/icon-192.png?v=4", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icons/icon-512.png?v=4", sizes: "512x512", type: "image/png", purpose: "any" },
       {
         src: fallbackIcon,
         sizes: "any",
@@ -67,4 +51,11 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       },
     ],
   };
+
+  return new Response(JSON.stringify(manifest), {
+    headers: {
+      "Content-Type": "application/manifest+json; charset=utf-8",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+    },
+  });
 }

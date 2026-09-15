@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel Admin — Papa Bonski Mandarin</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#A63D0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PB Mandarin">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/admin.css">
+<script src="assets/js/config.js"></script>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="appbar-in">
+    <span class="brand-logo" aria-hidden="true">⚙️</span>
+    <div class="brand">
+      <p class="brand-name">Panel Admin</p>
+      <p class="brand-tag" id="adminSubtitle">Kelola tampilan &amp; permainan</p>
+    </div>
+    <div class="appbar-tools">
+      <button id="themeBtn" class="ghost-btn" type="button" aria-label="Ganti tema">🌙</button>
+      <a class="ghost-btn" href="index.html" style="text-decoration:none" aria-label="Buka aplikasi">↩ Aplikasi</a>
+    </div>
+  </div>
+</header>
+
+<!-- Gerbang PIN (lembut, bukan keamanan sungguhan) -->
+<div id="gate" class="gate">
+  <form id="gateForm" class="card gate-card">
+    <p class="gate-icon" aria-hidden="true">🔒</p>
+    <h1 class="gate-title">Masuk Panel Admin</h1>
+    <p class="gate-sub">Masukkan PIN untuk membuka pengaturan.</p>
+    <input id="pinInput" class="text-input" type="password" inputmode="numeric"
+           autocomplete="off" placeholder="PIN" aria-label="PIN admin">
+    <button class="btn-cta" type="submit">Buka</button>
+    <p id="gateErr" class="err" role="alert"></p>
+    <p class="gate-note">
+      Catatan: PIN ini hanya melindungi pengaturan lokal. Akses pelanggan dan
+      lisensi penjualan harus tetap diperiksa oleh sistem akun Papa Bonski.
+    </p>
+  </form>
+</div>
+
+<main class="wrap admin" id="adminMain" hidden>
+
+  <!-- Whitelabel -->
+  <section class="card">
+    <h2 class="sec-title2">🎨 Tampilan (Whitelabel)</h2>
+    <p class="sec-desc">Ubah nama, logo, dan warna. Perubahan langsung tampil di aplikasi pemain.</p>
+
+    <div class="field">
+      <label for="fName">Nama aplikasi</label>
+      <input id="fName" class="text-input" maxlength="40" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="fTag">Tagline</label>
+      <input id="fTag" class="text-input" maxlength="80" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="fLogo">Logo cadangan (emoji)</label>
+      <input id="fLogo" class="text-input logo-input" maxlength="4" autocomplete="off">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="fPrimary">Warna utama</label>
+        <div class="color-row">
+          <input id="fPrimary" type="color">
+          <input id="fPrimaryHex" class="text-input hex" maxlength="7" autocomplete="off">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fSecondary">Warna kedua (tombol)</label>
+        <div class="color-row">
+          <input id="fSecondary" type="color">
+          <input id="fSecondaryHex" class="text-input hex" maxlength="7" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <p class="field-label">Palet siap pakai</p>
+    <div id="presets" class="presets"></div>
+    <p class="hint" id="contrastNote"></p>
+
+    <p class="field-label">Pratinjau</p>
+    <div class="preview" id="preview">
+      <div class="pv-appbar"><span class="pv-logo" id="pvLogo">🀄</span>
+        <span class="pv-name" id="pvName">Papa Bonski Mandarin</span></div>
+      <div class="pv-body">
+        <p class="pv-q">Apa arti kata ini?</p>
+        <p class="pv-big">猫</p>
+        <button class="opt correct" type="button">kucing</button>
+        <button class="opt" type="button">anjing</button>
+        <div class="pv-actions">
+          <button class="btn-cta" type="button">↻ Main lagi</button>
+          <button class="pick" data-kind="level" aria-pressed="true" type="button">
+            <span class="pick-name">Beginner</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Default -->
+  <section class="card">
+    <h2 class="sec-title2">⚙️ Setelan awal</h2>
+    <p class="sec-desc">Level dan fokus yang terpilih saat pemain baru pertama membuka aplikasi.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="fLevel">Level default</label>
+        <select id="fLevel" class="text-input">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fFocus">Fokus default</label>
+        <select id="fFocus" class="text-input"></select>
+      </div>
+      <div class="field">
+        <label for="fQuestions">Jumlah soal per game</label>
+        <input id="fQuestions" class="text-input" type="number" min="5" max="50" step="1">
+      </div>
+    </div>
+    <p class="hint" id="qNote"></p>
+  </section>
+
+  <!-- Game aktif -->
+  <section class="card">
+    <h2 class="sec-title2">🎮 Game aktif</h2>
+    <p class="sec-desc">Matikan game yang tidak ingin ditampilkan ke pemain.</p>
+    <div id="gameToggles" class="toggles"></div>
+  </section>
+
+  <!-- Data & keamanan -->
+  <section class="card">
+    <h2 class="sec-title2">💾 Data &amp; keamanan</h2>
+    <div class="field">
+      <label for="fPin">PIN admin</label>
+      <input id="fPin" class="text-input" maxlength="12" autocomplete="off" inputmode="numeric">
+    </div>
+    <div class="btn-row">
+      <button id="exportBtn" class="btn-plain" type="button">⬇ Ekspor config.json</button>
+      <label class="btn-plain file-btn">⬆ Impor config.json
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </label>
+      <button id="resetBtn" class="btn-plain" type="button">↺ Kembalikan bawaan</button>
+      <button id="clearBoardBtn" class="btn-plain danger" type="button">🗑 Kosongkan papan bintang</button>
+    </div>
+    <p class="hint">
+      <strong>Terapkan ke semua perangkat:</strong> perubahan di sini tersimpan di
+      perangkat ini. Untuk berlaku global, klik <em>Ekspor config.json</em>, taruh
+      file itu di folder <code>dist/</code>, lalu deploy ulang ke Vercel.
+    </p>
+    <p id="savedNote" class="saved-note" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script src="assets/js/admin.js"></script>
+<script>
+if (location.protocol.startsWith("http") && "serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

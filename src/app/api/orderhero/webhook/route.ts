@@ -6,6 +6,13 @@ import { isPaid, normalizeOrderHeroPayload, payloadReadiness, verifyWebhook } fr
 export const runtime = "nodejs";
 
 const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
+const MANDARIN_STANDARD_SKU = "PBM-MANDARIN";
+const MANDARIN_MEMBER_SKU = "PBM-MANDARIN-MEMBER";
+const MANDARIN_SKUS = new Set([MANDARIN_STANDARD_SKU, MANDARIN_MEMBER_SKU]);
+const ORDERHERO_MANDARIN_PRODUCT_ID =
+  process.env.ORDERHERO_MANDARIN_PRODUCT_ID || "6aa2651358d21cc2224250c0";
+const ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID =
+  process.env.ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID || "6aa8b81d733fa8f8f8eb8966";
 const STORY_TOPUPS: Record<string, { credits: number; name: string }> = {
   "PBSK-STORY-CREDIT-3": { credits: 3, name: "Papa Bonski - Tambah 3 Cerita" },
   "PBSK-STORY-CREDIT-8": { credits: 8, name: "Papa Bonski - Tambah 8 Cerita" },
@@ -86,7 +93,16 @@ export async function POST(req: Request) {
     let productSku=n.productSku || (topupSku || "PBSK-SUPER-KIDS");
     let planCode=process.env.ORDERHERO_DEFAULT_PLAN||"PBSK-PREMIUM-1Y";
 
-    if (n.externalProductId === ORDERHERO_SUPER_KIDS_PRODUCT_ID) {
+    if (MANDARIN_SKUS.has(normalizedSku)) {
+      productSku = normalizedSku;
+      planCode = "PBM-MANDARIN-1Y";
+    } else if (ORDERHERO_MANDARIN_PRODUCT_ID && n.externalProductId === ORDERHERO_MANDARIN_PRODUCT_ID) {
+      productSku = MANDARIN_STANDARD_SKU;
+      planCode = "PBM-MANDARIN-1Y";
+    } else if (ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID && n.externalProductId === ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID) {
+      productSku = MANDARIN_MEMBER_SKU;
+      planCode = "PBM-MANDARIN-1Y";
+    } else if (n.externalProductId === ORDERHERO_SUPER_KIDS_PRODUCT_ID) {
       productSku = "PBSK-SUPER-KIDS";
       planCode = "PBSK-PREMIUM-1Y";
     } else {
@@ -109,6 +125,11 @@ export async function POST(req: Request) {
 
     const actualSku=String(topupSku || productSku || "").trim().toUpperCase();
     const isTopup=topupCredits > 0;
+    productSku=actualSku;
+    const isMandarin=MANDARIN_SKUS.has(actualSku);
+    const isMandarinMember=actualSku === MANDARIN_MEMBER_SKU;
+    const entitlementKey=isMandarin ? "mandarin_access" : "super_kids_access";
+    const productLabel=isMandarin ? "Papa Bonski Mandarin" : "Paket Super Kids 1";
 
     // OrderHero can retry the same paid order with a different delivery id.
     // If the order already produced its entitlement/grant, finish this event as
@@ -191,7 +212,7 @@ export async function POST(req: Request) {
     // Ownership must therefore come ONLY from a recent Papa Bonski checkout
     // intent of the correct type. If recovery is not unique, hold the payment
     // for manual mapping instead of ever falling back to the OrderHero buyer.
-    const expectedIntentType=isTopup ? "member_topup" : "recipient_purchase";
+    const expectedIntentType=isTopup ? "member_topup" : isMandarinMember ? "member_addon" : "recipient_purchase";
     if(!intent){
       const cutoff=new Date(Date.now()-30*60*1000).toISOString();
       const {data:candidates,error:candidateError}=await db.from("webhook_events")
@@ -212,13 +233,13 @@ export async function POST(req: Request) {
       if(matching.length===1){
         intent=matching[0];
       } else {
-        const prefix=isTopup ? "topup" : "recipient";
+        const prefix=isTopup ? "topup" : isMandarinMember ? "member_addon" : "recipient";
         const reason=matching.length===0 ? `${prefix}_intent_missing` : `${prefix}_intent_ambiguous`;
         await db.from("webhook_events").update({
           status:"needs_mapping",
           error:matching.length===0
-            ? `${isTopup ? "Top-up" : "Base-package"} payment has no recent Papa Bonski checkout intent. OrderHero buyer email was intentionally ignored.`
-            : `${isTopup ? "Top-up" : "Base-package"} payment matches multiple recent Papa Bonski checkout intents. OrderHero buyer email was intentionally ignored.`,
+            ? `${isTopup ? "Top-up" : isMandarinMember ? "Member add-on" : "Base-package"} payment has no recent Papa Bonski checkout intent. OrderHero buyer email was intentionally ignored.`
+            : `${isTopup ? "Top-up" : isMandarinMember ? "Member add-on" : "Base-package"} payment matches multiple recent Papa Bonski checkout intents. OrderHero buyer email was intentionally ignored.`,
           processed_at:new Date().toISOString(),
           normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
         }).eq("id",event.id);
@@ -227,12 +248,14 @@ export async function POST(req: Request) {
     }
 
     if(String(intent?.payload?.intent_type || "") !== expectedIntentType){
-      const reason=isTopup ? "topup_intent_invalid" : "recipient_intent_invalid";
+      const reason=isTopup ? "topup_intent_invalid" : isMandarinMember ? "member_addon_intent_invalid" : "recipient_intent_invalid";
       await db.from("webhook_events").update({
         status:"needs_mapping",
         error:isTopup
           ? "Top-up requires a signed-in member intent. OrderHero buyer email was intentionally ignored."
-          : "Base-package purchase requires a recipient_purchase intent. OrderHero buyer email was intentionally ignored.",
+          : isMandarinMember
+            ? "Mandarin member pricing requires a signed-in Super Kids intent. OrderHero buyer email was intentionally ignored."
+            : "Base-package purchase requires a recipient_purchase intent. OrderHero buyer email was intentionally ignored.",
         processed_at:new Date().toISOString(),
         normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
       }).eq("id",event.id);
@@ -285,12 +308,14 @@ export async function POST(req: Request) {
 
     let customerId:string|undefined=customer?.id;
 
-    if(isTopup){
+    if(isTopup || isMandarinMember){
       const intendedCustomerId=String(intent?.payload?.customer_id || "").trim();
       if(intendedCustomerId && customerId && intendedCustomerId !== customerId){
         await db.from("webhook_events").update({
           status:"needs_mapping",
-          error:"Signed-in top-up intent customer does not match recipient account.",
+          error:isMandarinMember
+            ? "Signed-in Super Kids member does not match the Mandarin recipient account."
+            : "Signed-in top-up intent customer does not match recipient account.",
           processed_at:new Date().toISOString(),
           normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:topupSku}
         }).eq("id",event.id);
@@ -298,22 +323,26 @@ export async function POST(req: Request) {
           ok:true,
           accepted:true,
           needsMapping:true,
-          reason:"topup_customer_mismatch"
+          reason:isMandarinMember ? "member_addon_customer_mismatch" : "topup_customer_mismatch"
         },{status:202});
       }
     }
 
-    if(!customerId && topupCredits > 0){
+    if(!customerId && (topupCredits > 0 || isMandarinMember)){
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:"Top-up requires an existing Papa Bonski recipient account.",
+        error:isMandarinMember
+          ? "Mandarin member pricing requires an existing Super Kids recipient account."
+          : "Top-up requires an existing Papa Bonski recipient account.",
         processed_at:new Date().toISOString(),
         normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:topupSku}
       }).eq("id",event.id);
       if(intent?.id){
         await db.from("webhook_events").update({
           status:"needs_mapping",
-          error:"Recipient account was not found for this top-up.",
+          error:isMandarinMember
+            ? "Super Kids recipient account was not found for this Mandarin member purchase."
+            : "Recipient account was not found for this top-up.",
           processed_at:new Date().toISOString()
         }).eq("id",intent.id);
       }
@@ -321,8 +350,50 @@ export async function POST(req: Request) {
         ok:true,
         accepted:true,
         needsMapping:true,
-        reason:"topup_recipient_not_found"
+        reason:isMandarinMember ? "member_addon_recipient_not_found" : "topup_recipient_not_found"
       },{status:202});
+    }
+
+    if(isMandarinMember && customerId){
+      const [{data:memberEntitlement,error:memberEntitlementError},{data:memberSubscription,error:memberSubscriptionError}]=await Promise.all([
+        db.from("entitlements")
+          .select("id,expires_at")
+          .eq("customer_id",customerId)
+          .eq("key","super_kids_access")
+          .maybeSingle(),
+        db.from("subscriptions")
+          .select("id,expires_at,plans!inner(code)")
+          .eq("customer_id",customerId)
+          .eq("status","active")
+          .eq("plans.code","PBSK-PREMIUM-1Y")
+          .order("expires_at",{ascending:false})
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      if(memberEntitlementError) throw memberEntitlementError;
+      if(memberSubscriptionError) throw memberSubscriptionError;
+
+      if(!memberEntitlement?.id || !memberSubscription?.id){
+        await db.from("webhook_events").update({
+          status:"needs_mapping",
+          error:"The Rp15.000 Mandarin price requires active Super Kids access at payment time.",
+          processed_at:new Date().toISOString(),
+          normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:actualSku}
+        }).eq("id",event.id);
+        if(intent?.id){
+          await db.from("webhook_events").update({
+            status:"needs_mapping",
+            error:"Super Kids membership was not active when the member add-on payment arrived.",
+            processed_at:new Date().toISOString()
+          }).eq("id",intent.id);
+        }
+        return NextResponse.json({
+          ok:true,
+          accepted:true,
+          needsMapping:true,
+          reason:"super_kids_access_required"
+        },{status:202});
+      }
     }
 
     if(!customerId){
@@ -428,12 +499,18 @@ export async function POST(req: Request) {
       });
     }
 
-    const nowIso=new Date().toISOString();
+    const {data:plan}=await db.from("plans")
+      .select("id,duration_days,code")
+      .eq("code",planCode)
+      .eq("active",true)
+      .maybeSingle();
+    if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
+
     const {data:activeSub,error:activeSubError}=await db.from("subscriptions")
       .select("id,expires_at,source_order_id")
       .eq("customer_id",customerId)
+      .eq("plan_id",plan.id)
       .eq("status","active")
-      .gt("expires_at",nowIso)
       .order("expires_at",{ascending:false})
       .limit(1)
       .maybeSingle();
@@ -487,7 +564,7 @@ export async function POST(req: Request) {
 
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:"Recipient email already has an active Paket Super Kids 1. Choose story top-up or a different recipient email.",
+        error:`Recipient email already has active ${productLabel} access. Choose a different recipient email.`,
         processed_at:new Date().toISOString(),
         normalized:{
           ...n,
@@ -516,15 +593,8 @@ export async function POST(req: Request) {
       },{status:202});
     }
 
-    const {data:plan}=await db.from("plans")
-      .select("id,duration_days,code")
-      .eq("code",planCode)
-      .eq("active",true)
-      .maybeSingle();
-    if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
-
-    const expires=new Date(Date.now()+(plan.duration_days||365)*86400000).toISOString();
-    let accessExpiresAt=expires;
+    const expires:string|null=null;
+    let accessExpiresAt:string|null=expires;
 
     const existingSub=await db.from("subscriptions")
       .select("id,expires_at")
@@ -559,7 +629,7 @@ export async function POST(req: Request) {
 
     const entitlement=await db.from("entitlements").upsert({
       customer_id:customerId,
-      key:"super_kids_access",
+      key:entitlementKey,
       value:true,
       expires_at:accessExpiresAt
     },{onConflict:"customer_id,key"});

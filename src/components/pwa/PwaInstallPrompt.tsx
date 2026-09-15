@@ -20,7 +20,7 @@ function isStandalone(): boolean {
   );
 }
 
-export default function PwaInstallPrompt() {
+export default function PwaInstallPrompt({ appName = "Papa Bonski Super Kids" }: { appName?: string }) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [preparing, setPreparing] = useState(true);
@@ -91,7 +91,7 @@ export default function PwaInstallPrompt() {
   if (installed) {
     return (
       <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-200">
-        <p className="text-sm font-extrabold text-emerald-800">✓ Papa Bonski Super Kids sudah terpasang</p>
+        <p className="text-sm font-extrabold text-emerald-800">✓ {appName} sudah terpasang</p>
         <p className="mt-1 text-xs font-semibold text-emerald-700">Buka dari icon Papa Bonski di Home Screen.</p>
       </div>
     );
@@ -113,7 +113,7 @@ export default function PwaInstallPrompt() {
           disabled={installing}
           className="btn-primary mt-4 w-full py-3 text-base disabled:cursor-wait disabled:opacity-70"
         >
-          {installing ? "Membuka pilihan install…" : "Install Papa Bonski Super Kids"}
+          {installing ? "Membuka pilihan install…" : `Install ${appName}`}
         </button>
       ) : isIos ? (
         <div className="mt-4 rounded-2xl bg-surface px-4 py-4 text-sm font-semibold leading-relaxed text-ink-soft">

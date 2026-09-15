@@ -1,31 +1,41 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { claimCustomerByVerifiedEmail, getCustomerAccess } from "@/lib/customer-access";
+import { claimCustomerByVerifiedEmail, CUSTOMER_ENTITLEMENTS, getCustomerAccess, getCustomerPortalAccess } from "@/lib/customer-access";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const params = await searchParams;
+  const nextPath = params.next?.startsWith("/mandarin") ? "/mandarin" : "/app";
+  const isMandarin = nextPath === "/mandarin";
+  const productName = isMandarin ? "Papa Bonski Mandarin" : "produk Papa Bonski";
   const brand = await getRuntimeBrand();
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.is_anonymous || !user.email) redirect("/login");
+  if (!user || user.is_anonymous || !user.email) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
 
   await claimCustomerByVerifiedEmail();
-  const access = await getCustomerAccess();
+  const access = isMandarin
+    ? await getCustomerAccess(CUSTOMER_ENTITLEMENTS.mandarin)
+    : await getCustomerPortalAccess();
 
   if (!access) return <main className="min-h-[100dvh] bg-surface px-5 py-10 text-ink"><div className="mx-auto max-w-lg rounded-[2rem] bg-surface-card p-7 text-center shadow-xl ring-1 ring-black/[0.06]">
     <Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={104} height={104} className="mx-auto rounded-3xl" />
     <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">Aktivasi Akses</p>
     <h1 className="mt-2 text-2xl font-extrabold">Pembelian belum ditemukan</h1>
-    <p className="mt-3 text-sm leading-relaxed text-ink-soft">Kami sudah memverifikasi Email Penerima <b>{user.email}</b>, tetapi belum menemukan akses Papa Bonski Super Kids yang aktif untuk email tersebut.</p>
+    <p className="mt-3 text-sm leading-relaxed text-ink-soft">Kami sudah memverifikasi Email Penerima <b>{user.email}</b>, tetapi belum menemukan akses {productName} yang aktif untuk email tersebut.</p>
     <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-900"><b>Yang bisa dilakukan:</b><br/>1. Pastikan email ini adalah Email Penerima yang didaftarkan sebelum checkout.<br/>2. Jika baru membayar, tunggu sebentar lalu muat ulang halaman.<br/>3. Jika tetap belum aktif, hubungi Papa Bonski dan sertakan bukti pembayaran atau nomor pesanan.</div>
     <Link href="/login" className="btn-secondary mt-6">Gunakan Email Lain</Link>
   </div></main>;
 
-  if (!access.hasAccess) redirect("/account/inactive");
+  if (!access.hasAccess) redirect(`/account/inactive?product=${isMandarin ? "mandarin" : "super-kids"}`);
 
   return <main className="min-h-[100dvh] bg-surface px-5 py-10 text-ink"><div className="mx-auto max-w-lg">
     <div className="rounded-[2rem] bg-surface-card p-7 text-center shadow-xl ring-1 ring-black/[0.06]">
@@ -33,13 +43,13 @@ export default async function OnboardingPage() {
       <div className="mt-4 text-4xl">🎉</div>
       <p className="mt-2 text-xs font-extrabold uppercase tracking-[0.18em] text-brand-primary">Akses Aktif</p>
       <h1 className="mt-2 text-3xl font-extrabold">Selamat datang, {access.customerName}!</h1>
-      <p className="mt-3 text-sm leading-relaxed text-ink-soft">Pembelian berhasil. Akses Papa Bonski Super Kids sudah aktif dan siap digunakan.</p>
+      <p className="mt-3 text-sm leading-relaxed text-ink-soft">Pembelian berhasil. Akses {productName} sudah aktif dan siap digunakan.</p>
       <div className="mt-6 grid gap-3 text-left sm:grid-cols-2">
         <div className="rounded-2xl bg-white p-4 ring-1 ring-black/[0.05]"><div className="text-xs font-bold text-ink-faint">ID Member</div><div className="mt-1 font-extrabold">{access.customerCode}</div></div>
         <div className="rounded-2xl bg-white p-4 ring-1 ring-black/[0.05]"><div className="text-xs font-bold text-ink-faint">Status Akun</div><div className="mt-1 font-extrabold text-emerald-700">Aktif</div></div>
       </div>
-      {access.expiresAt ? <p className="mt-3 text-xs text-ink-faint">Masa akses sampai {new Date(access.expiresAt).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}.</p> : null}
-      <div className="mt-6 flex flex-col gap-3"><Link href="/app" className="btn-primary w-full">Mulai Menggunakan Papa Bonski →</Link><Link href="/install" className="btn-secondary w-full">📲 Install di HP / Tablet</Link></div>
+      <p className="mt-3 text-xs font-bold text-emerald-700">Hak akses tidak kedaluwarsa.</p>
+      <div className="mt-6 flex flex-col gap-3"><Link href={nextPath} className="btn-primary w-full">Mulai Menggunakan {isMandarin ? "Mandarin" : "Papa Bonski"} →</Link>{!isMandarin && <Link href="/install" className="btn-secondary w-full">📲 Install di HP / Tablet</Link>}</div>
     </div>
   </div></main>;
 }

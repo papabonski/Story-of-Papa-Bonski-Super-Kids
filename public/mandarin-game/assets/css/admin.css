@@ -1,0 +1,87 @@
+/* Gaya khusus panel admin. Token warna & tombol dari style.css. */
+
+.admin { max-width: 720px; }
+.sec-title2 { font-size: 17px; font-weight: 800; margin: 0 0 4px; }
+.sec-desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 1rem; }
+
+.field { margin-bottom: 0.9rem; }
+.field > label, .field-label {
+  display: block; font-size: 12.5px; font-weight: 700;
+  color: var(--text-secondary); margin-bottom: 5px;
+}
+.field-label { margin-top: 1rem; }
+.field-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.field-row .field { flex: 1 1 220px; }
+select.text-input { appearance: auto; }
+.logo-input { max-width: 120px; font-size: 22px; text-align: center; }
+
+.color-row { display: flex; gap: 8px; align-items: center; }
+.color-row input[type="color"] {
+  width: 46px; height: 42px; padding: 2px; border: 1.5px solid var(--border-strong);
+  border-radius: 10px; background: var(--surface-2); cursor: pointer; flex: none;
+}
+.text-input.hex { max-width: 120px; font-family: ui-monospace, "Cascadia Code", monospace; text-transform: uppercase; }
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset {
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid var(--border); border-radius: 999px;
+  padding: 5px 12px 5px 6px; background: var(--surface-2);
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.preset:hover { border-color: var(--border-strong); }
+.preset .dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+.preset .dot2 { width: 16px; height: 16px; border-radius: 50%; display: inline-block; margin-left: -10px; border: 2px solid var(--surface-2); }
+
+.hint { font-size: 12.5px; color: var(--text-secondary); margin: 8px 0 0; line-height: 1.5; }
+.hint code { background: var(--surface-1); padding: 1px 5px; border-radius: 5px; font-size: 12px; }
+
+/* Pratinjau */
+.preview {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow); margin-top: 6px;
+}
+.pv-appbar {
+  background: var(--teal); color: #fff; padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px; font-weight: 800;
+}
+.pv-logo { font-size: 22px; }
+.pv-logo-img { width: 34px; height: 34px; object-fit: cover; border-radius: 9px; vertical-align: middle; }
+.pv-body { padding: 16px; background: var(--surface-2); }
+.pv-q { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; }
+.pv-big { font-size: 34px; margin: 0 0 12px; }
+.preview .opt { display: block; width: 100%; text-align: left; margin: 8px 0; padding: 11px 15px; }
+.pv-actions { display: flex; gap: 10px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+
+/* Toggle game */
+.toggles { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.toggle {
+  display: flex; align-items: center; gap: 10px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 9px 12px; background: var(--surface-2); cursor: pointer;
+}
+.toggle input { width: 18px; height: 18px; accent-color: var(--teal-bright); flex: none; cursor: pointer; }
+.toggle .tg-emoji { font-size: 18px; }
+.toggle .tg-name { font-size: 13.5px; font-weight: 700; }
+.toggle.off { opacity: .55; }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.file-btn { cursor: pointer; display: inline-flex; align-items: center; }
+.btn-plain.danger { color: var(--text-danger); border-color: var(--bg-danger); }
+.btn-plain.danger:hover { background: var(--bg-danger); }
+.saved-note { font-size: 13px; font-weight: 700; color: var(--text-success); margin-top: 10px; min-height: 1.2em; }
+
+/* Gerbang PIN */
+.gate {
+  position: fixed; inset: 0; z-index: 40;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.gate-card { max-width: 420px; width: 100%; text-align: center; padding: 2rem 1.5rem; }
+.gate-icon { font-size: 40px; }
+.gate-title { font-size: 22px; font-weight: 800; margin: 8px 0 2px; }
+.gate-sub { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 1.2rem; }
+.gate .text-input { width: 100%; margin-bottom: 10px; text-align: center; letter-spacing: 3px; }
+.gate .btn-cta { width: 100%; }
+/* --text-muted gagal AA untuk teks sekecil ini; pakai secondary. */
+.gate-note { font-size: 11.5px; color: var(--text-secondary); margin-top: 1.2rem; line-height: 1.5; }

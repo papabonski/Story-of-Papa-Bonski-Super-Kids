@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Papa Bonski Mandarin — Belajar Mandarin Seru untuk Anak</title>
+<meta name="description" content="Papa Bonski Mandarin menghadirkan 18 mini-game belajar Mandarin untuk anak, tiga tingkat kesulitan, suara pelafalan, bintang, dan akses offline.">
+<meta name="theme-color" content="#A63D0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PB Mandarin">
+<meta property="og:title" content="Papa Bonski Mandarin — Belajar Mandarin Seru untuk Anak">
+<meta property="og:description" content="Belajar Bahasa Mandarin melalui 18 mini-game, suara pelafalan, tiga tingkat, dan tantangan bintang.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="assets/js/config.js"></script>
+</head>
+<body>
+
+<h1 class="sr-only">Papa Bonski Mandarin — game belajar Bahasa Mandarin untuk anak dengan 18 mini-game.</h1>
+
+<header class="appbar">
+  <div class="appbar-in">
+    <span id="brandLogo" class="brand-logo" aria-hidden="true"><img class="brand-logo-img" src="assets/papa-bonski-logo.png" alt=""></span>
+    <div class="brand">
+      <p class="brand-name" id="brandName">Papa Bonski Mandarin</p>
+      <p class="brand-tag" id="brandTag">Belajar Mandarin Seru untuk Anak · 汉语真好玩</p>
+    </div>
+    <div class="appbar-tools">
+      <button id="installBtn" class="ghost-btn install-btn" data-act="install" hidden>Pasang</button>
+      <button id="themeBtn" class="ghost-btn" data-act="theme" aria-label="Ganti tema terang atau gelap">🌙</button>
+      <button id="soundBtn" class="ghost-btn" data-act="sound" aria-label="Nyalakan atau matikan suara">🔔</button>
+      <p class="starpill" aria-live="polite"><span id="headAvatar" aria-hidden="true"></span><span aria-hidden="true">⭐</span> <span id="starTotal">0</span><span class="sr-only"> bintang terkumpul</span></p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Layar 1: kenalan -->
+  <section id="onboard" class="card onboard" hidden>
+    <img class="onboard-mascot" src="assets/panda-mandarin.png" alt="Panda Papa Bonski sedang belajar Mandarin">
+    <h2 class="onboard-title">Halo, teman kecil!</h2>
+    <p class="onboard-sub">Siapa namamu? Ayo kumpulkan bintang sebanyak-banyaknya!</p>
+    <p class="avatar-label">Pilih temanmu:</p>
+    <div id="avatarPick" class="avatar-pick" role="radiogroup" aria-label="Pilih avatar"></div>
+    <form id="nameForm" class="onboard-form">
+      <input id="nameInput" class="text-input" maxlength="16" autocomplete="off"
+             placeholder="Tulis namamu di sini" aria-label="Nama pemain" required>
+      <button class="btn-cta" type="submit">Mulai main! 🚀</button>
+    </form>
+    <p id="nameErr" class="err" role="alert"></p>
+  </section>
+
+  <!-- Layar 2: beranda -->
+  <section id="home" hidden>
+    <div class="hello">
+      <span id="helloAvatar" class="hello-avatar" aria-hidden="true"></span>
+      <div>
+        <h2 class="hello-title">Halo, <span id="playerName"></span>! <span aria-hidden="true">👋</span></h2>
+        <p class="hello-sub">Pilih permainan favoritmu:</p>
+      </div>
+      <button class="btn-plain" data-act="switch">Ganti pemain</button>
+    </div>
+
+    <!-- Pilih level & fokus: satu langkah per layar -->
+    <div id="wizard" hidden>
+      <div class="wiz-bar">
+        <button id="wizBack" class="btn-plain sm" data-act="wiz-back"></button>
+        <p id="wizStep" class="wiz-step" role="status"></p>
+        <div id="wizDots" class="wiz-dots" aria-hidden="true"></div>
+      </div>
+
+      <div id="stepLevel" class="card picker" hidden>
+        <div class="picker-label">
+          <p class="kicker">Level</p>
+          <p class="picker-title">Pilih tingkat tantangan</p>
+          <p id="levelHint" class="picker-hint"></p>
+        </div>
+        <div id="levelOpts" class="picker-opts" role="group" aria-label="Tingkat kesulitan"></div>
+      </div>
+
+      <div id="stepFocus" class="card picker" hidden>
+        <div class="picker-label">
+          <p class="kicker">Fokus belajar</p>
+          <p id="focusTitle" class="picker-title"></p>
+          <p id="focusHint" class="picker-hint"></p>
+        </div>
+        <div id="focusOpts" class="picker-opts" role="group" aria-label="Fokus belajar"></div>
+      </div>
+    </div>
+
+    <!-- Ringkasan pilihan, tampil setelah wizard selesai -->
+    <div id="summary" class="summary" hidden>
+      <div class="journey-steps" aria-label="Langkah belajar">
+        <span class="journey-step done">Nama</span>
+        <span id="sumLevel" class="journey-step done"></span>
+        <span id="sumFocus" class="journey-step done"></span>
+        <span class="journey-step on">Main</span>
+      </div>
+      <button class="btn-plain sm" data-act="wiz-edit">Ubah pilihan</button>
+    </div>
+
+    <div id="sections"></div>
+
+    <div id="boardCard" class="card board">
+      <div class="board-head">
+        <p class="board-title"><span aria-hidden="true">🏆</span> Papan bintang <span class="board-note">(tersimpan di perangkat ini)</span></p>
+        <button class="btn-plain sm" data-act="reset-board">Kosongkan</button>
+      </div>
+      <ol id="boardList" class="board-list"></ol>
+    </div>
+  </section>
+
+  <!-- Layar 3: permainan -->
+  <section id="game"></section>
+
+  <footer class="site-foot">
+    <a href="https://www.papabonski.com" class="foot-link" rel="noopener">Papa Bonski · Kids Educational Adventures</a>
+  </footer>
+</main>
+
+<!-- Modal hasil -->
+<div id="modal" class="modal-back" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <button class="modal-x" data-act="close-modal" aria-label="Tutup">✕</button>
+    <p id="modalStars" class="modal-stars" aria-hidden="true"></p>
+    <p id="modalName" class="modal-name"></p>
+    <div id="modalGrid" class="modal-grid"></div>
+    <div class="modal-actions">
+      <button class="btn-cta" data-act="again">↻ Main lagi</button>
+      <button class="btn-plain" data-act="close-modal">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup install PWA -->
+<div id="pwaModal" class="modal-back pwa-back" hidden>
+  <div class="modal pwa-modal" role="dialog" aria-modal="true" aria-labelledby="pwaTitle" aria-describedby="pwaLead">
+    <button class="modal-x" data-act="close-pwa" aria-label="Tutup">✕</button>
+    <div class="pwa-appmark" aria-hidden="true">
+      <img src="assets/icons/icon-512.png" alt="" width="58" height="58">
+      <span class="pwa-appmark-badge">⬇</span>
+    </div>
+    <p id="pwaTag" class="pwa-tag"></p>
+    <p id="pwaTitle" class="modal-name">Pasang <span id="pwaBrand">Papa Bonski Mandarin</span></p>
+    <p id="pwaLead" class="pwa-lead"></p>
+    <div class="pwa-benefits">
+      <span><b aria-hidden="true">📱</b>Ikon di layar utama</span>
+      <span><b aria-hidden="true">⚡</b>Buka lebih cepat</span>
+      <span><b aria-hidden="true">📚</b>Belajar offline</span>
+    </div>
+    <ol id="pwaSteps" class="pwa-steps"></ol>
+    <p id="pwaNote" class="pwa-note" hidden></p>
+    <div class="modal-actions">
+      <button id="pwaInstallNow" class="btn-cta" data-act="pwa-install-confirm">Pasang sekarang</button>
+      <button class="btn-plain" data-act="close-pwa">Nanti</button>
+    </div>
+    <button id="pwaNever" class="pwa-never" data-act="pwa-never">Jangan tampilkan lagi</button>
+  </div>
+</div>
+
+<!-- Pesan singkat seputar pemasangan aplikasi -->
+<div id="pwaToast" class="pwa-toast" role="status" aria-live="polite" hidden></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<!-- Service worker utama Papa Bonski menangani instalasi dan menjaga halaman
+     pelanggan tetap memerlukan verifikasi lisensi melalui jaringan. -->
+</body>
+</html>
