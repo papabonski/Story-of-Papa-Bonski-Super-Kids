@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "Papa Bonski Mandarin — Belajar Mandarin untuk Anak",
-  description: "Belajar Mandarin melalui 9 mini game interaktif untuk anak.",
+  description: "Belajar Mandarin melalui 18 mini-game interaktif untuk anak.",
   applicationName: "Papa Bonski Mandarin",
   manifest: "/mandarin/manifest.webmanifest",
   appleWebApp: {

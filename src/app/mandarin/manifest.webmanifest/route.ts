@@ -2,7 +2,7 @@ const manifest = {
   id: "/mandarin",
   name: "Papa Bonski Mandarin",
   short_name: "Papa Bonski Mandarin",
-  description: "Belajar Mandarin melalui 9 mini game interaktif untuk anak.",
+  description: "Belajar Mandarin melalui 18 mini-game interaktif untuk anak.",
   start_url: "/mandarin",
   scope: "/",
   display: "standalone",
