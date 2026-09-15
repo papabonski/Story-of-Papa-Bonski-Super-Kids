@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
-import { requireCustomerAccess } from "@/lib/customer-access";
+import { requireCustomerPortalAccess } from "@/lib/customer-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function InstallPage() {
-  if (process.env.REQUIRE_CUSTOMER_LOGIN === "true") await requireCustomerAccess();
+  if (process.env.REQUIRE_CUSTOMER_LOGIN === "true") await requireCustomerPortalAccess("/install");
   const brand = await getRuntimeBrand();
 
   return (

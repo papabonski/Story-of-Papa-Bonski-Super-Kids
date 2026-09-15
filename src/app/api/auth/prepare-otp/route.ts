@@ -4,6 +4,11 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 const AUTH_PAGE_SIZE = 1000;
 const MAX_AUTH_PAGES = 50;
 const GENERIC_PROFILE_NAME = "member papa bonski";
+const MODULE_PLANS: Record<string, string> = {
+  super_kids_access: "PBSK-PREMIUM-1Y",
+  mandarin_access: "PBM-MANDARIN-1Y",
+};
+const ALLOWED_ENTITLEMENTS = new Set(["portal_access", ...Object.keys(MODULE_PLANS)]);
 
 function normalizeEmail(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -40,6 +45,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => null);
     const email = normalizeEmail(body?.email);
     const displayName = normalizeProfileName(body?.displayName);
+    const requestedEntitlement = String(body?.entitlementKey || "portal_access");
+    const entitlementKey = ALLOWED_ENTITLEMENTS.has(requestedEntitlement)
+      ? requestedEntitlement
+      : "portal_access";
 
     if (!email) {
       return NextResponse.json(
@@ -94,35 +103,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [{ data: entitlement, error: entitlementError }, { data: subscription, error: subscriptionError }] =
+    const requestedKeys = entitlementKey === "portal_access"
+      ? Object.keys(MODULE_PLANS)
+      : [entitlementKey];
+    const requestedPlans = requestedKeys.map((key) => MODULE_PLANS[key]);
+    const [{ data: entitlements, error: entitlementError }, { data: subscriptions, error: subscriptionError }] =
       await Promise.all([
         admin
           .from("entitlements")
-          .select("expires_at")
+          .select("key")
           .eq("customer_id", customer.id)
-          .eq("key", "super_kids_access")
-          .maybeSingle(),
+          .in("key", requestedKeys),
         admin
           .from("subscriptions")
-          .select("status,expires_at")
+          .select("status,plans!inner(code)")
           .eq("customer_id", customer.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
+          .eq("status", "active")
+          .in("plans.code", requestedPlans),
       ]);
 
     if (entitlementError) throw entitlementError;
     if (subscriptionError) throw subscriptionError;
 
-    const now = Date.now();
-    const entitlementActive =
-      Boolean(entitlement) &&
-      (!entitlement?.expires_at || new Date(entitlement.expires_at).getTime() > now);
-    const subscriptionActive =
-      subscription?.status === "active" &&
-      (!subscription?.expires_at || new Date(subscription.expires_at).getTime() > now);
+    const entitlementSet = new Set((entitlements || []).map((item) => item.key));
+    const activePlanSet = new Set(
+      (subscriptions || []).flatMap((item: any) => {
+        const plan = Array.isArray(item.plans) ? item.plans[0] : item.plans;
+        return plan?.code ? [plan.code] : [];
+      }),
+    );
+    const accessActive = requestedKeys.some(
+      (key) => entitlementSet.has(key) && activePlanSet.has(MODULE_PLANS[key]),
+    );
 
-    if (!entitlementActive || !subscriptionActive) {
+    if (!accessActive) {
       return NextResponse.json(
         {
           ok: false,

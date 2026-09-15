@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCustomerAccess } from "@/lib/customer-access";
+import { getCustomerPortalAccess } from "@/lib/customer-access";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 
@@ -16,7 +16,7 @@ export default async function AccessPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user && !user.is_anonymous && user.email) {
-    const access = await getCustomerAccess();
+    const access = await getCustomerPortalAccess();
     if (access?.hasAccess) redirect("/app");
     redirect("/onboarding");
   }
@@ -47,7 +47,7 @@ export default async function AccessPage() {
               <li><b className="text-ink">1.</b> Tekan tombol Akses Produk.</li>
               <li><b className="text-ink">2.</b> Masukkan Email Penerima / email login Papa Bonski.</li>
               <li><b className="text-ink">3.</b> Masukkan kode OTP 6 digit dari email Papa Bonski.</li>
-              <li><b className="text-ink">4.</b> Akses Super Kids akan diverifikasi otomatis.</li>
+              <li><b className="text-ink">4.</b> Hak setiap modul akan diverifikasi otomatis.</li>
             </ol>
           </div>
 

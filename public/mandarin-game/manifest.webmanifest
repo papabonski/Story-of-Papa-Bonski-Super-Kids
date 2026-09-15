@@ -1,0 +1,104 @@
+{
+  "name": "Papa Bonski Mandarin",
+  "short_name": "PB Mandarin",
+  "description": "18 mini-game seru untuk anak belajar bahasa Mandarin bersama Papa Bonski.",
+  "id": "/mandarin",
+  "start_url": "/mandarin",
+  "scope": "/mandarin",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#FFF8EC",
+  "theme_color": "#A63D0B",
+  "lang": "id",
+  "categories": ["education", "games", "kids"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/mandarin-game/assets/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/mandarin-game/assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mulai Kuis Campuran",
+      "short_name": "Kuis",
+      "description": "Langsung buka latihan campuran.",
+      "url": "/mandarin?game=mixed",
+      "icons": [{ "src": "/mandarin-game/assets/icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ]
+}

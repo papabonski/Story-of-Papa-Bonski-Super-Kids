@@ -1,13 +1,18 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { CUSTOMER_ENTITLEMENTS, getCustomerAccess } from "@/lib/customer-access";
 import { createSupabaseAdminClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const CHECKOUTS: Record<string,string> = {
+const CHECKOUTS: Record<string,string | undefined> = {
   "PBSK-SUPER-KIDS": "https://papabonski.orderhero.id/form/papa-bonski-super-kids",
   "PBSK-STORY-CREDIT-3": "https://papabonski.orderhero.id/form/papa-bonski-tambah-3-cerita",
   "PBSK-STORY-CREDIT-8": "https://papabonski.orderhero.id/form/papa-bonski-tambah-8-cerita",
+  "PBM-MANDARIN": process.env.ORDERHERO_MANDARIN_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/form-order-papa-bonski-mandarin",
+  "PBM-MANDARIN-MEMBER": process.env.ORDERHERO_MANDARIN_MEMBER_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/papa-bonski-mandarin-member-super-kids",
 };
 
 function normalizeEmail(value: unknown) {
@@ -33,21 +38,34 @@ export async function POST(req: Request) {
     const isTopup =
       productSku === "PBSK-STORY-CREDIT-3" ||
       productSku === "PBSK-STORY-CREDIT-8";
+    const isMandarinMember = productSku === "PBM-MANDARIN-MEMBER";
     let authUserId: string | null = null;
+    let customerId: string | null = null;
 
     // Top-up ownership is derived ONLY from the authenticated member session.
     // Never fall back to an email supplied by the browser or by OrderHero.
-    if (isTopup) {
+    if (isTopup || isMandarinMember) {
       const supabase = await createSupabaseServerClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || user.is_anonymous || !user.email) {
         return NextResponse.json(
-          { ok: false, error: "topup_login_required" },
+          { ok: false, error: isMandarinMember ? "member_login_required" : "topup_login_required" },
           { status: 401 },
         );
       }
       authUserId = user.id;
       recipientEmail = normalizeEmail(user.email);
+
+      if (isMandarinMember) {
+        const access = await getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids);
+        if (!access?.hasAccess || access.email !== recipientEmail) {
+          return NextResponse.json(
+            { ok: false, error: "super_kids_access_required" },
+            { status: 403 },
+          );
+        }
+        customerId = access.customerId;
+      }
     }
 
     if (!recipientEmail || !recipientEmail.includes("@") || recipientEmail.length > 254) {
@@ -75,7 +93,9 @@ export async function POST(req: Request) {
       .contains("payload", {
         recipient_email: recipientEmail,
         product_sku: productSku,
-        ...(isTopup ? { intent_type: "member_topup" } : {}),
+        ...((isTopup || isMandarinMember)
+          ? { intent_type: isMandarinMember ? "member_addon" : "member_topup" }
+          : {}),
       });
 
     const { error } = await db.from("webhook_events").insert({
@@ -83,15 +103,16 @@ export async function POST(req: Request) {
       event_key: token,
       status: "pending",
       payload: {
-        intent_type: isTopup ? "member_topup" : "recipient_purchase",
+        intent_type: isMandarinMember ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
         auth_user_id: authUserId,
+        customer_id: customerId,
         recipient_email: recipientEmail,
         product_sku: productSku,
         attribution,
         created_at: new Date().toISOString(),
       },
       normalized: {
-        intentType: isTopup ? "member_topup" : "recipient_purchase",
+        intentType: isMandarinMember ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
         recipientEmail,
         productSku,
       },

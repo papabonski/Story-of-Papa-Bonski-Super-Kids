@@ -7,6 +7,8 @@ const PRIVATE_NAV_PREFIXES = [
   "/onboarding",
   "/install",
   "/super-kids/checkout",
+  "/mandarin",
+  "/mandarin-game",
   "/story/",
 ];
 

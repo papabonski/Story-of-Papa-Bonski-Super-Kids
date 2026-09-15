@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${runtimeBrand.name} — Cerita Personal untuk Si Kecil`,
     description: `${runtimeBrand.tagline} ${runtimeBrand.subtagline}`,
     applicationName: runtimeBrand.name,
+    manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,
       title: runtimeBrand.name,
