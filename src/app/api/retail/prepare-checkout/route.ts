@@ -78,6 +78,28 @@ export async function POST(req: Request) {
     const attribution = cleanAttribution(body?.attribution);
     const token = crypto.randomUUID().replace(/-/g, "");
     const db = createSupabaseAdminClient();
+    let promo: null | { code: string; slot: number; remaining: number; expiresAt: string } = null;
+
+    if (productSku === "PBM-MANDARIN") {
+      const { data: reservation, error: reservationError } = await db.rpc("reserve_promo_claim", {
+        p_promotion_key: "mandarin-launch-50",
+        p_recipient_email: recipientEmail,
+        p_checkout_intent_key: token,
+      });
+      // Promo migration can be deployed independently. Until it exists or is
+      // activated, checkout safely continues at the normal Rp25.000 price.
+      if (!reservationError) {
+        const row = Array.isArray(reservation) ? reservation[0] : reservation;
+        if (row?.reserved && row?.coupon_code) {
+          promo = {
+            code: String(row.coupon_code),
+            slot: Number(row.slot_number),
+            remaining: Number(row.remaining),
+            expiresAt: String(row.reservation_expires_at),
+          };
+        }
+      }
+    }
 
     // Keep only the newest pending intent for this recipient + SKU. Older
     // abandoned attempts would otherwise make webhook recovery ambiguous if
@@ -109,6 +131,8 @@ export async function POST(req: Request) {
         recipient_email: recipientEmail,
         product_sku: productSku,
         attribution,
+        promo_key: promo ? "mandarin-launch-50" : null,
+        promo_slot: promo?.slot ?? null,
         created_at: new Date().toISOString(),
       },
       normalized: {
@@ -125,7 +149,7 @@ export async function POST(req: Request) {
     }
     url.searchParams.set("utm_content", `pbint_${token}`);
 
-    return NextResponse.json({ ok:true, url:url.toString() });
+    return NextResponse.json({ ok:true, url:url.toString(), promo });
   } catch {
     return NextResponse.json({ ok:false, error:"prepare_failed" }, { status:500 });
   }
