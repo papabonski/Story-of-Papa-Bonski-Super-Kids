@@ -57,7 +57,8 @@ export function normalizeOrderHeroPayload(input: Record<string, unknown>): Norma
     productSku: first(product.sku, product.code, product.variant_id, order.product_sku, data.product_sku, root.product_sku),
     externalProductId: String(first(product.id, product.product_id, order.product_id, data.product_id, root.product_id) || "") || undefined,
     productName: first(product.name, product.title, product.product_name, order.product_name, data.product_name, root.product_name),
-    amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+    // A 100% coupon is a valid completed order with a numeric total of zero.
+    amount: Number.isFinite(amount) && amount >= 0 ? amount : undefined,
     currency: String(first(order.currency, payment.currency, data.currency, root.currency, "IDR")),
     paidAt: first(order.paid_at, payment.paid_at, data.paid_at, root.paid_at),
     utm: {
@@ -124,7 +125,7 @@ export function verifyWebhook(rawBody: string, req: Request) {
 
 export function isPaid(status?: string) {
   const s=(status??"").toLowerCase();
-  return ["paid","success","completed","settled","payment_success","payment.success","lunas"].includes(s) || s.includes("paid") || s.includes("lunas");
+  return ["paid","success","completed","settled","payment_success","payment.success","lunas","free"].includes(s) || s.includes("paid") || s.includes("lunas");
 }
 
 export function payloadReadiness(n: NormalizedOrderHeroOrder) {

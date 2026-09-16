@@ -36,7 +36,7 @@ export default async function MandarinCheckoutPage() {
         <div className="rounded-[2rem] bg-white p-6 shadow-xl ring-1 ring-black/[0.06] sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary">Sebelum pembayaran</p>
           <h1 className="mt-2 text-3xl font-extrabold">Siapa yang akan belajar Mandarin?</h1>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">Pelanggan baru membayar <b>Rp25.000</b>. Pemilik Papa Bonski Super Kids mendapat harga add-on <b>Rp15.000</b> setelah masuk dan diverifikasi dengan OTP.</p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">Harga normal pelanggan baru adalah <b>Rp25.000</b>. Selama kuota tersedia, 50 pengguna awal mendapat akses gratis dan diminta memberikan ulasan jujur setelah satu hari. Pemilik Super Kids tetap mendapat harga add-on <b>Rp15.000</b>.</p>
           <div className="mt-7"><MandarinPurchaseGate
             standaloneCheckoutReady={standaloneCheckoutReady}
             memberCheckoutReady={memberCheckoutReady}

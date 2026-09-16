@@ -200,7 +200,7 @@ export async function POST(req: Request) {
     let intent:any=null;
     if(intentToken){
       const {data,error}=await db.from("webhook_events")
-        .select("id,status,payload,received_at,external_order_id")
+        .select("id,event_key,status,payload,received_at,external_order_id")
         .eq("provider","retail_checkout")
         .eq("event_key",intentToken)
         .maybeSingle();
@@ -216,7 +216,7 @@ export async function POST(req: Request) {
     if(!intent){
       const cutoff=new Date(Date.now()-30*60*1000).toISOString();
       const {data:candidates,error:candidateError}=await db.from("webhook_events")
-        .select("id,status,payload,received_at,external_order_id")
+        .select("id,event_key,status,payload,received_at,external_order_id")
         .eq("provider","retail_checkout")
         .eq("status","pending")
         .gte("received_at",cutoff)
@@ -436,7 +436,7 @@ export async function POST(req: Request) {
       external_order_id:n.externalOrderId,
       customer_id:customerId,
       product_sku:productSku,
-      amount:n.amount||null,
+      amount:n.amount ?? null,
       currency:n.currency||"IDR",
       status:"paid",
       buyer_email:n.email||null,
@@ -634,6 +634,31 @@ export async function POST(req: Request) {
       expires_at:accessExpiresAt
     },{onConflict:"customer_id,key"});
     if(entitlement.error) throw entitlement.error;
+
+    // A zero-total standalone Mandarin order can consume a reserved launch
+    // promo slot. Paid orders release the reservation immediately.
+    const resolvedIntentKey=intentToken || String(intent?.event_key || "");
+    if(actualSku===MANDARIN_STANDARD_SKU && resolvedIntentKey){
+      const now=new Date();
+      const promoUpdate=n.amount===0
+        ? {
+            status:"activated",
+            customer_id:customerId,
+            order_id:order.id,
+            activated_at:now.toISOString(),
+            feedback_due_at:new Date(now.getTime()+24*60*60*1000).toISOString(),
+            updated_at:now.toISOString()
+          }
+        : {status:"released",updated_at:now.toISOString()};
+      const {error:promoError}=await db.from("promo_claims")
+        .update(promoUpdate)
+        .eq("promotion_key","mandarin-launch-50")
+        .eq("checkout_intent_key",resolvedIntentKey)
+        .eq("status","reserved");
+      // Deployments can overlap the migration briefly; normal paid activation
+      // must remain available if the promo table has not been installed yet.
+      if(promoError && !String(promoError.message || "").includes("promo_claims")) throw promoError;
+    }
 
     if(attribution && Object.values(attribution).some(Boolean)) {
       const attributionInsert=await db.from("attributions").insert({
