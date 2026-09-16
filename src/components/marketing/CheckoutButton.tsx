@@ -38,7 +38,7 @@ function emitMetaCheckout(attempt=0){
       content_ids:["PBSK-SUPER-KIDS"],
       content_name:"PBSK-SUPER-KIDS",
       content_type:"product",
-      value:50000,
+      value:25000,
       currency:"IDR",
     });
     return;
@@ -55,7 +55,7 @@ export default function CheckoutButton({label="Mulai Papa Bonski Super Kids",cla
     fetch("/api/funnel/track",{
       method:"POST",
       headers:{"content-type":"application/json"},
-      body:JSON.stringify({event:"InitiateCheckout",product:"PBSK-SUPER-KIDS",value:50000,path:location.pathname,utm}),
+      body:JSON.stringify({event:"InitiateCheckout",product:"PBSK-SUPER-KIDS",value:25000,path:location.pathname,utm}),
       keepalive:true,
     }).catch(()=>{});
     emitMetaCheckout();

@@ -192,7 +192,7 @@ export default function RetailPurchaseGate({
         <h2 className="mt-2 text-xl font-extrabold text-ink">Paket ini akan diberikan kepada:</h2>
         <p className="mt-2 break-all rounded-2xl bg-white px-4 py-3 text-base font-extrabold text-ink ring-1 ring-emerald-200">{email}</p>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-          Email ini akan menjadi pemilik lisensi, mendapat akses seumur hidup + 2 cerita personal, dan digunakan untuk login OTP.
+          Email ini akan menjadi pemilik akun, mendapat 1 cerita personal, dan digunakan untuk login OTP. Kuota cerita tidak kedaluwarsa.
         </p>
       </div>
 
@@ -201,7 +201,7 @@ export default function RetailPurchaseGate({
         onClick={() => goToCheckout("PBSK-SUPER-KIDS")}
         className="w-full rounded-2xl bg-brand-primary px-5 py-4 font-extrabold text-white shadow-sm"
       >
-        Konfirmasi & Lanjut ke Checkout — Rp50.000
+        Konfirmasi & Lanjut ke Checkout — Rp25.000
       </button>
 
       <div className="rounded-2xl bg-surface p-4 text-sm leading-relaxed text-ink-soft">
@@ -277,23 +277,23 @@ function TopupChoices({
     <button type="button" disabled={disabled} onClick={onThree} className="block w-full rounded-3xl bg-surface-card p-5 text-left shadow-sm ring-2 ring-emerald-200 hover:ring-emerald-400 disabled:opacity-60">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-extrabold text-ink">Tambah 3 Cerita</p>
-          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa mengubah hak akses seumur hidup.</p>
+          <p className="font-extrabold text-ink">Paket Nambah · +3 Cerita</p>
+          <p className="mt-1 text-sm text-ink-soft">Rp20.000 per cerita · kuota tidak kedaluwarsa.</p>
         </div>
-        <b className="whitespace-nowrap text-emerald-700">Rp50.000</b>
+        <b className="whitespace-nowrap text-emerald-700">Rp60.000</b>
       </div>
-      <div className="mt-4 rounded-2xl bg-emerald-600 px-4 py-3 text-center font-extrabold text-white">Pilih +3 Cerita</div>
+      <div className="mt-4 rounded-2xl bg-emerald-600 px-4 py-3 text-center font-extrabold text-white">Pilih Paket Nambah</div>
     </button>
 
     <button type="button" disabled={disabled} onClick={onEight} className="block w-full rounded-3xl bg-surface-card p-5 text-left shadow-sm ring-1 ring-black/5 hover:ring-brand-primary/40 disabled:opacity-60">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-extrabold text-ink">Tambah 8 Cerita</p>
-          <p className="mt-1 text-sm text-ink-soft">Tambah kuota tanpa mengubah hak akses seumur hidup.</p>
+          <p className="font-extrabold text-ink">Paket Rame-Rame · +8 Cerita</p>
+          <p className="mt-1 text-sm text-ink-soft">Paling hemat · Rp15.000 per cerita.</p>
         </div>
         <b className="whitespace-nowrap text-brand-primary">Rp120.000</b>
       </div>
-      <div className="mt-4 rounded-2xl bg-brand-primary px-4 py-3 text-center font-extrabold text-white">Pilih +8 Cerita</div>
+      <div className="mt-4 rounded-2xl bg-brand-primary px-4 py-3 text-center font-extrabold text-white">Pilih Paket Rame-Rame</div>
     </button>
   </>;
 }

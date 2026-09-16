@@ -39,4 +39,3 @@ export async function GET() {
     return NextResponse.json({ ok: false, active: false, total: 50, claimed: 0, remaining: 0 });
   }
 }
-

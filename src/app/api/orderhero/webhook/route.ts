@@ -13,9 +13,15 @@ const ORDERHERO_MANDARIN_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_PRODUCT_ID || "6aa2651358d21cc2224250c0";
 const ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID || "6aa8b81d733fa8f8f8eb8966";
-const STORY_TOPUPS: Record<string, { credits: number; name: string }> = {
-  "PBSK-STORY-CREDIT-3": { credits: 3, name: "Papa Bonski - Tambah 3 Cerita" },
-  "PBSK-STORY-CREDIT-8": { credits: 8, name: "Papa Bonski - Tambah 8 Cerita" },
+const STORY_TOPUPS: Record<string, { credits: number; names: string[] }> = {
+  "PBSK-STORY-CREDIT-3": {
+    credits: 3,
+    names: ["Papa Bonski - Paket Nambah", "Papa Bonski - Tambah 3 Cerita"],
+  },
+  "PBSK-STORY-CREDIT-8": {
+    credits: 8,
+    names: ["Papa Bonski - Paket Rame-rame", "Papa Bonski - Tambah 8 Cerita"],
+  },
 };
 
 function safeHeaders(req:Request){
@@ -84,10 +90,10 @@ export async function POST(req: Request) {
     const normalizedName = String(n.productName || "").trim().toLowerCase();
     const topupEntry =
       STORY_TOPUPS[normalizedSku] ??
-      Object.entries(STORY_TOPUPS).find(([, item]) => item.name.toLowerCase() === normalizedName)?.[1];
+      Object.entries(STORY_TOPUPS).find(([, item]) => item.names.some((name) => name.toLowerCase() === normalizedName))?.[1];
     const topupSku =
       STORY_TOPUPS[normalizedSku] ? normalizedSku :
-      Object.entries(STORY_TOPUPS).find(([, item]) => item.name.toLowerCase() === normalizedName)?.[0];
+      Object.entries(STORY_TOPUPS).find(([, item]) => item.names.some((name) => name.toLowerCase() === normalizedName))?.[0];
     const topupCredits = topupEntry?.credits ?? 0;
 
     let productSku=n.productSku || (topupSku || "PBSK-SUPER-KIDS");
@@ -506,11 +512,13 @@ export async function POST(req: Request) {
       .maybeSingle();
     if(!plan) throw new Error(`Plan mapping not found: ${planCode}`);
 
+    const nowIso=new Date().toISOString();
     const {data:activeSub,error:activeSubError}=await db.from("subscriptions")
       .select("id,expires_at,source_order_id")
       .eq("customer_id",customerId)
       .eq("plan_id",plan.id)
       .eq("status","active")
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order("expires_at",{ascending:false})
       .limit(1)
       .maybeSingle();

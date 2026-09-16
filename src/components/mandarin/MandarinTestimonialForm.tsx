@@ -31,4 +31,3 @@ export default function MandarinTestimonialForm({ customerName }: { customerName
     <button disabled={state==="saving"} className="btn-primary w-full disabled:opacity-60">{state==="saving"?"Menyimpan…":"Kirim Ulasan"}</button>
   </form>;
 }
-

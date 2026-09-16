@@ -258,14 +258,14 @@ export default function CreateWizard({
                   href={STORY_TOPUP_3_URL}
                   className="rounded-card bg-white px-3 py-3 text-center ring-1 ring-red-200 transition active:scale-95"
                 >
-                  <span className="block text-sm font-extrabold text-brand-primary">+3 Cerita</span>
-                  <span className="block text-xs font-bold text-ink-soft">Rp50.000</span>
+                  <span className="block text-sm font-extrabold text-brand-primary">Paket Nambah · +3 Cerita</span>
+                  <span className="block text-xs font-bold text-ink-soft">Rp60.000</span>
                 </a>
                 <a
                   href={STORY_TOPUP_8_URL}
                   className="rounded-card bg-brand-primary px-3 py-3 text-center text-white transition active:scale-95"
                 >
-                  <span className="block text-sm font-extrabold">+8 Cerita</span>
+                  <span className="block text-sm font-extrabold">Paket Rame-Rame · +8 Cerita</span>
                   <span className="block text-xs font-bold text-white/90">Rp120.000 · Lebih hemat</span>
                 </a>
               </div>

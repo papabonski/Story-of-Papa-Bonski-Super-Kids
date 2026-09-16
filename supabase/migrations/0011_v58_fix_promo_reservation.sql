@@ -112,4 +112,3 @@ $$;
 
 revoke all on function public.reserve_promo_claim(text, text, text) from public, anon, authenticated;
 grant execute on function public.reserve_promo_claim(text, text, text) to service_role;
-

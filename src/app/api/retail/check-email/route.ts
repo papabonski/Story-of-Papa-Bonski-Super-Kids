@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, hasActivePackage: false, hasActiveSuperKids: false });
     }
 
+    const now = new Date().toISOString();
     const [
       { data: subscription, error: subscriptionError },
       { data: superKidsSubscription, error: superKidsError },
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
         .eq("customer_id", customer.id)
         .eq("status", "active")
         .eq("plans.code", planCode)
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
         .order("expires_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -49,6 +51,7 @@ export async function POST(req: Request) {
         .eq("customer_id", customer.id)
         .eq("status", "active")
         .eq("plans.code", "PBSK-PREMIUM-1Y")
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
         .order("expires_at", { ascending: false })
         .limit(1)
         .maybeSingle(),

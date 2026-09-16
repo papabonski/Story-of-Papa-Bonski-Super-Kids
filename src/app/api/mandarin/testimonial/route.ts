@@ -16,7 +16,6 @@ async function context() {
     .maybeSingle();
   return { access, db, claim };
 }
-
 export async function GET() {
   const ctx = await context();
   if (!ctx) return NextResponse.json({ ok: false, error: "access_required" }, { status: 401 });
@@ -62,4 +61,3 @@ export async function POST(req: Request) {
   await ctx.db.from("promo_claims").update({ feedback_submitted_at: now, updated_at: now }).eq("id", ctx.claim.id);
   return NextResponse.json({ ok: true });
 }
-
