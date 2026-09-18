@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 import FunnelTracker from "@/components/marketing/FunnelTracker";
 import CheckoutButton from "@/components/marketing/CheckoutButton";
+import SuperKidsPromoBadge from "@/components/super-kids/SuperKidsPromoBadge";
 
 export const dynamic="force-dynamic";
 
@@ -83,6 +84,7 @@ export default async function SuperKids(){
             <a href="#kekhawatiran-bunda" className="btn-primary text-center">Pelajari Cara Kerjanya</a>
             <CheckoutButton label="Buat Cerita Pertama — Rp25.000" className="btn-secondary text-center"/>
           </div>
+          <div className="mt-4 max-w-xl"><SuperKidsPromoBadge /></div>
           <a href="#harga" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-extrabold text-brand-primary shadow-sm ring-1 ring-black/5">
             <span aria-hidden="true">☕</span>
             <span>Seharga secangkir kopi saja</span>
@@ -242,6 +244,7 @@ export default async function SuperKids(){
           <article className="flex flex-col rounded-[2rem] bg-white p-6 text-ink shadow-xl sm:p-8">
             <span className="w-fit rounded-full bg-brand-accent/30 px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-primary">Untuk mulai mencoba</span>
             <h3 className="mt-4 text-2xl font-extrabold">Paket Cobain</h3>
+            <div className="mt-3"><SuperKidsPromoBadge compact /></div>
             <p className="mt-2 text-sm leading-relaxed text-ink-soft">Cobain satu cerita unik yang dibuat khusus tentang si kecil.</p>
             <div className="mt-6"><span className="text-4xl font-extrabold">Rp25.000</span><span className="ml-2 text-sm font-bold text-ink-soft">1 cerita</span></div>
             <ul className="mt-6 space-y-3 text-sm font-semibold">
@@ -250,7 +253,7 @@ export default async function SuperKids(){
               <li>✓ Dapat direview sebelum diproses</li>
               <li>✓ Kuota tidak kedaluwarsa</li>
             </ul>
-            <CheckoutButton label="Buat Cerita Si Kecil" className="mt-7 w-full rounded-full bg-brand-primary px-5 py-3 text-center font-extrabold text-white"/>
+            <CheckoutButton label="Cek Paket Gratis" className="mt-7 w-full rounded-full bg-brand-primary px-5 py-3 text-center font-extrabold text-white"/>
           </article>
 
           <article className="flex flex-col rounded-[2rem] bg-emerald-50 p-6 text-ink ring-2 ring-emerald-300 sm:p-8">
@@ -317,7 +320,7 @@ export default async function SuperKids(){
         <p className="text-sm font-black uppercase tracking-widest text-brand-primary">Seharga secangkir kopi saja ☕</p>
         <h2 className="mt-3 text-3xl font-extrabold">Buat nasihat Bunda menjadi cerita milik si kecil.</h2>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">Mulai dengan satu cerita personal. Jadikan si kecil tokoh utama, lalu dampingi ia menemukan pelajarannya melalui kisah yang dekat dengan kehidupannya.</p>
-        <CheckoutButton label="Buat 1 Cerita — Rp25.000" className="mt-7 inline-flex rounded-full bg-brand-primary px-7 py-4 font-extrabold text-white shadow-lg"/>
+        <CheckoutButton label="Cek Paket Gratis" className="mt-7 inline-flex rounded-full bg-brand-primary px-7 py-4 font-extrabold text-white shadow-lg"/>
       </div>
     </section>
 

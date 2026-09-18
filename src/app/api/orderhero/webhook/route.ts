@@ -9,6 +9,10 @@ const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
 const MANDARIN_STANDARD_SKU = "PBM-MANDARIN";
 const MANDARIN_MEMBER_SKU = "PBM-MANDARIN-MEMBER";
 const MANDARIN_SKUS = new Set([MANDARIN_STANDARD_SKU, MANDARIN_MEMBER_SKU]);
+const PROMOTION_BY_SKU: Record<string,string> = {
+  "PBSK-SUPER-KIDS": "super-kids-launch-50",
+  [MANDARIN_STANDARD_SKU]: "mandarin-launch-50",
+};
 const ORDERHERO_MANDARIN_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_PRODUCT_ID || "6aa2651358d21cc2224250c0";
 const ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID =
@@ -402,6 +406,53 @@ export async function POST(req: Request) {
       }
     }
 
+    // Cross-module upgrade rules are enforced again when payment arrives so
+    // an old checkout tab or a direct OrderHero URL cannot bypass them.
+    if(customerId && !isTopup && !isMandarinMember){
+      const nowIso=new Date().toISOString();
+      const {data:moduleSubscriptions,error:moduleSubscriptionError}=await db.from("subscriptions")
+        .select("plans!inner(code)")
+        .eq("customer_id",customerId)
+        .eq("status","active")
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .in("plans.code",["PBSK-PREMIUM-1Y","PBM-MANDARIN-1Y"]);
+      if(moduleSubscriptionError) throw moduleSubscriptionError;
+
+      const activeCodes=new Set((moduleSubscriptions || []).flatMap((item:any) => {
+        const modulePlan=Array.isArray(item.plans) ? item.plans[0] : item.plans;
+        return modulePlan?.code ? [String(modulePlan.code)] : [];
+      }));
+      const mustUseStoryTopup=actualSku==="PBSK-SUPER-KIDS"
+        && activeCodes.has("PBM-MANDARIN-1Y")
+        && !activeCodes.has("PBSK-PREMIUM-1Y");
+      const mustUseMandarinAddon=actualSku===MANDARIN_STANDARD_SKU
+        && activeCodes.has("PBSK-PREMIUM-1Y");
+
+      if(mustUseStoryTopup || mustUseMandarinAddon){
+        const reason=mustUseStoryTopup
+          ? "mandarin_story_topup_only"
+          : "mandarin_member_addon_required";
+        const message=mustUseStoryTopup
+          ? "An active Mandarin account may add stories only through Paket Nambah or Paket Rame-rame."
+          : "An active Super Kids account must use the Rp15.000 Mandarin member add-on.";
+        await db.from("webhook_events").update({
+          status:"needs_mapping",
+          error:message,
+          processed_at:new Date().toISOString(),
+          normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:actualSku}
+        }).eq("id",event.id);
+        if(intent?.id){
+          await db.from("webhook_events").update({
+            status:"needs_mapping",
+            error:message,
+            processed_at:new Date().toISOString(),
+            external_order_id:n.externalOrderId
+          }).eq("id",intent.id);
+        }
+        return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason},{status:202});
+      }
+    }
+
     if(!customerId){
       const insertedCustomer=await db.from("customers").insert({
         name: buyerIsRecipient ? (n.name||"Member Papa Bonski") : "Member Papa Bonski",
@@ -643,10 +694,12 @@ export async function POST(req: Request) {
     },{onConflict:"customer_id,key"});
     if(entitlement.error) throw entitlement.error;
 
-    // A zero-total standalone Mandarin order can consume a reserved launch
-    // promo slot. Paid orders release the reservation immediately.
+    // A zero-total base-package order can consume its matching launch-promo
+    // slot. Paid orders release the reservation so the next customer can use it.
     const resolvedIntentKey=intentToken || String(intent?.event_key || "");
-    if(actualSku===MANDARIN_STANDARD_SKU && resolvedIntentKey){
+    const intentPromoKey=String((intent?.payload as Record<string,unknown> | null)?.promo_key || "");
+    const promotionKey=PROMOTION_BY_SKU[actualSku];
+    if(promotionKey && intentPromoKey===promotionKey && resolvedIntentKey){
       const now=new Date();
       const promoUpdate=n.amount===0
         ? {
@@ -660,7 +713,7 @@ export async function POST(req: Request) {
         : {status:"released",updated_at:now.toISOString()};
       const {error:promoError}=await db.from("promo_claims")
         .update(promoUpdate)
-        .eq("promotion_key","mandarin-launch-50")
+        .eq("promotion_key",promotionKey)
         .eq("checkout_intent_key",resolvedIntentKey)
         .eq("status","reserved");
       // Deployments can overlap the migration briefly; normal paid activation
