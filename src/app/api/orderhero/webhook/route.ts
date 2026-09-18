@@ -406,6 +406,53 @@ export async function POST(req: Request) {
       }
     }
 
+    // Cross-module upgrade rules are enforced again when payment arrives so
+    // an old checkout tab or a direct OrderHero URL cannot bypass them.
+    if(customerId && !isTopup && !isMandarinMember){
+      const nowIso=new Date().toISOString();
+      const {data:moduleSubscriptions,error:moduleSubscriptionError}=await db.from("subscriptions")
+        .select("plans!inner(code)")
+        .eq("customer_id",customerId)
+        .eq("status","active")
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .in("plans.code",["PBSK-PREMIUM-1Y","PBM-MANDARIN-1Y"]);
+      if(moduleSubscriptionError) throw moduleSubscriptionError;
+
+      const activeCodes=new Set((moduleSubscriptions || []).flatMap((item:any) => {
+        const modulePlan=Array.isArray(item.plans) ? item.plans[0] : item.plans;
+        return modulePlan?.code ? [String(modulePlan.code)] : [];
+      }));
+      const mustUseStoryTopup=actualSku==="PBSK-SUPER-KIDS"
+        && activeCodes.has("PBM-MANDARIN-1Y")
+        && !activeCodes.has("PBSK-PREMIUM-1Y");
+      const mustUseMandarinAddon=actualSku===MANDARIN_STANDARD_SKU
+        && activeCodes.has("PBSK-PREMIUM-1Y");
+
+      if(mustUseStoryTopup || mustUseMandarinAddon){
+        const reason=mustUseStoryTopup
+          ? "mandarin_story_topup_only"
+          : "mandarin_member_addon_required";
+        const message=mustUseStoryTopup
+          ? "An active Mandarin account may add stories only through Paket Nambah or Paket Rame-rame."
+          : "An active Super Kids account must use the Rp15.000 Mandarin member add-on.";
+        await db.from("webhook_events").update({
+          status:"needs_mapping",
+          error:message,
+          processed_at:new Date().toISOString(),
+          normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:actualSku}
+        }).eq("id",event.id);
+        if(intent?.id){
+          await db.from("webhook_events").update({
+            status:"needs_mapping",
+            error:message,
+            processed_at:new Date().toISOString(),
+            external_order_id:n.externalOrderId
+          }).eq("id",intent.id);
+        }
+        return NextResponse.json({ok:true,accepted:true,needsMapping:true,reason},{status:202});
+      }
+    }
+
     if(!customerId){
       const insertedCustomer=await db.from("customers").insert({
         name: buyerIsRecipient ? (n.name||"Member Papa Bonski") : "Member Papa Bonski",

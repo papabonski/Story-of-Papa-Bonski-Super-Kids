@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { CUSTOMER_ENTITLEMENTS, getCustomerAccess } from "@/lib/customer-access";
+import { CUSTOMER_ENTITLEMENTS, getCustomerAccess, getCustomerPortalAccess } from "@/lib/customer-access";
 import { createSupabaseAdminClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -61,7 +61,16 @@ export async function POST(req: Request) {
       authUserId = user.id;
       recipientEmail = normalizeEmail(user.email);
 
-      if (isMandarinMember) {
+      if (isTopup) {
+        const access = await getCustomerPortalAccess();
+        if (!access?.hasAccess || access.email !== recipientEmail) {
+          return NextResponse.json(
+            { ok: false, error: "module_access_required" },
+            { status: 403 },
+          );
+        }
+        customerId = access.customerId;
+      } else if (isMandarinMember) {
         const access = await getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids);
         if (!access?.hasAccess || access.email !== recipientEmail) {
           return NextResponse.json(
@@ -84,6 +93,49 @@ export async function POST(req: Request) {
     const token = crypto.randomUUID().replace(/-/g, "");
     const db = createSupabaseAdminClient();
     let promo: null | { code: string; slot: number; remaining: number; expiresAt: string } = null;
+
+    // Enforce the module upgrade path on the server. UI checks are only a
+    // convenience; direct requests must not bypass the Rp0 exclusivity rule.
+    if (!isTopup && !isMandarinMember) {
+      const { data: customer, error: customerError } = await db
+        .from("customers")
+        .select("id")
+        .ilike("email", recipientEmail)
+        .maybeSingle();
+      if (customerError) throw customerError;
+
+      if (customer?.id) {
+        const now = new Date().toISOString();
+        const { data: activeSubscriptions, error: subscriptionError } = await db
+          .from("subscriptions")
+          .select("plans!inner(code)")
+          .eq("customer_id", customer.id)
+          .eq("status", "active")
+          .or(`expires_at.is.null,expires_at.gt.${now}`)
+          .in("plans.code", ["PBSK-PREMIUM-1Y", "PBM-MANDARIN-1Y"]);
+        if (subscriptionError) throw subscriptionError;
+
+        const activeCodes = new Set((activeSubscriptions || []).flatMap((item: any) => {
+          const plan = Array.isArray(item.plans) ? item.plans[0] : item.plans;
+          return plan?.code ? [String(plan.code)] : [];
+        }));
+        const hasSuperKids = activeCodes.has("PBSK-PREMIUM-1Y");
+        const hasMandarin = activeCodes.has("PBM-MANDARIN-1Y");
+
+        if (productSku === "PBSK-SUPER-KIDS" && hasSuperKids) {
+          return NextResponse.json({ ok: false, error: "super_kids_already_active" }, { status: 409 });
+        }
+        if (productSku === "PBSK-SUPER-KIDS" && hasMandarin) {
+          return NextResponse.json({ ok: false, error: "mandarin_story_topup_only" }, { status: 409 });
+        }
+        if (productSku === "PBM-MANDARIN" && hasMandarin) {
+          return NextResponse.json({ ok: false, error: "mandarin_already_active" }, { status: 409 });
+        }
+        if (productSku === "PBM-MANDARIN" && hasSuperKids) {
+          return NextResponse.json({ ok: false, error: "mandarin_member_addon_required" }, { status: 409 });
+        }
+      }
+    }
 
     const promotionKey = PROMOTION_BY_SKU[productSku];
     if (promotionKey) {
