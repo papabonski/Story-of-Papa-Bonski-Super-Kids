@@ -19,10 +19,12 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
   // The Mandarin checkout uses the Super Kids entitlement to verify the
   // Rp15.000 member price. Opening the Mandarin app itself still requires the
   // dedicated Mandarin entitlement.
-  const entitlementKey = safeNext === "/mandarin/checkout"
-    ? "super_kids_access"
+  const entitlementKey = safeNext === "/mandarin/checkout" || safeNext === "/matematika/checkout"
+    ? "portal_access"
     : safeNext.startsWith("/mandarin")
       ? "mandarin_access"
+      : safeNext.startsWith("/matematika")
+        ? "matematika_access"
       : "portal_access";
 
   async function requestOtp(e: FormEvent) {

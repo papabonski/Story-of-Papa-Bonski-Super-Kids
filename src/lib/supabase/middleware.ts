@@ -4,7 +4,7 @@ import type { Database } from "../database.types";
 
 const PORTAL_PREFIXES = ["/app", "/install"];
 const SUPER_KIDS_PREFIXES = ["/create", "/collection", "/story", "/cerita/video"];
-const MODULE_ENTITLEMENTS = ["super_kids_access", "mandarin_access"];
+const MODULE_ENTITLEMENTS = ["super_kids_access", "mandarin_access", "matematika_access"];
 const AUTH_PATHS = ["/login", "/auth/callback", "/onboarding", "/account/inactive"];
 
 export async function updateSession(request: NextRequest) {
@@ -30,14 +30,15 @@ export async function updateSession(request: NextRequest) {
   const isPortalPath = PORTAL_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + "/"));
   const isSuperKidsPath = SUPER_KIDS_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + "/"));
   const isMandarinPath = path === "/mandarin" || path === "/mandarin-game" || path.startsWith("/mandarin-game/");
-  const protectedPath = isPortalPath || isSuperKidsPath || isMandarinPath;
+  const isMatematikaPath = path === "/matematika" || path === "/matematika-game" || path.startsWith("/matematika-game/");
+  const protectedPath = isPortalPath || isSuperKidsPath || isMandarinPath || isMatematikaPath;
   const authPath = AUTH_PATHS.some(prefix => path === prefix || path.startsWith(prefix + "/"));
 
   if (requireLogin && protectedPath) {
     if (!user || user.is_anonymous) {
       const login = request.nextUrl.clone();
       login.pathname = "/login";
-      login.searchParams.set("next", isMandarinPath ? "/mandarin" : path);
+      login.searchParams.set("next", isMandarinPath ? "/mandarin" : isMatematikaPath ? "/matematika" : path);
       return NextResponse.redirect(login);
     }
 
@@ -53,7 +54,7 @@ export async function updateSession(request: NextRequest) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";
-      onboarding.searchParams.set("next", isMandarinPath ? "/mandarin" : path);
+      onboarding.searchParams.set("next", isMandarinPath ? "/mandarin" : isMatematikaPath ? "/matematika" : path);
       return NextResponse.redirect(onboarding);
     }
     let entitlementQuery = supabase
@@ -62,13 +63,13 @@ export async function updateSession(request: NextRequest) {
       .eq("customer_id", membership.customer_id);
     entitlementQuery = isPortalPath
       ? entitlementQuery.in("key", MODULE_ENTITLEMENTS).limit(1)
-      : entitlementQuery.eq("key", isMandarinPath ? "mandarin_access" : "super_kids_access");
+      : entitlementQuery.eq("key", isMandarinPath ? "mandarin_access" : isMatematikaPath ? "matematika_access" : "super_kids_access");
     const { data: entitlements } = await entitlementQuery;
     if (!entitlements?.length) {
       const inactive = request.nextUrl.clone();
       inactive.pathname = "/account/inactive";
       inactive.search = "";
-      inactive.searchParams.set("product", isPortalPath ? "portal" : isMandarinPath ? "mandarin" : "super-kids");
+      inactive.searchParams.set("product", isPortalPath ? "portal" : isMandarinPath ? "mandarin" : isMatematikaPath ? "matematika" : "super-kids");
       return NextResponse.redirect(inactive);
     }
   }

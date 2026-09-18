@@ -120,6 +120,16 @@ export default async function SellerPage() {
             </p>
           </Link>
           <Link
+            href="/seller/matematika-promo"
+            className="rounded-2xl bg-orange-50 p-5 ring-1 ring-orange-200"
+          >
+            <div className="text-2xl">➗</div>
+            <h2 className="mt-2 font-extrabold">Promo Matematika</h2>
+            <p className="text-sm text-ink-soft">
+              Kuota 50 akses gratis dan tindak lanjut ulasan.
+            </p>
+          </Link>
+          <Link
             href="/seller/sales"
             className="rounded-2xl bg-surface-card p-5 ring-1 ring-black/[.06]"
           >

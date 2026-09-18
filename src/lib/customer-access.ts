@@ -17,6 +17,7 @@ export type CustomerAccess = {
 export const CUSTOMER_ENTITLEMENTS = {
   superKids: "super_kids_access",
   mandarin: "mandarin_access",
+  matematika: "matematika_access",
 } as const;
 
 export type CustomerEntitlement = typeof CUSTOMER_ENTITLEMENTS[keyof typeof CUSTOMER_ENTITLEMENTS];
@@ -24,6 +25,7 @@ export type CustomerEntitlement = typeof CUSTOMER_ENTITLEMENTS[keyof typeof CUST
 export const CUSTOMER_MODULES: Record<CustomerEntitlement, { planCode: string }> = {
   [CUSTOMER_ENTITLEMENTS.superKids]: { planCode: "PBSK-PREMIUM-1Y" },
   [CUSTOMER_ENTITLEMENTS.mandarin]: { planCode: "PBM-MANDARIN-1Y" },
+  [CUSTOMER_ENTITLEMENTS.matematika]: { planCode: "PBMAT-MATEMATIKA-LIFETIME" },
 };
 
 export type CustomerPortalAccess = {
@@ -170,7 +172,12 @@ export async function requireCustomerAccess(
 ) {
   const access = await getCustomerAccess(entitlementKey);
   if (!access) redirect(`/onboarding?next=${encodeURIComponent(nextPath)}`);
-  if (!access.hasAccess) redirect(`/account/inactive?product=${entitlementKey === CUSTOMER_ENTITLEMENTS.mandarin ? "mandarin" : "super-kids"}`);
+  const product = entitlementKey === CUSTOMER_ENTITLEMENTS.mandarin
+    ? "mandarin"
+    : entitlementKey === CUSTOMER_ENTITLEMENTS.matematika
+      ? "matematika"
+      : "super-kids";
+  if (!access.hasAccess) redirect(`/account/inactive?product=${product}`);
   return access;
 }
 

@@ -10,14 +10,16 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export default async function CustomerAppPage() {
-  const [access, brand, superKidsAccess, mandarinAccess] = await Promise.all([
+  const [access, brand, superKidsAccess, mandarinAccess, matematikaAccess] = await Promise.all([
     requireCustomerPortalAccess(),
     getRuntimeBrand(),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.mandarin),
+    getCustomerAccess(CUSTOMER_ENTITLEMENTS.matematika),
   ]);
   const hasSuperKids = Boolean(superKidsAccess?.hasAccess);
   const hasMandarin = Boolean(mandarinAccess?.hasAccess);
+  const hasMatematika = Boolean(matematikaAccess?.hasAccess);
   const quota = hasSuperKids ? await loadStoryQuota() : null;
   const superKidsFeedbackDue = hasSuperKids
     ? await loadSuperKidsFeedbackDue(access.customerId)
@@ -35,10 +37,16 @@ export default async function CustomerAppPage() {
       {hasSuperKids ? <Link href="/collection" className="rounded-2xl bg-white p-5 font-extrabold ring-1 ring-black/[0.06]">📚 Koleksi Cerita<div className="mt-1 text-xs font-semibold text-ink-soft">Lanjutkan dan baca cerita yang sudah dibuat.</div></Link> : <LockedModule title="📚 Koleksi Cerita" description="Memerlukan hak akses Super Kids." />}
       {hasSuperKids ? <Link href="/cerita/video" className="rounded-2xl bg-white p-5 font-extrabold ring-1 ring-black/[0.06]">🎬 English Learning<div className="mt-1 text-xs font-semibold text-ink-soft">Video, vocabulary, PDF dan kuis.</div></Link> : <LockedModule title="🎬 English Learning" description="Memerlukan hak akses Super Kids." />}
       {hasMandarin ? <Link href="/mandarin" className="rounded-2xl bg-[#176f67] p-5 font-extrabold text-white shadow-sm">🐼 Mandarin Learning<div className="mt-1 text-xs font-semibold text-white/80">18 mini-game, pelafalan, dan tantangan bintang.</div></Link> : <LockedModule title="🐼 Mandarin Learning" description="Modul ini belum dimiliki." />}
+      {hasMatematika ? <Link href="/matematika" className="rounded-2xl bg-[#e85d04] p-5 font-extrabold text-white shadow-sm">➗ Matematika<div className="mt-1 text-xs font-semibold text-white/80">Empat level, soal acak, dan penjelasan langkah.</div></Link> : <LockedModule title="➗ Matematika" description="Modul ini belum dimiliki." />}
       <Link href="/install" className="rounded-2xl bg-white p-5 font-extrabold ring-1 ring-black/[0.06]">📲 Install Aplikasi<div className="mt-1 text-xs font-semibold text-ink-soft">Pasang Papa Bonski di Home Screen.</div></Link>
     </div></div>
 
-    {(!hasSuperKids || !hasMandarin) && <section className="mt-5 rounded-[2rem] bg-violet-50 p-5 ring-1 ring-violet-200"><h2 className="font-extrabold text-violet-950">Tambah modul</h2><p className="mt-1 text-sm text-violet-800">Modul yang belum dibeli tetap terlihat tetapi terkunci.</p><div className="mt-4 flex flex-wrap gap-3">{!hasSuperKids && <Link href="/super-kids" className="btn-secondary">Lihat Super Kids</Link>}{!hasMandarin && <Link href="/mandarin/checkout" className="btn-primary">Beli Mandarin {hasSuperKids ? "Rp15.000" : "Rp25.000"}</Link>}</div></section>}
+    {(!hasSuperKids || !hasMandarin || !hasMatematika) && <section className="mt-5 rounded-[2rem] bg-violet-50 p-5 ring-1 ring-violet-200"><h2 className="font-extrabold text-violet-950">Tambah modul</h2><p className="mt-1 text-sm text-violet-800">Modul yang belum dibeli tetap terlihat tetapi terkunci.</p><div className="mt-4 flex flex-wrap gap-3">
+      {!hasSuperKids && !(hasMandarin || hasMatematika) && <Link href="/super-kids" className="btn-secondary">Lihat Super Kids</Link>}
+      {!hasSuperKids && (hasMandarin || hasMatematika) && <><a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-3" className="btn-secondary">Paket Nambah · Rp60.000</a><a href="/api/retail/member-topup?sku=PBSK-STORY-CREDIT-8" className="btn-secondary">Paket Rame-rame · Rp120.000</a></>}
+      {!hasMandarin && <Link href="/mandarin/checkout" className="btn-primary">Beli Mandarin {hasSuperKids || hasMatematika ? "Rp15.000" : "Rp25.000"}</Link>}
+      {!hasMatematika && <Link href="/matematika/checkout" className="btn-primary">Beli Matematika {hasSuperKids || hasMandarin ? "Rp15.000" : "Rp25.000"}</Link>}
+    </div></section>}
 
     {quota && (
       <section className={`mt-5 rounded-[2rem] p-5 ring-1 ${quotaExhausted ? "bg-red-50 text-red-800 ring-red-100" : "bg-emerald-50 text-emerald-900 ring-emerald-100"}`}>

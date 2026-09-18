@@ -58,14 +58,14 @@ export async function GET(req: Request) {
       .eq("status", "active")
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order("expires_at", { ascending: false })
-      .eq("plans.code", "PBSK-PREMIUM-1Y")
+      .in("plans.code", ["PBSK-PREMIUM-1Y", "PBM-MANDARIN-1Y", "PBMAT-MATEMATIKA-LIFETIME"])
       .limit(1)
       .maybeSingle();
     if (subError) throw subError;
 
     if (!activeSub?.id) {
       return NextResponse.json(
-        { ok: false, error: "active_subscription_required" },
+        { ok: false, error: "active_papa_bonski_module_required" },
         { status: 403 },
       );
     }

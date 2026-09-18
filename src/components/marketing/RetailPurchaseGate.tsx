@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-type CheckState = "idle" | "checking" | "new" | "existing" | "mandarin" | "redirecting" | "error";
+type CheckState = "idle" | "checking" | "new" | "existing" | "member-module" | "redirecting" | "error";
 type ProductSku = "PBSK-SUPER-KIDS" | "PBSK-STORY-CREDIT-3" | "PBSK-STORY-CREDIT-8";
 type MemberMode = "choose" | "topup" | "gift";
 
@@ -84,7 +84,7 @@ export default function RetailPurchaseGate({
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error("check_failed");
-      setState(data.hasActivePackage ? "existing" : data.hasActiveMandarin ? "mandarin" : "new");
+      setState(data.hasActivePackage ? "existing" : data.hasActiveMandarin || data.hasActiveMatematika ? "member-module" : "new");
     } catch {
       setState("error");
       setError("Pengecekan belum berhasil. Silakan coba lagi.");
@@ -112,7 +112,7 @@ export default function RetailPurchaseGate({
       const data = await res.json();
       if (!res.ok || !data?.ok || !data?.url) {
         if (data?.error === "mandarin_story_topup_only") {
-          setState("mandarin");
+          setState("member-module");
           return;
         }
         throw new Error("prepare_failed");
@@ -222,13 +222,13 @@ export default function RetailPurchaseGate({
     </div>;
   }
 
-  if (state === "mandarin") {
+  if (state === "member-module") {
     return <div className="space-y-5">
       <div className="rounded-3xl bg-violet-50 p-5 ring-1 ring-violet-200">
-        <p className="text-xs font-black uppercase tracking-wider text-violet-700">Akun Papa Bonski Mandarin ditemukan</p>
+        <p className="text-xs font-black uppercase tracking-wider text-violet-700">Akun Papa Bonski aktif ditemukan</p>
         <h2 className="mt-2 text-xl font-extrabold text-ink">Paket Cobain Rp0 tidak tersedia untuk akun ini.</h2>
         <p className="mt-2 text-sm leading-relaxed text-violet-950">
-          Akun yang sudah memiliki Mandarin dapat menambah cerita melalui <b>Paket Nambah</b> atau <b>Paket Rame-rame</b>. Masuk dengan OTP agar cerita ditambahkan ke akun yang benar.
+          Pemilik Mandarin atau Matematika dapat membuka Super Kids melalui <b>Paket Nambah</b> atau <b>Paket Rame-rame</b>. Masuk dengan OTP agar akses dan cerita ditambahkan ke akun yang benar.
         </p>
       </div>
       <a href={`/login?next=${encodeURIComponent("/super-kids/checkout")}&email=${encodeURIComponent(email)}`} className="btn-primary w-full">
