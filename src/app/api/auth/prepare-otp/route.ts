@@ -7,6 +7,7 @@ const GENERIC_PROFILE_NAME = "member papa bonski";
 const MODULE_PLANS: Record<string, string> = {
   super_kids_access: "PBSK-PREMIUM-1Y",
   mandarin_access: "PBM-MANDARIN-1Y",
+  matematika_access: "PBMAT-MATEMATIKA-LIFETIME",
 };
 const ALLOWED_ENTITLEMENTS = new Set(["portal_access", ...Object.keys(MODULE_PLANS)]);
 

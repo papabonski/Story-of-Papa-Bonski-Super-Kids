@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Papa Bonski Matematika — Game Matematika Anak</title>
+  <meta name="description" content="Game matematika interaktif Papa Bonski untuk anak SD usia 6-12 tahun. Empat level, soal acak, dan penjelasan cara mengerjakan.">
+
+  <!-- Aplikasi bisa dipasang di HP & tablet (PWA) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#E85D04">
+  <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Papa Bonski Matematika">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-head">
+      <div class="logo-badge" id="brand-logo" aria-hidden="true">PB</div>
+      <div>
+        <div class="site-title" id="brand-name">Papa Bonski Matematika</div>
+        <div class="site-tagline" id="brand-tagline">Belajar matematika jadi petualangan seru bersama Papa Bonski!</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn btn-sm btn-install" id="btn-install" aria-label="Pasang aplikasi" title="Pasang aplikasi di perangkat ini">⬇️ Pasang</button>
+        <button class="btn btn-sm" id="btn-home-nav" aria-label="Kembali ke beranda" title="Kembali ke beranda" style="display:none">🏠</button>
+        <div class="star-badge" id="star-badge" title="Bintang terkumpul">
+          <span class="star-badge-ico" aria-hidden="true">⭐</span>
+          <span class="star-badge-num" id="star-count">0</span>
+        </div>
+        <button class="btn btn-sm" id="btn-sound" aria-label="Suara">🔊</button>
+      </div>
+    </header>
+
+    <!-- Layar sambutan: masukkan nama dulu -->
+    <main id="screen-welcome" style="display:none">
+      <div class="card welcome-card">
+        <div class="welcome-star" aria-hidden="true">⭐</div>
+        <h1 class="welcome-title">Halo, teman kecil!</h1>
+        <p class="welcome-sub">Siapa namamu? Ayo kumpulkan bintang sebanyak-banyaknya!</p>
+        <form id="name-form" class="welcome-form" autocomplete="off" novalidate>
+          <input type="text" id="welcome-name" maxlength="20" placeholder="Tulis namamu di sini" aria-label="Nama kamu">
+          <button type="submit" class="btn btn-accent">Mulai main! 🚀</button>
+        </form>
+        <p id="welcome-error" class="welcome-error" role="alert"></p>
+        <button type="button" class="install-help-link" id="btn-install-welcome">📲 Pasang aplikasi di HP</button>
+        <p class="install-help-note">Sekali dipasang, aplikasi bisa dibuka dari layar utama dan dimainkan tanpa internet.</p>
+      </div>
+    </main>
+
+    <!-- Layar pilih permainan: 3 langkah (level → fokus → game) -->
+    <main id="screen-select" style="display:none">
+
+      <!-- Langkah 1: pilih level -->
+      <div id="step-level">
+        <div class="card" style="text-align:center">
+          <p class="greet-line" id="greet-line"></p>
+          <p style="font-family:var(--font-display);font-weight:500;font-size:20px;margin-bottom:6px">Siap berpetualang?</p>
+          <p style="color:var(--ink-soft);font-size:15px">Pilih level sesuai usiamu, lalu pilih fokus materinya. Soal selalu diacak setiap kali bermain!</p>
+        </div>
+
+        <div class="mode-row">
+          <button class="mode-btn" id="btn-mode-party">
+            <span class="mode-ico">👥</span>
+            <span class="mode-name">Main Bareng</span>
+            <span class="mode-sub">2-4 pemain, satu layar</span>
+          </button>
+          <button class="mode-btn" id="btn-mode-challenge">
+            <span class="mode-ico">🎯</span>
+            <span class="mode-name">Tantangan Teman</span>
+            <span class="mode-sub">soal sama, beda HP</span>
+          </button>
+        </div>
+        <p class="mode-or">— atau main sendiri, pilih levelmu di bawah —</p>
+
+        <div class="step-bar"><span class="step-dot on">1</span><span class="step-line"></span><span class="step-dot">2</span><span class="step-line"></span><span class="step-dot">3</span></div>
+        <h2 class="pick-title">Pilih Level</h2>
+        <div id="level-grid" class="pick-grid"></div>
+
+        <div class="card" id="ach-card" style="margin-top:18px">
+          <div class="board-title">🎖️ Koleksi Lencana</div>
+          <div id="ach-collection" class="ach-collection"></div>
+        </div>
+
+        <div class="card" id="board-card" style="margin-top:18px">
+          <div class="board-head">
+            <div class="board-title">🏆 Papan Juara</div>
+            <button class="btn btn-ghost btn-sm" id="btn-board-refresh" title="Segarkan">↻ Segarkan</button>
+          </div>
+          <p class="board-hint">Ketuk nama untuk melihat rincian skornya.</p>
+          <div id="board-list"></div>
+        </div>
+      </div>
+
+      <!-- Langkah 2: pilih fokus materi -->
+      <div id="step-focus" style="display:none"></div>
+
+      <!-- Langkah 3: pilih game -->
+      <div id="step-games" style="display:none"></div>
+    </main>
+
+    <!-- Layar setup (Main Bareng / Tantangan) -->
+    <main id="screen-setup" style="display:none"></main>
+
+    <!-- Layar game -->
+    <main id="screen-game" style="display:none">
+      <div id="game-stage"></div>
+    </main>
+
+    <footer class="site-foot">
+      <p id="footer-text">© 2026 Papa Bonski Matematika</p>
+      <p style="margin-top:6px">
+        <a id="wa-link" href="#" target="_blank" rel="noopener" style="display:none">Hubungi Kami</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <div class="install-modal" id="install-modal" hidden>
+    <div class="install-modal-backdrop" data-install-close></div>
+    <section class="install-modal-card" role="dialog" aria-modal="true" aria-labelledby="install-modal-title">
+      <button type="button" class="install-modal-close" data-install-close aria-label="Tutup">×</button>
+      <img src="assets/icons/icon-192.png" alt="Logo Papa Bonski Matematika" class="install-modal-icon">
+      <h2 id="install-modal-title">Pasang Papa Bonski Matematika</h2>
+      <p id="install-modal-intro">Pilih petunjuk sesuai perangkat Anda.</p>
+      <div class="install-steps" id="install-steps"></div>
+      <button type="button" class="btn btn-accent install-action" id="install-action" hidden>Pasang sekarang</button>
+      <p class="install-modal-foot">Setelah terpasang, ikon Papa Bonski akan muncul di layar utama.</p>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="assets/questions.js"></script>
+  <script src="assets/game.js"></script>
+  <script src="assets/pwa.js"></script>
+</body>
+</html>

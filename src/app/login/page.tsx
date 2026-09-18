@@ -13,6 +13,7 @@ export default async function LoginPage({
   const brand = await getRuntimeBrand();
   const params = await searchParams;
   const isMandarinTarget = params.next?.startsWith("/mandarin") ?? false;
+  const isMatematikaTarget = params.next?.startsWith("/matematika") ?? false;
   const productName = brand.name;
   const logoSrc = brand.logoSrc || "/logo.png";
 
@@ -25,7 +26,7 @@ export default async function LoginPage({
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">Satu login untuk seluruh modul Papa Bonski. Gunakan Email Penerima yang didaftarkan sebelum checkout. Pada login pertama, isi juga Nama Penerima, lalu kami kirim kode OTP 6 digit.</p>
       </div>
       <LoginForm initialEmail={params.email || ""} nextPath={params.next || "/app"} />
-      <p className="mt-5 text-center text-xs text-ink-soft">Belum memiliki modul? <Link className="font-extrabold text-brand-primary hover:underline" href={isMandarinTarget ? "/mandarin/checkout" : "/"}>Lihat {isMandarinTarget ? "Papa Bonski Mandarin" : "produk Papa Bonski"}</Link></p>
+      <p className="mt-5 text-center text-xs text-ink-soft">Belum memiliki modul? <Link className="font-extrabold text-brand-primary hover:underline" href={isMandarinTarget ? "/mandarin/checkout" : isMatematikaTarget ? "/matematika/checkout" : "/"}>Lihat {isMandarinTarget ? "Papa Bonski Mandarin" : isMatematikaTarget ? "Papa Bonski Matematika" : "produk Papa Bonski"}</Link></p>
     </div>
   </div></main>;
 }
