@@ -100,6 +100,16 @@ export default async function SellerPage() {
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <Link
+            href="/seller/super-kids-promo"
+            className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200"
+          >
+            <div className="text-2xl">📖</div>
+            <h2 className="mt-2 font-extrabold">Promo Super Kids</h2>
+            <p className="text-sm text-ink-soft">
+              Kuota 50 Paket Cobain gratis dan tindak lanjut ulasan.
+            </p>
+          </Link>
+          <Link
             href="/seller/mandarin-promo"
             className="rounded-2xl bg-violet-50 p-5 ring-1 ring-violet-200"
           >

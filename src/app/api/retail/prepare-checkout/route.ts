@@ -15,6 +15,11 @@ const CHECKOUTS: Record<string,string | undefined> = {
     "https://papabonski.orderhero.id/form/papa-bonski-mandarin-member-super-kids",
 };
 
+const PROMOTION_BY_SKU: Record<string,string> = {
+  "PBSK-SUPER-KIDS": "super-kids-launch-50",
+  "PBM-MANDARIN": "mandarin-launch-50",
+};
+
 function normalizeEmail(value: unknown) {
   return String(value || "").trim().toLowerCase();
 }
@@ -80,9 +85,10 @@ export async function POST(req: Request) {
     const db = createSupabaseAdminClient();
     let promo: null | { code: string; slot: number; remaining: number; expiresAt: string } = null;
 
-    if (productSku === "PBM-MANDARIN") {
+    const promotionKey = PROMOTION_BY_SKU[productSku];
+    if (promotionKey) {
       const { data: reservation, error: reservationError } = await db.rpc("reserve_promo_claim", {
-        p_promotion_key: "mandarin-launch-50",
+        p_promotion_key: promotionKey,
         p_recipient_email: recipientEmail,
         p_checkout_intent_key: token,
       });
@@ -131,7 +137,7 @@ export async function POST(req: Request) {
         recipient_email: recipientEmail,
         product_sku: productSku,
         attribution,
-        promo_key: promo ? "mandarin-launch-50" : null,
+        promo_key: promo ? promotionKey : null,
         promo_slot: promo?.slot ?? null,
         created_at: new Date().toISOString(),
       },

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type CheckState = "idle" | "checking" | "new" | "existing" | "redirecting" | "error";
 type ProductSku = "PBSK-SUPER-KIDS" | "PBSK-STORY-CREDIT-3" | "PBSK-STORY-CREDIT-8";
@@ -37,6 +37,15 @@ export default function RetailPurchaseGate({
   const [email, setEmail] = useState(isSignedInMember ? "" : initialEmail);
   const [state, setState] = useState<CheckState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [promoRemaining, setPromoRemaining] = useState<number | null>(null);
+  const [promoReady, setPromoReady] = useState<{url:string;code:string;slot:number;remaining:number;expiresAt:string}|null>(null);
+
+  useEffect(() => {
+    fetch("/api/promotions/super-kids-launch", { cache: "no-store" })
+      .then(response => response.json())
+      .then(data => setPromoRemaining(data?.active ? Number(data.remaining || 0) : 0))
+      .catch(() => setPromoRemaining(null));
+  }, []);
 
   function resetGiftForm() {
     setMode("gift");
@@ -102,11 +111,33 @@ export default function RetailPurchaseGate({
       });
       const data = await res.json();
       if (!res.ok || !data?.ok || !data?.url) throw new Error("prepare_failed");
+      if (productSku === "PBSK-SUPER-KIDS" && data.promo?.code) {
+        setPromoReady({ url: data.url, ...data.promo });
+        setPromoRemaining(Number(data.promo.remaining));
+        setState("new");
+        return;
+      }
       window.location.assign(data.url);
     } catch {
       setState("error");
       setError("Checkout belum dapat dibuka. Silakan coba lagi.");
     }
+  }
+
+  if (promoReady) {
+    const continueToOrderHero = async () => {
+      try { await navigator.clipboard.writeText(promoReady.code); } catch {}
+      window.location.assign(promoReady.url);
+    };
+    return <div className="space-y-5">
+      <div className="rounded-3xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
+        <p className="text-xs font-black uppercase tracking-wider text-emerald-700">Slot gratis #{promoReady.slot} berhasil diamankan</p>
+        <p className="mt-2 text-3xl font-extrabold text-emerald-950">Rp0</p>
+        <p className="mt-2 text-sm text-emerald-900">Sisa {promoReady.remaining} dari 50 Paket Cobain gratis. Reservasi berlaku sekitar 30 menit.</p>
+      </div>
+      <div className="rounded-2xl bg-white p-4 ring-1 ring-emerald-200"><p className="text-xs font-bold text-ink-soft">Kode kupon OrderHero</p><p className="mt-1 font-mono text-lg font-black">{promoReady.code}</p><p className="mt-2 text-xs text-ink-soft">Kode akan disalin saat Anda melanjutkan. Masukkan di kolom kupon OrderHero bila belum terpasang otomatis.</p></div>
+      <button type="button" onClick={continueToOrderHero} className="w-full rounded-2xl bg-emerald-600 px-5 py-4 font-extrabold text-white">Salin Kode & Lanjut ke OrderHero</button>
+    </div>;
   }
 
   if (isSignedInMember && mode === "choose") {
@@ -201,8 +232,10 @@ export default function RetailPurchaseGate({
         onClick={() => goToCheckout("PBSK-SUPER-KIDS")}
         className="w-full rounded-2xl bg-brand-primary px-5 py-4 font-extrabold text-white shadow-sm"
       >
-        Konfirmasi & Lanjut ke Checkout — Rp25.000
+        {promoRemaining && promoRemaining > 0 ? "Ambil Paket Gratis — Rp0" : "Konfirmasi & Lanjut ke Checkout — Rp25.000"}
       </button>
+
+      {promoRemaining !== null && promoRemaining > 0 && <div className="rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">🎁 Tersisa {promoRemaining} dari 50 Paket Cobain gratis. Setelah habis, checkout otomatis kembali ke harga normal Rp25.000.</div>}
 
       <div className="rounded-2xl bg-surface p-4 text-sm leading-relaxed text-ink-soft">
         Di halaman OrderHero, pembeli mengisi <b>Email Pembeli</b>, nama, dan WhatsApp. Email Pembeli boleh sama atau berbeda dengan Email Penerima di atas.

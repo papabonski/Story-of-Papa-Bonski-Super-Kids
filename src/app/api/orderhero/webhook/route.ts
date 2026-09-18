@@ -9,6 +9,10 @@ const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
 const MANDARIN_STANDARD_SKU = "PBM-MANDARIN";
 const MANDARIN_MEMBER_SKU = "PBM-MANDARIN-MEMBER";
 const MANDARIN_SKUS = new Set([MANDARIN_STANDARD_SKU, MANDARIN_MEMBER_SKU]);
+const PROMOTION_BY_SKU: Record<string,string> = {
+  "PBSK-SUPER-KIDS": "super-kids-launch-50",
+  [MANDARIN_STANDARD_SKU]: "mandarin-launch-50",
+};
 const ORDERHERO_MANDARIN_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_PRODUCT_ID || "6aa2651358d21cc2224250c0";
 const ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID =
@@ -643,10 +647,12 @@ export async function POST(req: Request) {
     },{onConflict:"customer_id,key"});
     if(entitlement.error) throw entitlement.error;
 
-    // A zero-total standalone Mandarin order can consume a reserved launch
-    // promo slot. Paid orders release the reservation immediately.
+    // A zero-total base-package order can consume its matching launch-promo
+    // slot. Paid orders release the reservation so the next customer can use it.
     const resolvedIntentKey=intentToken || String(intent?.event_key || "");
-    if(actualSku===MANDARIN_STANDARD_SKU && resolvedIntentKey){
+    const intentPromoKey=String((intent?.payload as Record<string,unknown> | null)?.promo_key || "");
+    const promotionKey=PROMOTION_BY_SKU[actualSku];
+    if(promotionKey && intentPromoKey===promotionKey && resolvedIntentKey){
       const now=new Date();
       const promoUpdate=n.amount===0
         ? {
@@ -660,7 +666,7 @@ export async function POST(req: Request) {
         : {status:"released",updated_at:now.toISOString()};
       const {error:promoError}=await db.from("promo_claims")
         .update(promoUpdate)
-        .eq("promotion_key","mandarin-launch-50")
+        .eq("promotion_key",promotionKey)
         .eq("checkout_intent_key",resolvedIntentKey)
         .eq("status","reserved");
       // Deployments can overlap the migration briefly; normal paid activation

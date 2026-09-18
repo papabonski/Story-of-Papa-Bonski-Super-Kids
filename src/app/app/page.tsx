@@ -5,6 +5,7 @@ import { CUSTOMER_ENTITLEMENTS, getCustomerAccess, requireCustomerPortalAccess }
 import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { getStoryQuotaForUser } from "@/lib/story-quota";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,16 @@ export default async function CustomerAppPage() {
   const hasSuperKids = Boolean(superKidsAccess?.hasAccess);
   const hasMandarin = Boolean(mandarinAccess?.hasAccess);
   const quota = hasSuperKids ? await loadStoryQuota() : null;
+  const superKidsFeedbackDue = hasSuperKids
+    ? await loadSuperKidsFeedbackDue(access.customerId)
+    : false;
 
   const quotaExhausted = Boolean(quota && quota.remaining <= 0);
 
   return <main className="min-h-[100dvh] bg-surface px-5 py-8 text-ink"><div className="mx-auto max-w-3xl">
     <header className="flex items-center gap-3"><Image src={brand.logoSrc || "/logo.png"} alt={brand.name} width={64} height={64} className="rounded-2xl"/><div className="min-w-0"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand-primary">Papa Bonski Member</p><h1 className="text-2xl font-extrabold">Halo! 👋</h1><p className="mt-0.5 truncate text-sm font-semibold text-ink-soft" title={access.email}>Masuk sebagai {access.email}</p></div></header>
+
+    {superKidsFeedbackDue && <section className="mt-5 flex flex-col gap-3 rounded-[2rem] bg-amber-50 p-5 text-amber-950 ring-1 ring-amber-200 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-extrabold">Sudah mencoba Papa Bonski selama satu hari?</p><p className="mt-1 text-sm">Bagikan ulasan jujur Anda sebagai peserta program 50 pengguna awal.</p></div><Link href="/super-kids/testimoni" className="btn-primary shrink-0">Isi Ulasan</Link></section>}
 
     <div className="mt-6 rounded-[2rem] bg-surface-card p-6 shadow-lg ring-1 ring-black/[0.05]"><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary">Modul Saya</p><h2 className="mt-1 text-xl font-extrabold">Pilih modul yang sudah aktif</h2></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Akses seumur hidup</span></div><div className="mt-5 grid gap-3 sm:grid-cols-2">
       {hasSuperKids ? <Link href="/create" className={`rounded-2xl p-5 font-extrabold shadow-sm ${quotaExhausted ? "bg-red-50 text-red-800 ring-1 ring-red-100" : "bg-brand-primary text-white"}`}>{quotaExhausted ? "🔒 Kuota Cerita Habis" : "✨ Buat Cerita Personal"}<div className={`mt-1 text-xs font-semibold ${quotaExhausted ? "text-red-700/80" : "opacity-80"}`}>{quotaExhausted ? "Tambah kuota untuk membuat cerita baru." : "Buat cerita sesuai profil dan kebutuhan anak."}</div></Link> : <LockedModule title="✨ Buat Cerita Personal" description="Memerlukan hak akses Super Kids." />}
@@ -80,5 +86,24 @@ async function loadStoryQuota() {
     return await getStoryQuotaForUser(userId);
   } catch {
     return null;
+  }
+}
+
+async function loadSuperKidsFeedbackDue(customerId: string) {
+  try {
+    const db = createSupabaseAdminClient();
+    const { data } = await db.from("promo_claims")
+      .select("feedback_due_at,feedback_submitted_at")
+      .eq("promotion_key", "super-kids-launch-50")
+      .eq("customer_id", customerId)
+      .eq("status", "activated")
+      .maybeSingle();
+    return Boolean(
+      data?.feedback_due_at &&
+      !data.feedback_submitted_at &&
+      new Date(data.feedback_due_at).getTime() <= Date.now()
+    );
+  } catch {
+    return false;
   }
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import RetailPurchaseGate from "@/components/marketing/RetailPurchaseGate";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
+import SuperKidsPromoBadge from "@/components/super-kids/SuperKidsPromoBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,8 @@ export default async function RetailCheckoutPage() {
         <div className="mt-5 rounded-2xl bg-orange-50 p-4 text-sm leading-relaxed text-orange-950 ring-1 ring-orange-100">
           <b>Email Pembeli boleh sama atau berbeda.</b> Nama, WhatsApp, dan Email Pembeli untuk transaksi baru akan diisi pada langkah pembayaran OrderHero berikutnya.
         </div>
+
+        <div className="mt-5"><SuperKidsPromoBadge /></div>
 
         {signedInMember && (
           <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm leading-relaxed text-emerald-900 ring-1 ring-emerald-100">
