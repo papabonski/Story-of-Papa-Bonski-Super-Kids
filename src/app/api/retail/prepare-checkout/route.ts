@@ -13,11 +13,16 @@ const CHECKOUTS: Record<string,string | undefined> = {
     "https://papabonski.orderhero.id/form/form-order-papa-bonski-mandarin",
   "PBM-MANDARIN-MEMBER": process.env.ORDERHERO_MANDARIN_MEMBER_CHECKOUT_URL ||
     "https://papabonski.orderhero.id/form/papa-bonski-mandarin-member-super-kids",
+  "PBMAT-MATEMATIKA": process.env.ORDERHERO_MATEMATIKA_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/papa-bonski-matematika",
+  "PBMAT-MATEMATIKA-MEMBER": process.env.ORDERHERO_MATEMATIKA_MEMBER_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/papa-bonski-matematika-member",
 };
 
 const PROMOTION_BY_SKU: Record<string,string> = {
   "PBSK-SUPER-KIDS": "super-kids-launch-50",
   "PBM-MANDARIN": "mandarin-launch-50",
+  "PBMAT-MATEMATIKA": "matematika-launch-50",
 };
 
 function normalizeEmail(value: unknown) {
@@ -44,17 +49,19 @@ export async function POST(req: Request) {
       productSku === "PBSK-STORY-CREDIT-3" ||
       productSku === "PBSK-STORY-CREDIT-8";
     const isMandarinMember = productSku === "PBM-MANDARIN-MEMBER";
+    const isMatematikaMember = productSku === "PBMAT-MATEMATIKA-MEMBER";
+    const isMemberAddon = isMandarinMember || isMatematikaMember;
     let authUserId: string | null = null;
     let customerId: string | null = null;
 
     // Top-up ownership is derived ONLY from the authenticated member session.
     // Never fall back to an email supplied by the browser or by OrderHero.
-    if (isTopup || isMandarinMember) {
+    if (isTopup || isMemberAddon) {
       const supabase = await createSupabaseServerClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || user.is_anonymous || !user.email) {
         return NextResponse.json(
-          { ok: false, error: isMandarinMember ? "member_login_required" : "topup_login_required" },
+          { ok: false, error: isMemberAddon ? "member_login_required" : "topup_login_required" },
           { status: 401 },
         );
       }
@@ -70,11 +77,15 @@ export async function POST(req: Request) {
           );
         }
         customerId = access.customerId;
-      } else if (isMandarinMember) {
-        const access = await getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids);
-        if (!access?.hasAccess || access.email !== recipientEmail) {
+      } else {
+        const eligibleEntitlements = isMandarinMember
+          ? [CUSTOMER_ENTITLEMENTS.superKids, CUSTOMER_ENTITLEMENTS.matematika]
+          : [CUSTOMER_ENTITLEMENTS.superKids, CUSTOMER_ENTITLEMENTS.mandarin];
+        const accesses = await Promise.all(eligibleEntitlements.map((key) => getCustomerAccess(key)));
+        const access = accesses.find((item) => item?.hasAccess && item.email === recipientEmail);
+        if (!access) {
           return NextResponse.json(
-            { ok: false, error: "super_kids_access_required" },
+            { ok: false, error: isMandarinMember ? "mandarin_addon_access_required" : "matematika_addon_access_required" },
             { status: 403 },
           );
         }
@@ -96,7 +107,7 @@ export async function POST(req: Request) {
 
     // Enforce the module upgrade path on the server. UI checks are only a
     // convenience; direct requests must not bypass the Rp0 exclusivity rule.
-    if (!isTopup && !isMandarinMember) {
+    if (!isTopup && !isMemberAddon) {
       const { data: customer, error: customerError } = await db
         .from("customers")
         .select("id")
@@ -112,7 +123,7 @@ export async function POST(req: Request) {
           .eq("customer_id", customer.id)
           .eq("status", "active")
           .or(`expires_at.is.null,expires_at.gt.${now}`)
-          .in("plans.code", ["PBSK-PREMIUM-1Y", "PBM-MANDARIN-1Y"]);
+          .in("plans.code", ["PBSK-PREMIUM-1Y", "PBM-MANDARIN-1Y", "PBMAT-MATEMATIKA-LIFETIME"]);
         if (subscriptionError) throw subscriptionError;
 
         const activeCodes = new Set((activeSubscriptions || []).flatMap((item: any) => {
@@ -121,18 +132,25 @@ export async function POST(req: Request) {
         }));
         const hasSuperKids = activeCodes.has("PBSK-PREMIUM-1Y");
         const hasMandarin = activeCodes.has("PBM-MANDARIN-1Y");
+        const hasMatematika = activeCodes.has("PBMAT-MATEMATIKA-LIFETIME");
 
         if (productSku === "PBSK-SUPER-KIDS" && hasSuperKids) {
           return NextResponse.json({ ok: false, error: "super_kids_already_active" }, { status: 409 });
         }
-        if (productSku === "PBSK-SUPER-KIDS" && hasMandarin) {
+        if (productSku === "PBSK-SUPER-KIDS" && (hasMandarin || hasMatematika)) {
           return NextResponse.json({ ok: false, error: "mandarin_story_topup_only" }, { status: 409 });
         }
         if (productSku === "PBM-MANDARIN" && hasMandarin) {
           return NextResponse.json({ ok: false, error: "mandarin_already_active" }, { status: 409 });
         }
-        if (productSku === "PBM-MANDARIN" && hasSuperKids) {
+        if (productSku === "PBM-MANDARIN" && (hasSuperKids || hasMatematika)) {
           return NextResponse.json({ ok: false, error: "mandarin_member_addon_required" }, { status: 409 });
+        }
+        if (productSku === "PBMAT-MATEMATIKA" && hasMatematika) {
+          return NextResponse.json({ ok: false, error: "matematika_already_active" }, { status: 409 });
+        }
+        if (productSku === "PBMAT-MATEMATIKA" && (hasSuperKids || hasMandarin)) {
+          return NextResponse.json({ ok: false, error: "matematika_member_addon_required" }, { status: 409 });
         }
       }
     }
@@ -173,8 +191,8 @@ export async function POST(req: Request) {
       .contains("payload", {
         recipient_email: recipientEmail,
         product_sku: productSku,
-        ...((isTopup || isMandarinMember)
-          ? { intent_type: isMandarinMember ? "member_addon" : "member_topup" }
+        ...((isTopup || isMemberAddon)
+          ? { intent_type: isMemberAddon ? "member_addon" : "member_topup" }
           : {}),
       });
 
@@ -183,7 +201,7 @@ export async function POST(req: Request) {
       event_key: token,
       status: "pending",
       payload: {
-        intent_type: isMandarinMember ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
+        intent_type: isMemberAddon ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
         auth_user_id: authUserId,
         customer_id: customerId,
         recipient_email: recipientEmail,
@@ -194,7 +212,7 @@ export async function POST(req: Request) {
         created_at: new Date().toISOString(),
       },
       normalized: {
-        intentType: isMandarinMember ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
+        intentType: isMemberAddon ? "member_addon" : isTopup ? "member_topup" : "recipient_purchase",
         recipientEmail,
         productSku,
       },

@@ -1,4 +1,4 @@
-const CACHE_NAME = "papa-bonski-super-kids-pwa-v6";
+const CACHE_NAME = "papa-bonski-super-kids-pwa-v7";
 const APP_SHELL = ["/offline"];
 const PRIVATE_NAV_PREFIXES = [
   "/app",
@@ -9,6 +9,8 @@ const PRIVATE_NAV_PREFIXES = [
   "/super-kids/checkout",
   "/mandarin",
   "/mandarin-game",
+  "/matematika",
+  "/matematika-game",
   "/story/",
 ];
 
@@ -63,8 +65,11 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) => Promise.all(APP_SHELL.map((url) => cache.add(url).catch(() => null))))
-      .then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {

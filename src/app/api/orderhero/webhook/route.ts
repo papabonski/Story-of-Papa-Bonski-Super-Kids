@@ -9,14 +9,20 @@ const ORDERHERO_SUPER_KIDS_PRODUCT_ID = "6a906158ffceb421fe4ee6ca";
 const MANDARIN_STANDARD_SKU = "PBM-MANDARIN";
 const MANDARIN_MEMBER_SKU = "PBM-MANDARIN-MEMBER";
 const MANDARIN_SKUS = new Set([MANDARIN_STANDARD_SKU, MANDARIN_MEMBER_SKU]);
+const MATEMATIKA_STANDARD_SKU = "PBMAT-MATEMATIKA";
+const MATEMATIKA_MEMBER_SKU = "PBMAT-MATEMATIKA-MEMBER";
+const MATEMATIKA_SKUS = new Set([MATEMATIKA_STANDARD_SKU, MATEMATIKA_MEMBER_SKU]);
 const PROMOTION_BY_SKU: Record<string,string> = {
   "PBSK-SUPER-KIDS": "super-kids-launch-50",
   [MANDARIN_STANDARD_SKU]: "mandarin-launch-50",
+  [MATEMATIKA_STANDARD_SKU]: "matematika-launch-50",
 };
 const ORDERHERO_MANDARIN_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_PRODUCT_ID || "6aa2651358d21cc2224250c0";
 const ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID =
   process.env.ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID || "6aa8b81d733fa8f8f8eb8966";
+const ORDERHERO_MATEMATIKA_PRODUCT_ID = process.env.ORDERHERO_MATEMATIKA_PRODUCT_ID || "";
+const ORDERHERO_MATEMATIKA_MEMBER_PRODUCT_ID = process.env.ORDERHERO_MATEMATIKA_MEMBER_PRODUCT_ID || "";
 const STORY_TOPUPS: Record<string, { credits: number; names: string[] }> = {
   "PBSK-STORY-CREDIT-3": {
     credits: 3,
@@ -44,6 +50,44 @@ function normalizeEmail(value: unknown) {
 function intentTokenFromContent(content?: string) {
   const value=String(content || "").trim();
   return value.startsWith("pbint_") ? value.slice("pbint_".length) : "";
+}
+
+async function ensureSuperKidsAccessFromTopup(db: any, customerId: string, orderId: string) {
+  const {data:plan,error:planError}=await db.from("plans")
+    .select("id")
+    .eq("code","PBSK-PREMIUM-1Y")
+    .eq("active",true)
+    .maybeSingle();
+  if(planError) throw planError;
+  if(!plan?.id) throw new Error("Super Kids plan mapping not found");
+
+  const {data:activeSub,error:activeSubError}=await db.from("subscriptions")
+    .select("id")
+    .eq("customer_id",customerId)
+    .eq("plan_id",plan.id)
+    .eq("status","active")
+    .limit(1)
+    .maybeSingle();
+  if(activeSubError) throw activeSubError;
+
+  if(!activeSub?.id){
+    const {error:subscriptionError}=await db.from("subscriptions").insert({
+      customer_id:customerId,
+      plan_id:plan.id,
+      source_order_id:orderId,
+      status:"active",
+      expires_at:null,
+    });
+    if(subscriptionError && subscriptionError.code!=="23505") throw subscriptionError;
+  }
+
+  const {error:entitlementError}=await db.from("entitlements").upsert({
+    customer_id:customerId,
+    key:"super_kids_access",
+    value:true,
+    expires_at:null,
+  },{onConflict:"customer_id,key"});
+  if(entitlementError) throw entitlementError;
 }
 
 export async function POST(req: Request) {
@@ -112,6 +156,15 @@ export async function POST(req: Request) {
     } else if (ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID && n.externalProductId === ORDERHERO_MANDARIN_MEMBER_PRODUCT_ID) {
       productSku = MANDARIN_MEMBER_SKU;
       planCode = "PBM-MANDARIN-1Y";
+    } else if (MATEMATIKA_SKUS.has(normalizedSku)) {
+      productSku = normalizedSku;
+      planCode = "PBMAT-MATEMATIKA-LIFETIME";
+    } else if (ORDERHERO_MATEMATIKA_PRODUCT_ID && n.externalProductId === ORDERHERO_MATEMATIKA_PRODUCT_ID) {
+      productSku = MATEMATIKA_STANDARD_SKU;
+      planCode = "PBMAT-MATEMATIKA-LIFETIME";
+    } else if (ORDERHERO_MATEMATIKA_MEMBER_PRODUCT_ID && n.externalProductId === ORDERHERO_MATEMATIKA_MEMBER_PRODUCT_ID) {
+      productSku = MATEMATIKA_MEMBER_SKU;
+      planCode = "PBMAT-MATEMATIKA-LIFETIME";
     } else if (n.externalProductId === ORDERHERO_SUPER_KIDS_PRODUCT_ID) {
       productSku = "PBSK-SUPER-KIDS";
       planCode = "PBSK-PREMIUM-1Y";
@@ -138,8 +191,11 @@ export async function POST(req: Request) {
     productSku=actualSku;
     const isMandarin=MANDARIN_SKUS.has(actualSku);
     const isMandarinMember=actualSku === MANDARIN_MEMBER_SKU;
-    const entitlementKey=isMandarin ? "mandarin_access" : "super_kids_access";
-    const productLabel=isMandarin ? "Papa Bonski Mandarin" : "Paket Super Kids 1";
+    const isMatematika=MATEMATIKA_SKUS.has(actualSku);
+    const isMatematikaMember=actualSku === MATEMATIKA_MEMBER_SKU;
+    const isMemberAddon=isMandarinMember || isMatematikaMember;
+    const entitlementKey=isMandarin ? "mandarin_access" : isMatematika ? "matematika_access" : "super_kids_access";
+    const productLabel=isMandarin ? "Papa Bonski Mandarin" : isMatematika ? "Papa Bonski Matematika" : "Paket Super Kids 1";
 
     // OrderHero can retry the same paid order with a different delivery id.
     // If the order already produced its entitlement/grant, finish this event as
@@ -166,6 +222,7 @@ export async function POST(req: Request) {
           if(existingGrantError) throw existingGrantError;
 
           if(existingGrant?.id){
+            await ensureSuperKidsAccessFromTopup(db,existingOrder.customer_id,existingOrder.id);
             await db.from("webhook_events").update({
               status:"processed",
               processed_at:new Date().toISOString(),
@@ -222,7 +279,7 @@ export async function POST(req: Request) {
     // Ownership must therefore come ONLY from a recent Papa Bonski checkout
     // intent of the correct type. If recovery is not unique, hold the payment
     // for manual mapping instead of ever falling back to the OrderHero buyer.
-    const expectedIntentType=isTopup ? "member_topup" : isMandarinMember ? "member_addon" : "recipient_purchase";
+    const expectedIntentType=isTopup ? "member_topup" : isMemberAddon ? "member_addon" : "recipient_purchase";
     if(!intent){
       const cutoff=new Date(Date.now()-30*60*1000).toISOString();
       const {data:candidates,error:candidateError}=await db.from("webhook_events")
@@ -243,13 +300,13 @@ export async function POST(req: Request) {
       if(matching.length===1){
         intent=matching[0];
       } else {
-        const prefix=isTopup ? "topup" : isMandarinMember ? "member_addon" : "recipient";
+        const prefix=isTopup ? "topup" : isMemberAddon ? "member_addon" : "recipient";
         const reason=matching.length===0 ? `${prefix}_intent_missing` : `${prefix}_intent_ambiguous`;
         await db.from("webhook_events").update({
           status:"needs_mapping",
           error:matching.length===0
-            ? `${isTopup ? "Top-up" : isMandarinMember ? "Member add-on" : "Base-package"} payment has no recent Papa Bonski checkout intent. OrderHero buyer email was intentionally ignored.`
-            : `${isTopup ? "Top-up" : isMandarinMember ? "Member add-on" : "Base-package"} payment matches multiple recent Papa Bonski checkout intents. OrderHero buyer email was intentionally ignored.`,
+            ? `${isTopup ? "Top-up" : isMemberAddon ? "Member add-on" : "Base-package"} payment has no recent Papa Bonski checkout intent. OrderHero buyer email was intentionally ignored.`
+            : `${isTopup ? "Top-up" : isMemberAddon ? "Member add-on" : "Base-package"} payment matches multiple recent Papa Bonski checkout intents. OrderHero buyer email was intentionally ignored.`,
           processed_at:new Date().toISOString(),
           normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
         }).eq("id",event.id);
@@ -258,13 +315,13 @@ export async function POST(req: Request) {
     }
 
     if(String(intent?.payload?.intent_type || "") !== expectedIntentType){
-      const reason=isTopup ? "topup_intent_invalid" : isMandarinMember ? "member_addon_intent_invalid" : "recipient_intent_invalid";
+      const reason=isTopup ? "topup_intent_invalid" : isMemberAddon ? "member_addon_intent_invalid" : "recipient_intent_invalid";
       await db.from("webhook_events").update({
         status:"needs_mapping",
         error:isTopup
           ? "Top-up requires a signed-in member intent. OrderHero buyer email was intentionally ignored."
-          : isMandarinMember
-            ? "Mandarin member pricing requires a signed-in Super Kids intent. OrderHero buyer email was intentionally ignored."
+          : isMemberAddon
+            ? "Member pricing requires a signed-in eligible Papa Bonski account. OrderHero buyer email was intentionally ignored."
             : "Base-package purchase requires a recipient_purchase intent. OrderHero buyer email was intentionally ignored.",
         processed_at:new Date().toISOString(),
         normalized:{...n,eventName:eventName ?? n.eventName,productSku:actualSku}
@@ -318,13 +375,13 @@ export async function POST(req: Request) {
 
     let customerId:string|undefined=customer?.id;
 
-    if(isTopup || isMandarinMember){
+    if(isTopup || isMemberAddon){
       const intendedCustomerId=String(intent?.payload?.customer_id || "").trim();
       if(intendedCustomerId && customerId && intendedCustomerId !== customerId){
         await db.from("webhook_events").update({
           status:"needs_mapping",
-          error:isMandarinMember
-            ? "Signed-in Super Kids member does not match the Mandarin recipient account."
+          error:isMemberAddon
+            ? "Signed-in Papa Bonski member does not match the add-on recipient account."
             : "Signed-in top-up intent customer does not match recipient account.",
           processed_at:new Date().toISOString(),
           normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:topupSku}
@@ -333,16 +390,16 @@ export async function POST(req: Request) {
           ok:true,
           accepted:true,
           needsMapping:true,
-          reason:isMandarinMember ? "member_addon_customer_mismatch" : "topup_customer_mismatch"
+          reason:isMemberAddon ? "member_addon_customer_mismatch" : "topup_customer_mismatch"
         },{status:202});
       }
     }
 
-    if(!customerId && (topupCredits > 0 || isMandarinMember)){
+    if(!customerId && (topupCredits > 0 || isMemberAddon)){
       await db.from("webhook_events").update({
         status:"needs_mapping",
-        error:isMandarinMember
-          ? "Mandarin member pricing requires an existing Super Kids recipient account."
+        error:isMemberAddon
+          ? "Member add-on pricing requires an existing Papa Bonski recipient account."
           : "Top-up requires an existing Papa Bonski recipient account.",
         processed_at:new Date().toISOString(),
         normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:topupSku}
@@ -350,8 +407,8 @@ export async function POST(req: Request) {
       if(intent?.id){
         await db.from("webhook_events").update({
           status:"needs_mapping",
-          error:isMandarinMember
-            ? "Super Kids recipient account was not found for this Mandarin member purchase."
+          error:isMemberAddon
+            ? "Papa Bonski recipient account was not found for this member add-on purchase."
             : "Recipient account was not found for this top-up.",
           processed_at:new Date().toISOString()
         }).eq("id",intent.id);
@@ -360,40 +417,34 @@ export async function POST(req: Request) {
         ok:true,
         accepted:true,
         needsMapping:true,
-        reason:isMandarinMember ? "member_addon_recipient_not_found" : "topup_recipient_not_found"
+        reason:isMemberAddon ? "member_addon_recipient_not_found" : "topup_recipient_not_found"
       },{status:202});
     }
 
-    if(isMandarinMember && customerId){
-      const [{data:memberEntitlement,error:memberEntitlementError},{data:memberSubscription,error:memberSubscriptionError}]=await Promise.all([
-        db.from("entitlements")
-          .select("id,expires_at")
-          .eq("customer_id",customerId)
-          .eq("key","super_kids_access")
-          .maybeSingle(),
-        db.from("subscriptions")
-          .select("id,expires_at,plans!inner(code)")
-          .eq("customer_id",customerId)
-          .eq("status","active")
-          .eq("plans.code","PBSK-PREMIUM-1Y")
-          .order("expires_at",{ascending:false})
-          .limit(1)
-          .maybeSingle(),
-      ]);
-      if(memberEntitlementError) throw memberEntitlementError;
+    if(isMemberAddon && customerId){
+      const eligiblePlans=isMandarinMember
+        ? ["PBSK-PREMIUM-1Y","PBMAT-MATEMATIKA-LIFETIME"]
+        : ["PBSK-PREMIUM-1Y","PBM-MANDARIN-1Y"];
+      const {data:memberSubscriptions,error:memberSubscriptionError}=await db.from("subscriptions")
+        .select("id,plans!inner(code)")
+        .eq("customer_id",customerId)
+        .eq("status","active")
+        .in("plans.code",eligiblePlans)
+        .limit(1);
       if(memberSubscriptionError) throw memberSubscriptionError;
 
-      if(!memberEntitlement?.id || !memberSubscription?.id){
+      if(!memberSubscriptions?.length){
+        const memberProduct=isMandarinMember ? "Mandarin" : "Matematika";
         await db.from("webhook_events").update({
           status:"needs_mapping",
-          error:"The Rp15.000 Mandarin price requires active Super Kids access at payment time.",
+          error:`The Rp15.000 ${memberProduct} price requires another active Papa Bonski module at payment time.`,
           processed_at:new Date().toISOString(),
           normalized:{...n,eventName:eventName ?? n.eventName,recipientEmail,productSku:actualSku}
         }).eq("id",event.id);
         if(intent?.id){
           await db.from("webhook_events").update({
             status:"needs_mapping",
-            error:"Super Kids membership was not active when the member add-on payment arrived.",
+            error:"An eligible Papa Bonski module was not active when the member add-on payment arrived.",
             processed_at:new Date().toISOString()
           }).eq("id",intent.id);
         }
@@ -401,21 +452,21 @@ export async function POST(req: Request) {
           ok:true,
           accepted:true,
           needsMapping:true,
-          reason:"super_kids_access_required"
+          reason:"eligible_module_access_required"
         },{status:202});
       }
     }
 
     // Cross-module upgrade rules are enforced again when payment arrives so
     // an old checkout tab or a direct OrderHero URL cannot bypass them.
-    if(customerId && !isTopup && !isMandarinMember){
+    if(customerId && !isTopup && !isMemberAddon){
       const nowIso=new Date().toISOString();
       const {data:moduleSubscriptions,error:moduleSubscriptionError}=await db.from("subscriptions")
         .select("plans!inner(code)")
         .eq("customer_id",customerId)
         .eq("status","active")
         .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-        .in("plans.code",["PBSK-PREMIUM-1Y","PBM-MANDARIN-1Y"]);
+        .in("plans.code",["PBSK-PREMIUM-1Y","PBM-MANDARIN-1Y","PBMAT-MATEMATIKA-LIFETIME"]);
       if(moduleSubscriptionError) throw moduleSubscriptionError;
 
       const activeCodes=new Set((moduleSubscriptions || []).flatMap((item:any) => {
@@ -423,18 +474,22 @@ export async function POST(req: Request) {
         return modulePlan?.code ? [String(modulePlan.code)] : [];
       }));
       const mustUseStoryTopup=actualSku==="PBSK-SUPER-KIDS"
-        && activeCodes.has("PBM-MANDARIN-1Y")
+        && (activeCodes.has("PBM-MANDARIN-1Y") || activeCodes.has("PBMAT-MATEMATIKA-LIFETIME"))
         && !activeCodes.has("PBSK-PREMIUM-1Y");
       const mustUseMandarinAddon=actualSku===MANDARIN_STANDARD_SKU
-        && activeCodes.has("PBSK-PREMIUM-1Y");
+        && (activeCodes.has("PBSK-PREMIUM-1Y") || activeCodes.has("PBMAT-MATEMATIKA-LIFETIME"));
+      const mustUseMatematikaAddon=actualSku===MATEMATIKA_STANDARD_SKU
+        && (activeCodes.has("PBSK-PREMIUM-1Y") || activeCodes.has("PBM-MANDARIN-1Y"));
 
-      if(mustUseStoryTopup || mustUseMandarinAddon){
+      if(mustUseStoryTopup || mustUseMandarinAddon || mustUseMatematikaAddon){
         const reason=mustUseStoryTopup
           ? "mandarin_story_topup_only"
-          : "mandarin_member_addon_required";
+          : mustUseMandarinAddon ? "mandarin_member_addon_required" : "matematika_member_addon_required";
         const message=mustUseStoryTopup
-          ? "An active Mandarin account may add stories only through Paket Nambah or Paket Rame-rame."
-          : "An active Super Kids account must use the Rp15.000 Mandarin member add-on.";
+          ? "An account with another Papa Bonski module may add Super Kids only through Paket Nambah or Paket Rame-rame."
+          : mustUseMandarinAddon
+            ? "An account with another Papa Bonski module must use the Rp15.000 Mandarin member add-on."
+            : "An account with another Papa Bonski module must use the Rp15.000 Matematika member add-on.";
         await db.from("webhook_events").update({
           status:"needs_mapping",
           error:message,
@@ -514,6 +569,10 @@ export async function POST(req: Request) {
         source: "orderhero_topup",
       }, { onConflict: "order_id" });
       if (grant.error) throw grant.error;
+
+      // Paket Nambah/Rame-rame is also the allowed Super Kids entry path for
+      // owners of Mandarin or Matematika, so it must unlock the story module.
+      await ensureSuperKidsAccessFromTopup(db,customerId!,order.id);
 
       const metaCapi=await sendMetaPurchase({
         externalOrderId:String(n.externalOrderId),
