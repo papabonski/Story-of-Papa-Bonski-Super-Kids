@@ -13,8 +13,10 @@ const CHECKOUTS: Record<string,string | undefined> = {
     "https://papabonski.orderhero.id/form/form-order-papa-bonski-mandarin",
   "PBM-MANDARIN-MEMBER": process.env.ORDERHERO_MANDARIN_MEMBER_CHECKOUT_URL ||
     "https://papabonski.orderhero.id/form/papa-bonski-mandarin-member-super-kids",
-  "PBMAT-MATEMATIKA": process.env.ORDERHERO_MATEMATIKA_CHECKOUT_URL,
-  "PBMAT-MATEMATIKA-MEMBER": process.env.ORDERHERO_MATEMATIKA_MEMBER_CHECKOUT_URL,
+  "PBMAT-MATEMATIKA": process.env.ORDERHERO_MATEMATIKA_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/papa-bonski-matematika",
+  "PBMAT-MATEMATIKA-MEMBER": process.env.ORDERHERO_MATEMATIKA_MEMBER_CHECKOUT_URL ||
+    "https://papabonski.orderhero.id/form/papa-bonski-matematika-member",
 };
 
 const PROMOTION_BY_SKU: Record<string,string> = {
