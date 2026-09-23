@@ -82,8 +82,9 @@ export default async function CustomerAppPage() {
     <div className="mt-5"><PwaInstallPrompt /></div>
     <div className="mt-5 flex flex-col gap-4 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05] sm:flex-row sm:items-center sm:justify-between">
       <div>Status akun: <b className="text-emerald-700">Aktif</b> · Hak modul yang dibeli berlaku <b className="text-ink">seumur hidup</b>.</div>
-      <form action={customerLogout}>
-        <button type="submit" className="font-extrabold text-red-700 underline decoration-red-200 underline-offset-4 hover:text-red-800">Keluar dari perangkat ini</button>
+      <form action={customerLogout} className="max-w-xs sm:text-right">
+        <button type="submit" className="text-xs font-extrabold text-ink-soft underline decoration-black/20 underline-offset-4 hover:text-ink">Ganti akun</button>
+        <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">Akun ini akan logout. Untuk masuk dengan akun baru, Anda akan diminta kode OTP.</p>
       </form>
     </div>
   </div></main>;
