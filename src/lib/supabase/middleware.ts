@@ -38,7 +38,9 @@ export async function updateSession(request: NextRequest) {
     if (!user || user.is_anonymous) {
       const login = request.nextUrl.clone();
       login.pathname = "/login";
-      login.searchParams.set("next", isMandarinPath ? "/mandarin" : isMatematikaPath ? "/matematika" : path);
+      // Customer OTP login always lands on the shared module menu. The module
+      // route itself still enforces its dedicated entitlement when selected.
+      login.searchParams.set("next", "/app");
       return NextResponse.redirect(login);
     }
 
@@ -54,7 +56,7 @@ export async function updateSession(request: NextRequest) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";
-      onboarding.searchParams.set("next", isMandarinPath ? "/mandarin" : isMatematikaPath ? "/matematika" : path);
+      onboarding.searchParams.set("next", "/app");
       return NextResponse.redirect(onboarding);
     }
     let entitlementQuery = supabase

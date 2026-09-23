@@ -1,9 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { initialEmail?: string; nextPath?: string }) {
+const CUSTOMER_PORTAL_PATH = "/app";
+
+export default function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
   const [email, setEmail] = useState(initialEmail);
   const [displayName, setDisplayName] = useState("");
   const [token, setToken] = useState("");
@@ -12,20 +14,9 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const safeNext = useMemo(
-    () => nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/app",
-    [nextPath],
-  );
-  // The Mandarin checkout uses the Super Kids entitlement to verify the
-  // Rp15.000 member price. Opening the Mandarin app itself still requires the
-  // dedicated Mandarin entitlement.
-  const entitlementKey = safeNext === "/mandarin/checkout" || safeNext === "/matematika/checkout"
-    ? "portal_access"
-    : safeNext.startsWith("/mandarin")
-      ? "mandarin_access"
-      : safeNext.startsWith("/matematika")
-        ? "matematika_access"
-      : "portal_access";
+  // Customer login always enters the shared Papa Bonski portal. Module-level
+  // authorization remains enforced when a customer opens an individual card.
+  const entitlementKey = "portal_access";
 
   async function requestOtp(e: FormEvent) {
     e.preventDefault();
@@ -98,7 +89,7 @@ export default function LoginForm({ initialEmail = "", nextPath = "/app" }: { in
         }
       }
 
-      window.location.assign(safeNext);
+      window.location.assign(CUSTOMER_PORTAL_PATH);
     } catch (e: any) {
       setError(e?.message || "Kode OTP tidak valid atau sudah kedaluwarsa. Minta kode baru dan coba lagi.");
     } finally { setLoading(false); }

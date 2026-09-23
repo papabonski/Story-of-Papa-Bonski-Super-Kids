@@ -25,7 +25,7 @@ export default async function LoginPage({
         <h1 className="mt-2 text-3xl font-extrabold">Masuk ke {productName}</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">Satu login untuk seluruh modul Papa Bonski. Gunakan Email Penerima yang didaftarkan sebelum checkout. Pada login pertama, isi juga Nama Penerima, lalu kami kirim kode OTP 6 digit.</p>
       </div>
-      <LoginForm initialEmail={params.email || ""} nextPath={params.next || "/app"} />
+      <LoginForm initialEmail={params.email || ""} />
       <p className="mt-5 text-center text-xs text-ink-soft">Belum memiliki modul? <Link className="font-extrabold text-brand-primary hover:underline" href={isMandarinTarget ? "/mandarin/checkout" : isMatematikaTarget ? "/matematika/checkout" : "/"}>Lihat {isMandarinTarget ? "Papa Bonski Mandarin" : isMatematikaTarget ? "Papa Bonski Matematika" : "produk Papa Bonski"}</Link></p>
     </div>
   </div></main>;
