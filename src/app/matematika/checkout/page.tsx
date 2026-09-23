@@ -1,17 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import MatematikaPurchaseGate from "@/components/marketing/MatematikaPurchaseGate";
+import TestimonialSection from "@/components/marketing/TestimonialSection";
 import { CUSTOMER_ENTITLEMENTS, getCustomerAccess } from "@/lib/customer-access";
+import { getApprovedTestimonials } from "@/lib/testimonials";
 
 export const dynamic = "force-dynamic";
 
 export default async function MatematikaCheckoutPage() {
   const standaloneCheckoutReady = Boolean(process.env.ORDERHERO_MATEMATIKA_CHECKOUT_URL);
   const memberCheckoutReady = Boolean(process.env.ORDERHERO_MATEMATIKA_MEMBER_CHECKOUT_URL);
-  const [superKidsAccess, mandarinAccess, matematikaAccess] = await Promise.all([
+  const [superKidsAccess, mandarinAccess, matematikaAccess, testimonials] = await Promise.all([
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.mandarin),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.matematika),
+    getApprovedTestimonials("matematika"),
   ]);
 
   return (
@@ -28,7 +31,7 @@ export default async function MatematikaCheckoutPage() {
         <div className="rounded-[2rem] bg-white p-6 shadow-xl ring-1 ring-black/[0.06] sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary">Sebelum pembayaran</p>
           <h1 className="mt-2 text-3xl font-extrabold">Siapa yang akan belajar Matematika?</h1>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">Harga normal pelanggan baru adalah <b>Rp25.000</b>. Selama kuota tersedia, 50 pengguna awal yang belum pernah mengambil promo Rp0 mendapat akses gratis dan diminta memberikan ulasan jujur setelah satu hari. Pemilik Super Kids atau Mandarin mendapat harga add-on <b>Rp15.000</b>.</p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">Harga pelanggan baru adalah <b>Rp25.000</b>. Pemilik Super Kids atau Mandarin mendapat harga add-on <b>Rp15.000</b>.</p>
           <div className="mt-7"><MatematikaPurchaseGate
             standaloneCheckoutReady={standaloneCheckoutReady}
             memberCheckoutReady={memberCheckoutReady}
@@ -39,6 +42,7 @@ export default async function MatematikaCheckoutPage() {
           /></div>
         </div>
       </div>
+      <TestimonialSection testimonials={testimonials} productName="Papa Bonski Matematika" />
     </main>
   );
 }

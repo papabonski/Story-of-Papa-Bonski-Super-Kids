@@ -49,7 +49,7 @@ values (
   'MATEMATIKA50GRATIS',
   50,
   30,
-  true,
+  false,
   'papa-bonski-first-free-module'
 )
 on conflict (key) do update

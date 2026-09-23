@@ -4,6 +4,8 @@ import { getRuntimeBrand } from "@/lib/white-label/settings";
 import FunnelTracker from "@/components/marketing/FunnelTracker";
 import CheckoutButton from "@/components/marketing/CheckoutButton";
 import SuperKidsPromoBadge from "@/components/super-kids/SuperKidsPromoBadge";
+import TestimonialSection from "@/components/marketing/TestimonialSection";
+import { getApprovedTestimonials } from "@/lib/testimonials";
 
 export const dynamic="force-dynamic";
 
@@ -51,7 +53,10 @@ const parentConcerns=[
 ];
 
 export default async function SuperKids(){
-  const brand=await getRuntimeBrand();
+  const [brand, testimonials]=await Promise.all([
+    getRuntimeBrand(),
+    getApprovedTestimonials("super-kids"),
+  ]);
   return <main className="min-h-screen bg-surface pb-20 text-ink md:pb-0">
     <FunnelTracker event="ViewContent" product="PBSK-SUPER-KIDS" value={25000}/>
 
@@ -288,6 +293,8 @@ export default async function SuperKids(){
         <p className="mx-auto mt-7 max-w-3xl text-center text-sm leading-relaxed text-white/85">Seluruh kuota melekat pada satu akun Papa Bonski dan tidak dapat dipindahkan atau dibagikan ke akun Papa Bonski lainnya.</p>
       </div>
     </section>
+
+    <TestimonialSection testimonials={testimonials} productName="Papa Bonski Super Kids" />
 
     <section className="px-5 py-14">
       <div className="mx-auto max-w-3xl">

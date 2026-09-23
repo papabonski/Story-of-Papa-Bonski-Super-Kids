@@ -100,6 +100,16 @@ export default async function SellerPage() {
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <Link
+            href="/seller/testimonials"
+            className="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200"
+          >
+            <div className="text-2xl">💬</div>
+            <h2 className="mt-2 font-extrabold">Moderasi Testimoni</h2>
+            <p className="text-sm text-ink-soft">
+              Setujui testimoni sebelum ditampilkan pada landing page.
+            </p>
+          </Link>
+          <Link
             href="/seller/super-kids-promo"
             className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200"
           >

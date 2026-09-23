@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import MandarinPurchaseGate from "@/components/marketing/MandarinPurchaseGate";
+import TestimonialSection from "@/components/marketing/TestimonialSection";
 import { CUSTOMER_ENTITLEMENTS, getCustomerAccess } from "@/lib/customer-access";
+import { getApprovedTestimonials } from "@/lib/testimonials";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +19,11 @@ export default async function MandarinCheckoutPage() {
     process.env.ORDERHERO_MANDARIN_MEMBER_CHECKOUT_URL ||
       "https://papabonski.orderhero.id/form/papa-bonski-mandarin-member-super-kids",
   );
-  const [superKidsAccess, matematikaAccess, mandarinAccess] = await Promise.all([
+  const [superKidsAccess, matematikaAccess, mandarinAccess, testimonials] = await Promise.all([
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.superKids),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.matematika),
     getCustomerAccess(CUSTOMER_ENTITLEMENTS.mandarin),
+    getApprovedTestimonials("mandarin"),
   ]);
 
   return (
@@ -48,6 +51,7 @@ export default async function MandarinCheckoutPage() {
           /></div>
         </div>
       </div>
+      <TestimonialSection testimonials={testimonials} productName="Papa Bonski Mandarin" />
     </main>
   );
 }
