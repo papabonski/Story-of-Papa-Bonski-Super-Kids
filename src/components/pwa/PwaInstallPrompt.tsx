@@ -20,7 +20,7 @@ function isStandalone(): boolean {
   );
 }
 
-export default function PwaInstallPrompt({ appName = "Papa Bonski Super Kids" }: { appName?: string }) {
+export default function PwaInstallPrompt({ appName = "Aplikasi Papa Bonski" }: { appName?: string }) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [preparing, setPreparing] = useState(true);
