@@ -78,6 +78,34 @@ export default function MatematikaSalesPage() {
       </section>
 
       <section className="bg-white px-5 py-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">Lihat cara bermainnya</p>
+            <h2 className="mt-3 text-3xl font-extrabold sm:text-5xl">Intip keseruan Papa Bonski Matematika</h2>
+            <p className="mt-4 leading-relaxed text-ink-soft">
+              Saksikan bagaimana anak memilih level, menentukan fokus materi, menjawab soal, dan mengumpulkan bintang.
+            </p>
+          </div>
+          <div className="mt-8 overflow-hidden rounded-[2rem] bg-[#2f2141] p-2 shadow-2xl ring-1 ring-black/10 sm:p-4">
+            <video
+              className="aspect-video w-full rounded-[1.5rem] bg-black object-contain"
+              controls
+              playsInline
+              preload="metadata"
+              aria-label="Video demonstrasi Papa Bonski Matematika"
+            >
+              <source src="/media/papa-bonski-matematika-demo-web.mp4" type="video/mp4" />
+              Browser Anda belum mendukung pemutaran video.
+            </video>
+          </div>
+          <div className="mt-7 flex flex-col items-center gap-3 text-center">
+            <BuyButton />
+            <p className="text-sm font-bold text-ink-soft">Sekali bayar · Akses seumur hidup</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white px-5 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">Satu game, bertahap sesuai kemampuan</p>
