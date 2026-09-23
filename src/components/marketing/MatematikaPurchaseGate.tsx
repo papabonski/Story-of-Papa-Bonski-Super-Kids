@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
@@ -38,15 +38,6 @@ export default function MatematikaPurchaseGate({
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "checking" | "new" | "member" | "existing" | "redirecting" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [availability, setAvailability] = useState<{active:boolean;remaining:number;total:number}|null>(null);
-  const [promoReady, setPromoReady] = useState<{url:string;code:string;slot:number;remaining:number;expiresAt:string}|null>(null);
-
-  useEffect(() => {
-    fetch("/api/promotions/matematika-launch", { cache: "no-store" })
-      .then(response => response.json())
-      .then(result => { if (result?.ok) setAvailability(result); })
-      .catch(() => {});
-  }, []);
 
   async function checkRecipient(event: FormEvent) {
     event.preventDefault();
@@ -92,12 +83,6 @@ export default function MatematikaPurchaseGate({
       });
       const result = await response.json();
       if (!response.ok || !result?.ok || !result?.url) throw new Error("checkout_failed");
-      if (productSku === "PBMAT-MATEMATIKA" && result.promo?.code) {
-        setPromoReady({ url: result.url, ...result.promo });
-        setAvailability(current => current ? { ...current, remaining: result.promo.remaining } : current);
-        setState("new");
-        return;
-      }
       window.location.assign(result.url);
     } catch {
       setState("error");
@@ -109,20 +94,6 @@ export default function MatematikaPurchaseGate({
     return <div className="space-y-4 rounded-3xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
       <p className="font-extrabold text-emerald-900">Akses Matematika pada akun ini sudah aktif.</p>
       <a href="/matematika" className="btn-primary w-full">Buka Papa Bonski Matematika</a>
-    </div>;
-  }
-
-  if (promoReady) {
-    async function openPromoCheckout() {
-      try { await navigator.clipboard.writeText(promoReady!.code); } catch {}
-      window.location.assign(promoReady!.url);
-    }
-    return <div className="space-y-4 rounded-3xl bg-violet-50 p-5 ring-1 ring-violet-200">
-      <div><p className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Slot gratis #{promoReady.slot} berhasil diamankan</p><p className="mt-1 text-3xl font-extrabold text-violet-950">Rp0</p><p className="mt-2 text-sm text-violet-900">Sisa {promoReady.remaining} dari 50 akses gratis. Reservasi berlaku sekitar 30 menit.</p></div>
-      <div className="rounded-2xl bg-white p-4 ring-1 ring-violet-200"><p className="text-xs font-bold text-ink-soft">Kode kupon</p><p className="mt-1 font-mono text-lg font-black">{promoReady.code}</p></div>
-      <p className="text-sm text-violet-900">Tombol berikut menyalin kode dan membuka OrderHero. Tempelkan pada kolom <b>Kode Kupon</b> agar total menjadi Rp0.</p>
-      <button type="button" onClick={openPromoCheckout} className="btn-primary w-full">Salin Kode & Buka OrderHero</button>
-      <button type="button" onClick={()=>setPromoReady(null)} className="btn-secondary w-full">Kembali</button>
     </div>;
   }
 
@@ -152,7 +123,7 @@ export default function MatematikaPurchaseGate({
     return <div className="space-y-4 rounded-3xl bg-violet-50 p-5 ring-1 ring-violet-200">
       <div>
         <p className="font-extrabold text-violet-950">Email ini berhak mendapat harga member Rp15.000.</p>
-        <p className="mt-2 text-sm text-violet-900">Masuk dengan OTP terlebih dahulu agar harga khusus dan tujuan akses dapat diverifikasi dengan aman.</p>
+        <p className="mt-2 text-sm text-violet-900">Masuk dengan OTP terlebih dahulu agar akun dan harga khusus dapat diverifikasi dengan aman.</p>
       </div>
       <a href={`/login?next=${encodeURIComponent("/matematika/checkout")}&email=${encodeURIComponent(email)}`} className="btn-primary w-full">Masuk & Ambil Harga Member</a>
       <button type="button" onClick={() => setState("idle")} className="btn-secondary w-full">Gunakan email lain</button>
@@ -162,21 +133,23 @@ export default function MatematikaPurchaseGate({
   if (state === "new" || state === "redirecting") {
     return <div className="space-y-4 rounded-3xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">{availability?.active && availability.remaining>0 ? "Promo 50 pengguna awal" : "Harga pelanggan baru"}</p>
-        <p className="mt-1 text-3xl font-extrabold text-emerald-950">{availability?.active && availability.remaining>0 ? "Gratis" : "Rp25.000"}</p>
-        {availability?.active && availability.remaining>0 && <p className="mt-2 text-sm font-bold text-emerald-800">Tersisa {availability.remaining} dari 50 akses gratis.</p>}
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Harga pelanggan baru</p>
+        <p className="mt-1 text-3xl font-extrabold text-emerald-950">Rp25.000</p>
+        <p className="mt-2 text-sm text-emerald-900">Sekali bayar untuk akses seumur hidup.</p>
       </div>
       <p className="text-sm text-emerald-900">Lisensi Matematika akan diberikan kepada:</p>
       <p className="break-all rounded-2xl bg-white p-4 font-extrabold ring-1 ring-emerald-200">{email}</p>
       <button type="button" onClick={() => continueToOrderHero("PBMAT-MATEMATIKA")} disabled={state === "redirecting"} className="btn-primary w-full disabled:opacity-60">
-        {state === "redirecting" ? "Menyiapkan slot…" : availability?.active && availability.remaining>0 ? "Ambil Slot Gratis" : "Konfirmasi & Lanjut ke Pembayaran"}
+        {state === "redirecting" ? "Membuka pembayaran…" : "Konfirmasi & Lanjut ke Pembayaran"}
       </button>
       <button type="button" onClick={() => setState("idle")} className="btn-secondary w-full">Ganti Email Penerima</button>
     </div>;
   }
 
   return <form onSubmit={checkRecipient} className="space-y-4">
-    {availability?.active && <div className="rounded-2xl bg-violet-50 p-4 text-sm font-semibold text-violet-950 ring-1 ring-violet-200"><b>{availability.remaining} dari 50</b> akses gratis masih tersedia untuk pelanggan baru. Setelah mencoba selama satu hari, peserta diminta memberikan ulasan jujur.</div>}
+    <div className="rounded-2xl bg-orange-50 p-4 text-sm text-orange-950 ring-1 ring-orange-200">
+      <b>Pelanggan baru Rp25.000.</b> Jika sudah memiliki Super Kids atau Mandarin, gunakan email akun lama untuk memperoleh harga add-on Rp15.000.
+    </div>
     <div>
       <label htmlFor="matematika-recipient" className="text-sm font-extrabold">Email Penerima / Email Login</label>
       <input id="matematika-recipient" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="penerima@email.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-4 outline-none focus:ring-2 focus:ring-brand-primary/20" />
