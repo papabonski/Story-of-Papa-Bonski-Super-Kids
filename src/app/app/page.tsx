@@ -6,6 +6,7 @@ import { getOrCreateUserId } from "@/lib/supabase/auth";
 import { getStoryQuotaForUser } from "@/lib/story-quota";
 import { getRuntimeBrand } from "@/lib/white-label/settings";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { customerLogout } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,12 @@ export default async function CustomerAppPage() {
     )}
 
     <div className="mt-5"><PwaInstallPrompt /></div>
-    <div className="mt-5 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05]">Status akun: <b className="text-emerald-700">Aktif</b> · Hak modul yang dibeli berlaku <b className="text-ink">seumur hidup</b>.</div>
+    <div className="mt-5 flex flex-col gap-4 rounded-2xl bg-surface-card p-4 text-sm text-ink-soft ring-1 ring-black/[0.05] sm:flex-row sm:items-center sm:justify-between">
+      <div>Status akun: <b className="text-emerald-700">Aktif</b> · Hak modul yang dibeli berlaku <b className="text-ink">seumur hidup</b>.</div>
+      <form action={customerLogout}>
+        <button type="submit" className="font-extrabold text-red-700 underline decoration-red-200 underline-offset-4 hover:text-red-800">Keluar dari perangkat ini</button>
+      </form>
+    </div>
   </div></main>;
 }
 
