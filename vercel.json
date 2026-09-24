@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/mandarin/testimonial-reminders/cron",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
