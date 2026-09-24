@@ -17,9 +17,9 @@ const levels = [
 
 const subjects = ["Kali & Bagi", "Waktu & Uang", "Pengukuran", "Kelipatan & Faktor", "Pecahan & Bangun", "Soal Cerita", "Campur Semua"];
 
-function BuyButton({ className = "" }: { className?: string }) {
+function BuyButton({ className = "", label = "Dapatkan Akses Rp25.000 →" }: { className?: string; label?: string }) {
   return <Link href="/matematika/checkout" className={`inline-flex items-center justify-center rounded-2xl bg-brand-primary px-6 py-4 text-center font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl ${className}`}>
-    Dapatkan Akses Rp25.000 →
+    {label}
   </Link>;
 }
 
@@ -153,12 +153,24 @@ export default function MatematikaSalesPage() {
       </section>
 
       <section className="px-5 py-16">
-        <div className="mx-auto max-w-3xl rounded-[2rem] bg-white p-7 text-center shadow-xl ring-1 ring-black/[0.06] sm:p-10">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">Akses seumur hidup</p>
-          <h2 className="mt-3 text-4xl font-extrabold">Rp25.000</h2>
-          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">Empat level, pilihan fokus materi, soal acak, mode bermain bersama, bintang, dan lencana dalam satu produk.</p>
-          <BuyButton className="mt-7 w-full sm:w-auto" />
-          <p className="mt-4 text-xs text-ink-soft">Member aktif Super Kids atau Mandarin otomatis diarahkan ke harga add-on Rp15.000 setelah email diperiksa.</p>
+        <div className="mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-white text-center shadow-xl ring-1 ring-black/[0.06]">
+          <div className="bg-[#fff1d6] px-7 py-8 sm:px-10 sm:py-10">
+            <p className="text-4xl" aria-hidden="true">☕</p>
+            <h2 className="mt-3 text-3xl font-extrabold leading-tight sm:text-5xl">
+              Bunda nggak ngopi sekali,<br />
+              <span className="text-brand-primary">Ananda belajar berkali-kali.</span>
+            </h2>
+            <p className="mt-5 text-xl font-extrabold leading-relaxed sm:text-2xl">
+              Cukup Rp25 ribu sekali bayar,<br />
+              seumur hidup bisa belajar.
+            </p>
+          </div>
+          <div className="px-7 py-8 sm:px-10 sm:py-10">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-primary">Akses seumur hidup</p>
+            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">Empat level, pilihan fokus materi, soal acak, mode bermain bersama, bintang, dan lencana dalam satu produk.</p>
+            <BuyButton className="mt-7 w-full sm:w-auto" label="Kopiku untuk Ananda ☕" />
+          </div>
+          <p className="px-7 pb-8 text-xs text-ink-soft sm:px-10 sm:pb-10">Member aktif Super Kids atau Mandarin otomatis diarahkan ke harga add-on Rp15.000 setelah email diperiksa.</p>
         </div>
       </section>
 
