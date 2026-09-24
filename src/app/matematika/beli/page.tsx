@@ -90,6 +90,9 @@ export default function MatematikaSalesPage() {
             <video
               className="aspect-video w-full rounded-[1.5rem] bg-black object-contain"
               controls
+              autoPlay
+              muted
+              loop
               playsInline
               preload="metadata"
               aria-label="Video demonstrasi Papa Bonski Matematika"
