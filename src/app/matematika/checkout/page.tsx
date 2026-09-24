@@ -18,17 +18,19 @@ export default async function MatematikaCheckoutPage() {
     <main className="min-h-[100dvh] bg-[#f5eee3] px-5 py-8 text-ink">
       <div className="mx-auto max-w-lg">
         <div className="mb-5 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 font-extrabold">
+          <Link href="/matematika/beli" className="flex items-center gap-2 font-extrabold">
             <Image src="/matematika-game/assets/icons/icon-192.png" alt="Papa Bonski" width={46} height={46} className="rounded-xl" />
             <span>Papa Bonski Matematika</span>
           </Link>
-          <Link href="/" className="text-sm font-bold text-ink-soft">Kembali</Link>
+          <Link href="/matematika/beli" className="text-sm font-bold text-ink-soft">Kembali</Link>
         </div>
 
         <div className="rounded-[2rem] bg-white p-6 shadow-xl ring-1 ring-black/[0.06] sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-primary">Sebelum pembayaran</p>
           <h1 className="mt-2 text-3xl font-extrabold">Siapa yang akan belajar Matematika?</h1>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">Harga normal pelanggan baru adalah <b>Rp25.000</b>. Selama kuota tersedia, 50 pengguna awal yang belum pernah mengambil promo Rp0 mendapat akses gratis dan diminta memberikan ulasan jujur setelah satu hari. Pemilik Super Kids atau Mandarin mendapat harga add-on <b>Rp15.000</b>.</p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            Pelanggan baru mendapat akses seumur hidup seharga <b>Rp25.000</b>. Pemilik aktif Papa Bonski Super Kids atau Mandarin mendapat harga add-on <b>Rp15.000</b>.
+          </p>
           <div className="mt-7"><MatematikaPurchaseGate
             standaloneCheckoutReady={standaloneCheckoutReady}
             memberCheckoutReady={memberCheckoutReady}
